@@ -3,9 +3,11 @@ import sqlite3
 import tempfile
 import shutil
 import typing
-from datetime import datetime
+import datetime
 
 import browser_history.utils as utils
+
+_local_tz = datetime.datetime.now().astimezone().tzinfo
 
 class Browser():
     name = "Generic"
@@ -74,7 +76,9 @@ class Browser():
                 conn = sqlite3.connect(f'file:{copied_history_path}?mode=ro', uri=True)
                 cursor = conn.cursor()
                 cursor.execute(self.history_SQL)
-                date_histories = [(datetime.strptime(d, '%Y-%m-%d %H:%M:%S'), url)
+                date_histories = [(datetime.datetime
+                                   .strptime(d, '%Y-%m-%d %H:%M:%S')
+                                   .replace(tzinfo=_local_tz), url)
                                   for d, url in cursor.fetchall()]
                 histories.extend(date_histories)
         return histories
