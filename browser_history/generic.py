@@ -2,6 +2,7 @@ from pathlib import Path
 import sqlite3
 import tempfile
 import shutil
+import typing
 from datetime import datetime
 
 import browser_history.utils as utils
@@ -41,18 +42,18 @@ class Browser():
         if self.profile_support and not self.profile_dir_prefixes:
             self.profile_dir_prefixes.append("*")
 
-    def profiles(self):
+    def profiles(self) -> typing.List[str]:
         if not self.profile_support:
             return ['.']
         maybe_profile_dirs = []
         for profile_dir_prefix in self.profile_dir_prefixes:
             maybe_profile_dirs.extend(self.history_dir.glob(profile_dir_prefix))
-        profile_dirs = [profile_dir for profile_dir in maybe_profile_dirs
+        profile_dirs = [profile_dir.name for profile_dir in maybe_profile_dirs
                         if (profile_dir / self.history_file).exists()]
 
         return profile_dirs
 
-    def history_path_profile(self, profile_dir):
+    def history_path_profile(self, profile_dir: Path):
         return self.history_dir / profile_dir / self.history_file
 
     def history_paths(self):
