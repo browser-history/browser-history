@@ -9,6 +9,12 @@ package to retrieve (almost) any browser's history on (almost) any platform.
 
 # Quick Start
 
+## Installation
+
+`pip install browser-history`
+
+## Usage
+
 ```python
 from browser_history.browsers import Firefox
 

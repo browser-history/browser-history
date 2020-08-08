@@ -3,6 +3,10 @@
 Quick Start
 ===========
 
+Installation::
+
+    pip install browser-history
+
 Get started::
 
     from browser_history.browsers import Firefox
