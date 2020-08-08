@@ -9,7 +9,7 @@ Work in progress.
 # Usage
 
 ```python
-from browser_history,browsers import Firefox
+from browser_history.browsers import Firefox
 
 f = Firefox()
 
