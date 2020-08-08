@@ -5,7 +5,7 @@ Quick Start
 
 Get started::
 
-    from browser_history import Firefox
+    from browser_history.browsers import Firefox
 
     f = Firefox()
 

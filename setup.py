@@ -5,14 +5,14 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="browser-history", # Replace with your own username
-    version="0.0.1",
+    version="0.1.0",
     author="Samyak S Sarnayak",
     author_email="samyak201@gmail.com",
     description="A python module to extract browser history",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/Samyak2/browser-history",
-    packages=setuptools.find_packages(),
+    packages=setuptools.find_packages(exclude=["tests"]),
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: Apache Software License",
