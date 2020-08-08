@@ -1,6 +1,8 @@
 # browser-history
 
-![](https://github.com/Samyak2/browser-history/workflows/tests/badge.svg)
+![tests](https://github.com/Samyak2/browser-history/workflows/tests/badge.svg)
+[![Documentation Status](https://readthedocs.org/projects/browser-history/badge/?version=latest)](https://browser-history.readthedocs.io/en/latest/?badge=latest)
+[![PyPI version](https://badge.fury.io/py/browser-history.svg)](https://badge.fury.io/py/browser-history)
 
 A python module to retrieve browser history.
 
