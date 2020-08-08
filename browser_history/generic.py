@@ -153,4 +153,5 @@ class Browser():
                                    .replace(tzinfo=_local_tz), url)
                                   for d, url in cursor.fetchall()]
                 histories.extend(date_histories)
+                conn.close()
         return histories
