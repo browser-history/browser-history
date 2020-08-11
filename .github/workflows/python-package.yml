@@ -36,11 +36,10 @@ jobs:
         pylint browser_history --exit-zero
     - name: Test with pytest and generate coverage reports
       run: |
-        pytest --cov=./ --cov-report=xml
+        pytest --cov=./browser_history --cov-report=xml
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
       with:
         file: ./coverage.xml
         flags: unittests
-        env_vars: OS,PYTHON
         fail_ci_if_error: true
