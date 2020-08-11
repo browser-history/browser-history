@@ -3,6 +3,7 @@
 ![tests](https://github.com/Samyak2/browser-history/workflows/tests/badge.svg)
 [![Documentation Status](https://readthedocs.org/projects/browser-history/badge/?version=latest)](https://browser-history.readthedocs.io/en/latest/?badge=latest)
 [![PyPI version](https://badge.fury.io/py/browser-history.svg)](https://badge.fury.io/py/browser-history)
+[![codecov](https://codecov.io/gh/Samyak2/browser-history/branch/master/graph/badge.svg)](https://codecov.io/gh/Samyak2/browser-history)
 
 ``browser-history`` is a simple, zero-dependencies, developer-friendly python
 package to retrieve (almost) any browser's history on (almost) any platform.
