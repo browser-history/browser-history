@@ -54,6 +54,9 @@ Development Process - Long Version
 
 #. Make changes, ``git add`` and then commit. Make sure to link the issue number in the commit message.
 
+   .. caution:: When testing changes, create and activate a virtual environment and install
+      the package in editable mode using ``pip install -e .`` to ensure that the pip version is not used.
+
    * ``git add <names of all modified files>``
    * ``git commit``
    * Make your commit descriptive. The above command will open your text editor.
