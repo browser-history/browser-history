@@ -11,7 +11,7 @@ setuptools.setup(
     description="A python module to extract browser history",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/Samyak2/browser-history",
+    url="https://github.com/pesos/browser-history",
     packages=setuptools.find_packages(exclude=["tests"]),
     classifiers=[
         "Programming Language :: Python :: 3",
