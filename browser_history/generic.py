@@ -124,7 +124,7 @@ class Browser():
         history_paths = [self.history_path_profile(profile_dir) for profile_dir in profile_dirs]
         return self.history(history_paths)
 
-    def history(self, history_paths=None):
+    def history(self, history_paths=None, sort=True, desc=False):
         """Returns history of all available profiles.
 
         The returned datetimes are timezone-aware with the local timezone set by default.
@@ -136,6 +136,12 @@ class Browser():
 
         :param history_paths: (optional) a list of history files.
         :type history_paths: list(:py:class:`pathlib.Path`)
+        :param sort: (optional) flag to specify if the output should be sorted.
+            Default value set to True.
+        :type sort: boolean
+        :param desc: (optional)  flag to speicify asc/desc (Applicable iff sort is True)
+            Default value set to False.
+        :type asc: boolean
         :return: List of tuples of a timestamp and corresponding URL
         :rtype: list(tuple(:py:class:`datetime.datetime`, str))
         """
@@ -154,4 +160,6 @@ class Browser():
                                   for d, url in cursor.fetchall()]
                 histories.extend(date_histories)
                 conn.close()
+        if sort:
+            histories.sort(reverse=desc)
         return histories
