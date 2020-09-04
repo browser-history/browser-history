@@ -163,3 +163,20 @@ class Browser():
         if sort:
             histories.sort(reverse=desc)
         return histories
+
+    def domain_history(self):
+        """
+        Returns the history sorted according to the domain-name.
+
+        :rtype: dict()
+                :type dict.key: str
+                :type dict.value: list(tuple(:py:class:`datetime.datetime`, str))
+        """
+        histories = self.history()
+        domain_histories = dict()
+        for entry in histories:
+            try:
+                domain_histories[entry[1].split('/')[2]].append(entry)
+            except KeyError:
+                domain_histories[entry[1].split('/')[2]] = [entry]
+        return domain_histories
