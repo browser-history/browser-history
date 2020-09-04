@@ -1,3 +1,9 @@
+"""
+This module defines the generic base class and the functionaliity.
+
+All browsers from :py:mod:`browser_history.browsers` inherit this class.
+"""
+
 from pathlib import Path
 import sqlite3
 import tempfile
