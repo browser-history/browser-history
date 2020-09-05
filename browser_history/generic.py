@@ -1,4 +1,12 @@
+"""
+This module defines the generic base class and the functionaliity.
+
+All browsers from :py:mod:`browser_history.browsers` inherit this class.
+"""
+
 from pathlib import Path
+from urllib.parse import urlparse
+from collections import defaultdict
 import sqlite3
 import tempfile
 import shutil
@@ -163,3 +171,17 @@ class Browser():
         if sort:
             histories.sort(reverse=desc)
         return histories
+
+    def domain_history(self):
+        """
+        Returns the history sorted according to the domain-name.
+
+        :rtype: dict()
+                :type dict.key: str
+                :type dict.value: list(tuple(:py:class:`datetime.datetime`, str))
+        """
+        histories = self.history()
+        domain_histories = defaultdict(list)
+        for entry in histories:
+            domain_histories[urlparse(entry[1]).netloc].append(entry)
+        return domain_histories
