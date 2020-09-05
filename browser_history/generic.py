@@ -5,6 +5,7 @@ All browsers from :py:mod:`browser_history.browsers` inherit this class.
 """
 
 from pathlib import Path
+from urllib.parse import urlparse
 import sqlite3
 import tempfile
 import shutil
@@ -182,7 +183,7 @@ class Browser():
         domain_histories = dict()
         for entry in histories:
             try:
-                domain_histories[entry[1].split('/')[2]].append(entry)
+                domain_histories[urlparse(entry[1]).netloc].append(entry)
             except KeyError:
-                domain_histories[entry[1].split('/')[2]] = [entry]
+                domain_histories[urlparse(entry[1]).netloc] = [entry]
         return domain_histories
