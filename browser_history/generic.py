@@ -6,6 +6,7 @@ All browsers from :py:mod:`browser_history.browsers` inherit this class.
 
 from pathlib import Path
 from urllib.parse import urlparse
+from collections import defaultdict
 import sqlite3
 import tempfile
 import shutil
@@ -180,10 +181,7 @@ class Browser():
                 :type dict.value: list(tuple(:py:class:`datetime.datetime`, str))
         """
         histories = self.history()
-        domain_histories = dict()
+        domain_histories = defaultdict(list)
         for entry in histories:
-            try:
-                domain_histories[urlparse(entry[1]).netloc].append(entry)
-            except KeyError:
-                domain_histories[urlparse(entry[1]).netloc] = [entry]
+            domain_histories[urlparse(entry[1]).netloc].append(entry)
         return domain_histories
