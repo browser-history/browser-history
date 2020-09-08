@@ -13,7 +13,7 @@ Get started::
 
     f = Firefox()
 
-    his = f.history()
+    his = f.fetch()
 
 - ``Firefox`` in the above snippet can be replaced with any of the :ref:`supported_browsers`.
 - ``his`` is a list of ``(datetime.datetime, url)`` tuples.

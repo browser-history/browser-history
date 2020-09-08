@@ -21,7 +21,7 @@ from browser_history.browsers import Firefox
 
 f = Firefox()
 
-his = f.history()
+his = f.fetch()
 ```
 
  - `Firefox` in the above snippet can be replaced with any of the [supported browsers](https://browser-history.readthedocs.io/en/latest/browsers.html).
