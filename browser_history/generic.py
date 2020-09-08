@@ -130,9 +130,9 @@ class Browser():
         :rtype: list(tuple(:py:class:`datetime.datetime`, str))
         """
         history_paths = [self.history_path_profile(profile_dir) for profile_dir in profile_dirs]
-        return self.history(history_paths)
+        return self.fetch(history_paths)
 
-    def history(self, history_paths=None, sort=True, desc=False):
+    def fetch(self, history_paths=None, sort=True, desc=False):
         """Returns history of all available profiles.
 
         The returned datetimes are timezone-aware with the local timezone set by default.
@@ -172,7 +172,7 @@ class Browser():
             histories.sort(reverse=desc)
         return histories
 
-    def domain_history(self):
+    def fetch_domain(self):
         """
         Returns the history sorted according to the domain-name.
 
@@ -180,7 +180,7 @@ class Browser():
                 :type dict.key: str
                 :type dict.value: list(tuple(:py:class:`datetime.datetime`, str))
         """
-        histories = self.history()
+        histories = self.fetch()
         domain_histories = defaultdict(list)
         for entry in histories:
             domain_histories[urlparse(entry[1]).netloc].append(entry)
