@@ -19,9 +19,9 @@ package to retrieve (almost) any browser's history on (almost) any platform.
 ```python
 from browser_history.browsers import Firefox
 
-f = Firefox()
+f = Firefox.fetch()
 
-his = f.history()
+his = f.get()
 ```
 
  - `Firefox` in the above snippet can be replaced with any of the [supported browsers](https://browser-history.readthedocs.io/en/latest/browsers.html).

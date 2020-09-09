@@ -126,13 +126,14 @@ class Browser():
         :param profile_dirs: List or iterable of profile directories. Can be obtained from
             :py:meth:`profiles`
         :type profile_dirs: list(str)
-        :return: History of selected profiles
-        :rtype: list(tuple(:py:class:`datetime.datetime`, str))
+        :return: Object of class :py:class:`browser_history.generic.Outputs` with the
+            data member entries set to list(tuple(:py:class:`datetime.datetime`, str))
+        :rtype: :py:class:`browser_history.generic.Outputs`
         """
         history_paths = [self.history_path_profile(profile_dir) for profile_dir in profile_dirs]
-        return self.history(history_paths)
+        return self.fetch(history_paths)
 
-    def history(self, history_paths=None, sort=True, desc=False):
+    def fetch(self, history_paths=None, sort=True, desc=False):
         """Returns history of all available profiles.
 
         The returned datetimes are timezone-aware with the local timezone set by default.
@@ -150,12 +151,13 @@ class Browser():
         :param desc: (optional)  flag to speicify asc/desc (Applicable iff sort is True)
             Default value set to False.
         :type asc: boolean
-        :return: List of tuples of a timestamp and corresponding URL
-        :rtype: list(tuple(:py:class:`datetime.datetime`, str))
+        :return: Object of class :py:class:`browser_history.generic.Outputs` with the
+            data member entries set to list(tuple(:py:class:`datetime.datetime`, str))
+        :rtype: :py:class:`browser_history.generic.Outputs`
         """
         if history_paths is None:
             history_paths = self.history_paths()
-        histories = []
+        output_object = Outputs()
         with tempfile.TemporaryDirectory() as tmpdirname:
             for history_path in history_paths:
                 copied_history_path = shutil.copy2(history_path.absolute(), tmpdirname)
@@ -166,13 +168,35 @@ class Browser():
                                    .strptime(d, '%Y-%m-%d %H:%M:%S')
                                    .replace(tzinfo=_local_tz), url)
                                   for d, url in cursor.fetchall()]
-                histories.extend(date_histories)
+                output_object.entries.extend(date_histories)
                 conn.close()
         if sort:
-            histories.sort(reverse=desc)
-        return histories
+            output_object.entries.sort(reverse=desc)
+        return output_object
 
-    def domain_history(self):
+
+class Outputs():
+    """
+    A generic class to encapsulate history outputs and to
+    easily convert them to JSON, CSV or other formats.
+
+    * **entries**: List of tuples of Timestamp & URL
+    :type entries: list(tuple(:py:class:`datetime.datetime`, str))
+
+    """
+
+    def __init__(self):
+        self.entries = []
+
+    def get(self):
+        """
+        Return the list of tuples of Timestamps & URLs.
+        :rtype: list(tuple(:py:class:`datetime.datetime`, str))
+        """
+
+        return self.entries
+
+    def sort_domain(self):
         """
         Returns the history sorted according to the domain-name.
 
@@ -180,8 +204,7 @@ class Browser():
                 :type dict.key: str
                 :type dict.value: list(tuple(:py:class:`datetime.datetime`, str))
         """
-        histories = self.history()
         domain_histories = defaultdict(list)
-        for entry in histories:
+        for entry in self.entries:
             domain_histories[urlparse(entry[1]).netloc].append(entry)
         return domain_histories
