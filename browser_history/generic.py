@@ -130,7 +130,7 @@ class Browser():
         :rtype: list(tuple(:py:class:`datetime.datetime`, str))
         """
         history_paths = [self.history_path_profile(profile_dir) for profile_dir in profile_dirs]
-        return self.fetch(history_paths)
+        return self.fetch(history_paths).entry_list
 
     def fetch(self, history_paths=None, sort=True, desc=False):
         """Returns history of all available profiles.
@@ -150,12 +150,14 @@ class Browser():
         :param desc: (optional)  flag to speicify asc/desc (Applicable iff sort is True)
             Default value set to False.
         :type asc: boolean
-        :return: List of tuples of a timestamp and corresponding URL
-        :rtype: list(tuple(:py:class:`datetime.datetime`, str))
+        :return: Object of class :py:class:`browser_history.generic.Outputs` with the
+            data member entry_list set to list(tuple(:py:class:`datetime.datetime`, str))
+        :rtype: :py:class:`browser_history.generic.Outputs`
         """
         if history_paths is None:
             history_paths = self.history_paths()
-        histories = []
+        output_object = Outputs()
+        output_object.entry_list = []
         with tempfile.TemporaryDirectory() as tmpdirname:
             for history_path in history_paths:
                 copied_history_path = shutil.copy2(history_path.absolute(), tmpdirname)
@@ -166,13 +168,40 @@ class Browser():
                                    .strptime(d, '%Y-%m-%d %H:%M:%S')
                                    .replace(tzinfo=_local_tz), url)
                                   for d, url in cursor.fetchall()]
-                histories.extend(date_histories)
+                output_object.entry_list.extend(date_histories)
                 conn.close()
         if sort:
-            histories.sort(reverse=desc)
-        return histories
+            output_object.entry_list.sort(reverse=desc)
+        return output_object
 
-    def fetch_domain(self):
+
+class Outputs():
+    """
+    A generic class to implement encapsulation & provide easy implementation
+    when choosing output in JSON, CSV or other formats.
+
+    Additional built-in methods to format output:
+    - Sort the List according to their domain names.
+
+    * **entry_list**: List of tuples of Timestamp & URL
+    :type entry_list: list(tuple(:py:class:`datetime.datetime`, str))
+
+    """
+
+    entry_list = []
+
+    def __init__(self):
+        pass
+
+    def get(self):
+        """
+        Return the list of tuples of Timestamps & URLs.
+        :rtype: list(tuple(:py:class:`datetime.datetime`, str))
+        """
+
+        return self.entry_list
+
+    def sort_domain(self):
         """
         Returns the history sorted according to the domain-name.
 
@@ -180,8 +209,7 @@ class Browser():
                 :type dict.key: str
                 :type dict.value: list(tuple(:py:class:`datetime.datetime`, str))
         """
-        histories = self.fetch()
         domain_histories = defaultdict(list)
-        for entry in histories:
+        for entry in self.entry_list:
             domain_histories[urlparse(entry[1]).netloc].append(entry)
         return domain_histories
