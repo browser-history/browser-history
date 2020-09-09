@@ -158,7 +158,6 @@ class Browser():
         if history_paths is None:
             history_paths = self.history_paths()
         output_object = Outputs()
-        output_object.entries = []
         with tempfile.TemporaryDirectory() as tmpdirname:
             for history_path in history_paths:
                 copied_history_path = shutil.copy2(history_path.absolute(), tmpdirname)
@@ -178,11 +177,8 @@ class Browser():
 
 class Outputs():
     """
-    A generic class to implement encapsulation & provide easy implementation
-    when choosing output in JSON, CSV or other formats.
-
-    Additional built-in methods to format output:
-    - Sort the List according to their domain names.
+    A generic class to encapsulate history outputs and to
+    easily convert them to JSON, CSV or other formats.
 
     * **entries**: List of tuples of Timestamp & URL
     :type entries: list(tuple(:py:class:`datetime.datetime`, str))
