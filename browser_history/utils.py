@@ -4,7 +4,6 @@ Module defines Platform class enumerates the popular Operating Systems.
 """
 import enum
 import platform
-from browser_history import browsers
 from browser_history import generic
 class Platform(enum.Enum):
     """An enum used to indicate the system's platform
@@ -48,35 +47,14 @@ def get_history():
     
     :rtype: :py:class:`browser_history.generic.Outputs`
     """
-    system = get_platform()
     output_object = generic.Outputs()
-
-    if system == Platform.LINUX:
-        chrome = browsers.Chrome()
-        chrome_object = chrome.fetch()
-        output_object.entries.extend(chrome_object.entries)
-        firefox = browsers.Firefox()
-        firefox_object = firefox.fetch()
-        output_object.entries.extend(firefox_object.entries)
-        chromium = browsers.Chromium()
-        chromium_object = chromium.fetch()
-        output_object.entries.extend(chromium_object.entries)
-
-
-    elif system == Platform.WINDOWS:
-        chrome = browsers.Chrome()
-        chrome_object = chrome.fetch()
-        output_object.entries.extend(chrome_object.entries)
-        firefox = browsers.Firefox()
-        firefox_object = firefox.fetch()
-        output_object.entries.extend(firefox_object.entries)
-
-    elif system == Platform.MAC:
-        safari = browsers.Safari()
-        safari_object = safari.fetch()
-        output_object.entries.extend(safari_object.entries)
-    
+    subclasses = generic.Browser.__subclasses__()
+    try:
+        for browser_class in subclasses:
+            browser_object = browser_class()
+            browser_output_object = browser_object.fetch()
+            output_object.entries.extend(browser_output_object.get())
+    except AssertionError:
+        pass
     output_object.entries.sort()
-
     return output_object
-
