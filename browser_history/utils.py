@@ -4,7 +4,10 @@ Module defines Platform class enumerates the popular Operating Systems.
 """
 import enum
 import platform
+import logging
 from browser_history import generic
+logging.basicConfig(level=logging.INFO)
+
 class Platform(enum.Enum):
     """An enum used to indicate the system's platform
 
@@ -49,12 +52,12 @@ def get_history():
     """
     output_object = generic.Outputs()
     subclasses = generic.Browser.__subclasses__()
-    try:
-        for browser_class in subclasses:
+    for browser_class in subclasses:
+        try:
             browser_object = browser_class()
             browser_output_object = browser_object.fetch()
             output_object.entries.extend(browser_output_object.get())
-    except AssertionError:
-        pass
+        except AssertionError:
+            logging.info("%s browser is not supported", browser_class.name)    
     output_object.entries.sort()
     return output_object
