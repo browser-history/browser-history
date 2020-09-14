@@ -6,7 +6,13 @@ import enum
 import platform
 import logging
 from browser_history import generic
-logging.basicConfig(level=logging.INFO)
+
+logger = logging.getLogger(__name__)
+handler = logging.StreamHandler()
+formatter = logging.Formatter('%(levelname)s: %(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+logger.setLevel(logging.INFO)
 
 class Platform(enum.Enum):
     """An enum used to indicate the system's platform
@@ -58,6 +64,7 @@ def get_history():
             browser_output_object = browser_object.fetch()
             output_object.entries.extend(browser_output_object.get())
         except AssertionError:
-            logging.info("%s browser is not supported", browser_class.name)    
+            logger.info("%s browser is not supported", browser_class.name)    
     output_object.entries.sort()
     return output_object
+    
