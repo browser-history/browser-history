@@ -15,19 +15,19 @@ def make_parser():
 
     :rtype: :py:class:`argparse.ArgumentParser`
     """
-    cli_parser = argparse.ArgumentParser(description='''
+    parser_ = argparse.ArgumentParser(description='''
                                             A tool to retrieve history from
                                             (almost) any browser on (almost) any platform''',
                                          epilog='''
                                             Checkout the GitHub repo https://github.com/pesos/browser-history
                                             if you have any issues or want to help contribute''')
 
-    cli_parser.add_argument('-b', '--browser',
+    parser_.add_argument('-b', '--browser',
                             default='all',
                             help=f'''
                                 browser to retrieve history from. Should be one of all, {AVAILABLE_BROWSERS}.
                                 Default is all (gets history from all browsers).''')
-    return cli_parser
+    return parser_
 
 parser = make_parser()
 
