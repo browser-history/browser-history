@@ -1,11 +1,20 @@
+"""This module defines functions and globals required for the
+command line interface of browser-history."""
+
 import sys
 import argparse
 from browser_history import generic, browsers, utils
 
 # get list of all implemented browser by finding subclasses of generic.Browser
-available_browsers = ', '.join(b.__name__ for b in generic.Browser.__subclasses__())
+AVAILABLE_BROWSERS = ', '.join(b.__name__ for b in generic.Browser.__subclasses__())
 
 def make_parser():
+    """Creates an ArgumentParser, configures and returns it.
+
+    This was made into a separate function to be used with sphinx-argparse
+
+    :rtype: :py:class:`argparse.ArgumentParser`
+    """
     cli_parser = argparse.ArgumentParser(description='''
                                             A tool to retrieve history from
                                             (almost) any browser on (almost) any platform''',
@@ -16,13 +25,17 @@ def make_parser():
     cli_parser.add_argument('-b', '--browser',
                             default='all',
                             help=f'''
-                                browser to retrieve history from. Should be one of all, {available_browsers}.
+                                browser to retrieve history from. Should be one of all, {AVAILABLE_BROWSERS}.
                                 Default is all (gets history from all browsers).''')
     return cli_parser
 
 parser = make_parser()
 
 def main():
+    """Entrypoint to the command-line interface (CLI) of browser-history.
+
+    It parses arguments from sys.argv and performs the appropriate actions.
+    """
     args = parser.parse_args()
 
     if args.browser == 'all':
