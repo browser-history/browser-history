@@ -1,6 +1,6 @@
 import sys
 import argparse
-from browser_history import generic, browsers
+from browser_history import generic, browsers, utils
 
 available_browsers = ', '.join(b.__name__ for b in generic.Browser.__subclasses__())
 parser = argparse.ArgumentParser(description='''A tool to retrieve history from
@@ -16,15 +16,10 @@ parser.add_argument('-b', '--browser',
                     ''')
 
 def main():
-    if len(sys.argv) <= 1:
-        parser.print_help()
-        sys.exit(1)
-
     args = parser.parse_args()
 
     if args.browser == 'all':
-        # TODO: fix after #15 is merged
-        raise NotImplementedError('Browser "all" is not available yet')
+        outputs = utils.get_history()
 
     else:
         try:
@@ -40,5 +35,5 @@ def main():
             print(e)
             sys.exit(1)
 
-        for date, url in outputs.get():
-            print(f'{date},{url}')
+    for date, url in outputs.get():
+        print(f'{date},{url}')
