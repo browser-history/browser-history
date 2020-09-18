@@ -5,18 +5,22 @@ from browser_history import generic, browsers, utils
 # get list of all implemented browser by finding subclasses of generic.Browser
 available_browsers = ', '.join(b.__name__ for b in generic.Browser.__subclasses__())
 
-parser = argparse.ArgumentParser(description='''
-                                    A tool to retrieve history from
-                                    (almost) any browser on (almost) any platform''',
-                                 epilog='''
-                                    Checkout the GitHub repo https://github.com/pesos/browser-history
-                                    if you have any issues or want to help contribute''')
+def make_parser():
+    cli_parser = argparse.ArgumentParser(description='''
+                                            A tool to retrieve history from
+                                            (almost) any browser on (almost) any platform''',
+                                         epilog='''
+                                            Checkout the GitHub repo https://github.com/pesos/browser-history
+                                            if you have any issues or want to help contribute''')
 
-parser.add_argument('-b', '--browser',
-                    default='all',
-                    help=f'''
-                        browser to retrieve history from. Should be one of all, {available_browsers}.
-                        Default is all (gets history from all browsers).''')
+    cli_parser.add_argument('-b', '--browser',
+                            default='all',
+                            help=f'''
+                                browser to retrieve history from. Should be one of all, {available_browsers}.
+                                Default is all (gets history from all browsers).''')
+    return cli_parser
+
+parser = make_parser()
 
 def main():
     args = parser.parse_args()

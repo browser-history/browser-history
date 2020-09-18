@@ -16,6 +16,7 @@ or platform, please open an issue on `the GitHub Page <https://github.com/pesos/
    :caption: Contents:
 
    quickstart
+   cli
    browsers
    API
    contributing
