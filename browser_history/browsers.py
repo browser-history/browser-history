@@ -32,7 +32,7 @@ class Chrome(Browser):
         WHERE urls.id = visits.url ORDER BY visit_time DESC"""
 
 class Chromium(Browser):
-    """Google Chrome Browser
+    """Chromium Browser
 
     Supported platforms (TODO: Windows and Mac OS support)
 
