@@ -12,6 +12,20 @@ Installation
 
 Get started:
 
+To get history from all installed browsers:
+::
+
+    from browser_history.utils import get_history
+
+    outputs = get_history()
+
+    histories = outputs.get()
+
+
+- ``histories`` is a list of ``(datetime.datetime, url)`` tuples.
+
+
+If you want history from a specific browser:
 ::
 
     from browser_history.browsers import Firefox
@@ -25,16 +39,6 @@ Get started:
 
 
 
-::
-
-    from browser_history.utils import get_history
-
-    outputs = get_history()
-
-    histories = outputs.get()
-
-
-- ``histories`` is a list of ``(datetime.datetime, url)`` tuples from every browser installed on the system.
 
 Command Line
 ------------
