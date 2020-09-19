@@ -38,6 +38,19 @@ his = f.get()
  - `Firefox` in the above snippet can be replaced with any of the [supported browsers](https://browser-history.readthedocs.io/en/latest/browsers.html).
  - `his` is a list of `(datetime.datetime, url)` tuples from the firefox browser.
 
+<<<<<<< HEAD
+=======
+
+```python
+from browser_history.utils import get_history
+
+outputs = get_history()
+
+histories = outputs.get()
+```
+
+ - ``histories`` is a list of ``(datetime.datetime, url)`` tuples from every browser installed on the system.
+>>>>>>> a18905f7a05b23ac3f1bf34369968b51debd585e
 
 Check out the [documentation](https://browser-history.readthedocs.io/en/latest/) for more details.
 

@@ -24,7 +24,11 @@ Development Process - Short Version
 #. Work on the master branch for smaller patches and a separate branch for new features.
 #. Make changes, ``git add`` and then commit. Make sure to link the issue number in the commit message.
 #. Run the following commands: ``pylint browser_history``, ``pytest --cov=./browser_history``
+<<<<<<< HEAD
 #. (Optional) If you're updating the documentation, Update ``docs/quickstart.rst`` and ``README.md`` simultaneously.
+=======
+#. (Optional) If you're updating the documentation, Update ``docs/quickstart.rst`` and ``README.md`` simoultaneously.
+>>>>>>> a18905f7a05b23ac3f1bf34369968b51debd585e
    Run the following: ``cd docs``, ``make html`` and then open ``_build/html/index.html`` in a browser to confirm that the documentation rendered correctly.
 #. If all tests are passing, pull changes from the original remote with a rebase, and push the changes to your remote repository.
 #. Use the GitHub website to create a Pull Request and wait for the maintainers to review it.
@@ -79,7 +83,11 @@ Development Process - Long Version
 
 #. (Optional) If you're updating the documentation, run the following:
 
+<<<<<<< HEAD
    .. caution:: If you're updating ``docs/quickstart.rst`` simultaneously update ``README.md``.
+=======
+   .. caution:: If you're updating ``docs/quickstart.rst`` simoultaneously update ``README.md``.
+>>>>>>> a18905f7a05b23ac3f1bf34369968b51debd585e
    
    * Change to the docs directory: ``cd docs``
    * Build the documentation: ``make html``
