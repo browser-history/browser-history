@@ -44,7 +44,7 @@ def main():
     else:
         try:
             # gets browser class by name (string). TODO: make it case-insensitive
-            browser_class = getattr(browsers, args.browser)
+            browser_class = getattr(browsers, args.browser.capitalize())
         except AttributeError:
             print(f'Browser {args.browser} is unavailable. Check --help for available browsers')
             sys.exit(1)
