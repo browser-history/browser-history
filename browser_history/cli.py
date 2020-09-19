@@ -44,7 +44,12 @@ def main():
     else:
         try:
             # gets browser class by name (string). TODO: make it case-insensitive
-            browser_class = getattr(browsers, args.browser)
+            selected_browser = args.browser
+            for browser in generic.Browser.__subclasses__():
+                if browser.__name__.lower() == args.browser.lower():
+                    selected_browser = browser.__name__
+                    break
+            browser_class = getattr(browsers, selected_browser)
         except AttributeError:
             print(f'Browser {args.browser} is unavailable. Check --help for available browsers')
             sys.exit(1)
