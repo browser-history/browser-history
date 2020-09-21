@@ -17,7 +17,7 @@ Get started
 To get history from all installed browsers:
 ::
 
-    from browser_history.utils import get_history
+    from browser_history import get_history
 
     outputs = get_history()
 
