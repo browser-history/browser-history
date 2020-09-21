@@ -13,13 +13,27 @@ Installation
 Get started
 -----------
 
+
+To get history from all installed browsers:
+::
+
+    from browser_history import get_history
+
+    outputs = get_history()
+
+    his = outputs.get()
+
+- ``his`` is a list of ``(datetime.datetime, url)`` tuples.
+
+
+If you want history from a specific browser:
 ::
 
     from browser_history.browsers import Firefox
 
     f = Firefox.fetch()
 
-    histories = f.get()
+    his = f.get()
 
 - ``Firefox`` in the above snippet can be replaced with any of the :ref:`supported_browsers`.
 - ``his`` is a list of ``(datetime.datetime, url)`` tuples.

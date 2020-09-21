@@ -16,6 +16,18 @@ package to retrieve (almost) any browser's history on (almost) any platform.
 
 ## Usage
 
+To get history from all installed browsers:
+```python
+from browser_history import get_history
+
+outputs = get_history()
+
+his = outputs.get()
+```
+ - `his` is a list of `(datetime.datetime, url)` tuples.
+
+
+If you want history from a specific browser:
 ```python
 from browser_history.browsers import Firefox
 
