@@ -62,7 +62,8 @@ Development Process - Long Version
    * Make your commit descriptive. The above command will open your text editor.
    * (optional) Tag the commit with appropriate tags such as: (see ``git log`` for examples)
 
-     * ``[CODE]`` - changes to the code
+     * ``[CODE]`` - changes to the main code (other than CLI)
+     * ``[CLI]`` - changes to the CLI code
      * ``[FIX]`` - bug fixes
      * ``[TESTS]`` - updates to tests
      * ``[CI]`` - changes related to integrations such as GitHub actions workflows, codecov, etc.
