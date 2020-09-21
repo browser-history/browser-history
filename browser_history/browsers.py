@@ -102,3 +102,26 @@ class Safari(Browser):
             history_items.id = history_visits.history_item
         ORDER BY
             visit_time DESC"""
+
+class Edge(Browser):
+    """Microsoft Edge Browser
+
+    Supported platforms (TODO: Mac OS support)
+
+    * Windows
+
+    Profile support: Yes
+    """
+    name = "Edge"
+
+    windows_path = 'AppData\\Local\\Microsoft\\Edge\\User Data'
+
+    profile_support = True
+    profile_dir_prefixes = ['Default*', 'Profile*']
+
+    history_file = 'History'
+    history_SQL = """SELECT
+                    datetime((last_visit_time/1000000)-11644473600, 'unixepoch', 'localtime')
+                    AS last_visit_time,
+                    url 
+                    FROM urls ORDER BY last_visit_time DESC"""
