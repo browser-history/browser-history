@@ -51,7 +51,7 @@ def test_edge_windows(become_windows, change_homedir):
     assert len(profs) == 2
     his_path = e.history_path_profile("Profile 2")
     assert his_path == Path.home() / \
-                       'AppData\\Local\\Microsoft\\Edge\\User Data\\Profile 2\\History'
+                       'AppData/Local/Microsoft/Edge/User Data/Profile 2/History'
     his = e.history_profiles(["Profile 2"]).get()
     assert len(his) == 1
     assert his == [(datetime.datetime(2020, 9, 23, 10, 45, 3,
