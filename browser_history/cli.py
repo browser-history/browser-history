@@ -39,7 +39,7 @@ def main():
     args = parser.parse_args()
 
     if args.browser == 'all':
-        outputs = __init__.get_history()
+        outputs = get_history()
 
     else:
         try:
