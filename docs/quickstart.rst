@@ -31,9 +31,9 @@ If you want history from a specific browser:
 
     from browser_history.browsers import Firefox
 
-    f = Firefox.fetch()
+    f = Firefox()
 
-    his = f.get()
+    his = f.fetch().get()
 
 - ``Firefox`` in the above snippet can be replaced with any of the :ref:`supported_browsers`.
 - ``his`` is a list of ``(datetime.datetime, url)`` tuples.
