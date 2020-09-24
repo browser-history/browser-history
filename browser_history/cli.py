@@ -3,7 +3,7 @@ command line interface of browser-history."""
 
 import sys
 import argparse
-from browser_history import __init__, generic, browsers
+from browser_history import get_history, generic, browsers
 
 # get list of all implemented browser by finding subclasses of generic.Browser
 AVAILABLE_BROWSERS = ', '.join(b.__name__ for b in generic.Browser.__subclasses__())
