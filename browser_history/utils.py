@@ -4,6 +4,14 @@ Module defines Platform class enumerates the popular Operating Systems.
 """
 import enum
 import platform
+import logging
+
+logger = logging.getLogger(__name__)
+handler = logging.StreamHandler()
+formatter = logging.Formatter('%(levelname)s: %(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+logger.setLevel(logging.INFO)
 
 class Platform(enum.Enum):
     """An enum used to indicate the system's platform
