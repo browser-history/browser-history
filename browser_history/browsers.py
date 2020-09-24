@@ -117,11 +117,7 @@ class Edge(Browser):
     windows_path = 'AppData/Local/Microsoft/Edge/User Data'
 
     profile_support = True
-    profile_dir_prefixes = ['Default*', 'Profile*']
+    profile_dir_prefixes = Chrome.profile_dir_prefixes
 
-    history_file = 'History'
-    history_SQL = """SELECT
-                    datetime((last_visit_time/1000000)-11644473600, 'unixepoch', 'localtime')
-                    AS last_visit_time,
-                    url 
-                    FROM urls ORDER BY last_visit_time DESC"""
+    history_file = Chrome.history_file
+    history_SQL = Chrome.history_SQL
