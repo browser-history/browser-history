@@ -31,9 +31,9 @@ If you want history from a specific browser:
 ```python
 from browser_history.browsers import Firefox
 
-f = Firefox.fetch()
+f = Firefox()
 
-his = f.get()
+his = f.fetch().get()
 ```
 
  - `Firefox` in the above snippet can be replaced with any of the [supported browsers](https://browser-history.readthedocs.io/en/latest/browsers.html).
