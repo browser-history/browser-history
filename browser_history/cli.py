@@ -86,7 +86,3 @@ def main():
         filename = args.output
         with open(filename, 'w') as output_file:
             output_file.write(formatted)
-
-    # for date, url in outputs.get():
-    #     # comma-separated output. NOT a CSV file
-    #     print(f'{date},{url}')
