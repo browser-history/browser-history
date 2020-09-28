@@ -95,9 +95,9 @@ class Browser():
         maybe_profile_dirs = []
         for profile_dir_prefix in self.profile_dir_prefixes:
             maybe_profile_dirs.extend(self.history_dir.glob(profile_dir_prefix))
-        profile_dirs = [profile_dir.name for profile_dir in maybe_profile_dirs
+        profile_dirs = [profile_dir.parent.name+'/'+profile_dir.name \
+                        for profile_dir in maybe_profile_dirs
                         if (profile_dir / self.history_file).exists()]
-
         return profile_dirs
 
     def history_path_profile(self, profile_dir: Path) -> Path:
