@@ -229,9 +229,12 @@ class Outputs():
         :param output_format: One the formats in py:attr:`~formats`
         :rtype: :py:class:`str` object
         """
+        # convert to lower case since the formats tuple is enforced in lowercase
+        output_format = output_format.lower()
         if self._format_map.get(output_format):
-            # fetch the required formatter in a case insensitive manner
-            formatter = self._format_map[output_format.lower()]
+            # fetch the required formatter and call it. The formatters are instance methods
+            # so no need to pass any arguments
+            formatter = self._format_map[output_format]
             return formatter()
         raise ValueError(f'Invalid format {output_format}. Should be one of {Outputs.formats}')
 
