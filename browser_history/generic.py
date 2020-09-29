@@ -12,7 +12,7 @@ import tempfile
 import shutil
 import typing
 import datetime
-
+import glob
 import browser_history.utils as utils
 
 _local_tz = datetime.datetime.now().astimezone().tzinfo
@@ -92,12 +92,11 @@ class Browser():
         """
         if not self.profile_support:
             return ['.']
-        maybe_profile_dirs = []
-        for profile_dir_prefix in self.profile_dir_prefixes:
-            maybe_profile_dirs.extend(self.history_dir.glob(profile_dir_prefix))
-        profile_dirs = [profile_dir.parent.name+'/'+profile_dir.name \
-                        for profile_dir in maybe_profile_dirs
-                        if (profile_dir / self.history_file).exists()]
+        file =glob.glob(str(self.history_dir)+"/**/"+str(self.history_file),recursive=True)
+        profile_dirs=[]
+        for profile_dir in file:
+            profile_dirs.append(profile_dir.split(str(self.history_dir)+'/')[-1]\
+                .split('/'+self.history_file)[0])
         return profile_dirs
 
     def history_path_profile(self, profile_dir: Path) -> Path:
