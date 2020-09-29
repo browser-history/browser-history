@@ -17,7 +17,7 @@ class Chrome(Browser):
     """
     name = 'Chrome'
 
-    windows_path = 'AppData\\Local\\Google\\Chrome\\User Data'
+    windows_path = 'AppData/Local/Google/Chrome/User Data'
     mac_path = 'Library/Application Support/Google/Chrome/'
     linux_path = '.config/google-chrome'
 
@@ -64,7 +64,7 @@ class Firefox(Browser):
     """
     name = "Firefox"
 
-    windows_path = 'AppData\\Roaming\\Mozilla\\Firefox\\Profiles'
+    windows_path = 'AppData/Roaming/Mozilla/Firefox/Profiles'
     linux_path = '.mozilla/firefox'
     mac_path = 'Library/Application Support/Firefox/Profiles/'
 
@@ -102,3 +102,22 @@ class Safari(Browser):
             history_items.id = history_visits.history_item
         ORDER BY
             visit_time DESC"""
+
+class Edge(Browser):
+    """Microsoft Edge Browser
+
+    Supported platforms (TODO: Mac OS support)
+
+    * Windows
+
+    Profile support: Yes
+    """
+    name = "Edge"
+
+    windows_path = 'AppData/Local/Microsoft/Edge/User Data'
+
+    profile_support = True
+    profile_dir_prefixes = Chrome.profile_dir_prefixes
+
+    history_file = Chrome.history_file
+    history_SQL = Chrome.history_SQL
