@@ -7,6 +7,7 @@ from browser_history import get_history, generic, browsers
 
 # get list of all implemented browser by finding subclasses of generic.Browser
 AVAILABLE_BROWSERS = ', '.join(b.__name__ for b in generic.Browser.__subclasses__())
+AVAILABLE_FORMATS = ', '.join(generic.Outputs.formats)
 
 def make_parser():
     """Creates an ArgumentParser, configures and returns it.
@@ -31,8 +32,8 @@ def make_parser():
     parser_.add_argument('-f', '--format',
                          default="csv",
                          help=f'''
-                                Format to be used in output. Should be one of {generic.Outputs.formats}.
-                                Default is CSV''')
+                                Format to be used in output. Should be one of {AVAILABLE_FORMATS}.
+                                Default is csv''')
 
     parser_.add_argument('-o', '--output',
                          default=None,
