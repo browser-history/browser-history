@@ -7,6 +7,7 @@ from browser_history import get_history, generic, browsers
 
 # get list of all implemented browser by finding subclasses of generic.Browser
 AVAILABLE_BROWSERS = ', '.join(b.__name__ for b in generic.Browser.__subclasses__())
+AVAILABLE_FORMATS = ', '.join(generic.Outputs.formats)
 
 def make_parser():
     """Creates an ArgumentParser, configures and returns it.
@@ -27,6 +28,18 @@ def make_parser():
                          help=f'''
                                 browser to retrieve history from. Should be one of all, {AVAILABLE_BROWSERS}.
                                 Default is all (gets history from all browsers).''')
+
+    parser_.add_argument('-f', '--format',
+                         default="csv",
+                         help=f'''
+                                Format to be used in output. Should be one of {AVAILABLE_FORMATS}.
+                                Default is csv''')
+
+    parser_.add_argument('-o', '--output',
+                         default=None,
+                         help='''
+                                File where output is to be written. 
+                                If not provided standard output is used.''')
     return parser_
 
 parser = make_parser()
@@ -61,6 +74,16 @@ def main():
             print(e)
             sys.exit(1)
 
-    for date, url in outputs.get():
-        # comma-separated output. NOT a CSV file
-        print(f'{date},{url}')
+    # Format the output
+    try:
+        formatted = outputs.formatted(args.format)
+    except ValueError as e:
+        print(e)
+        sys.exit(1)
+
+    if args.output is None:
+        print(formatted)
+    else:
+        filename = args.output
+        with open(filename, 'w') as output_file:
+            output_file.write(formatted)
