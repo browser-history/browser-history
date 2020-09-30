@@ -84,10 +84,6 @@ class Browser():
 
     def profiles(self) -> typing.List[str]:
         """Returns a list of profile directories
-
-        (TODO: fix this)
-        The returned profiles include only the final name in the path.
-
         :rtype: list(str)
         """
         if not self.profile_support:
