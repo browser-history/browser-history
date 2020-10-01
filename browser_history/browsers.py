@@ -134,6 +134,7 @@ class Opera(Browser):
     name = "Opera"
 
     linux_path = '.config/opera'
+    windows_path = 'AppData/Roaming/Opera Software/Opera Stable'
     
     profile_support = False
     
