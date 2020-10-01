@@ -106,18 +106,39 @@ class Safari(Browser):
 class Edge(Browser):
     """Microsoft Edge Browser
 
-    Supported platforms (TODO: Mac OS support)
+    Supported platforms
 
     * Windows
+    * Mac OS
 
     Profile support: Yes
     """
     name = "Edge"
 
     windows_path = 'AppData/Local/Microsoft/Edge/User Data'
+    mac_path = 'Library/Application Support/Microsoft Edge/Default'
 
     profile_support = True
     profile_dir_prefixes = Chrome.profile_dir_prefixes
 
     history_file = Chrome.history_file
+    history_SQL = Chrome.history_SQL
+
+class Opera(Browser):
+    """Opera Browser
+
+    Supported platforms (TODO: Windows support)
+
+    * Mac OS
+
+    Profile support: Yes
+    """
+    name = "Opera"
+    mac_path = 'Library/Application Support/com.operasoftware.Opera/'
+
+    profile_support = True
+    profile_dir_prefixes = Chrome.profile_dir_prefixes
+
+    history_file = Chrome.history_file
+
     history_SQL = Chrome.history_SQL
