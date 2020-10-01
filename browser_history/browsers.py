@@ -138,10 +138,9 @@ class Opera(Browser):
     
     profile_support = False
     
-    history_file = 'History'
-    history_SQL = """SELECT
-            datetime(visits.visit_time/1000000-11644473600, 'unixepoch', 'localtime') as 'visit_time',
-        urls.url from urls,visits
-        WHERE urls.id = visits.url ORDER BY visit_time DESC"""
+    history_file = Chrome.history_file
+
+    history_SQL = Chrome.history_SQL
+
 
 
