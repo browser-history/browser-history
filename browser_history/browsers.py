@@ -121,3 +121,22 @@ class Edge(Browser):
 
     history_file = Chrome.history_file
     history_SQL = Chrome.history_SQL
+
+class Brave(Browser):
+    """Brave Browser
+
+    Supported platforms:
+
+    * Linux
+
+    Profile support: Yes
+    """
+    name = "Brave"
+
+    linux_path = '.config/BraveSoftware/Brave-Browser'
+
+    profile_support = True
+    profile_dir_prefixes = Chrome.profile_dir_prefixes
+
+    history_file = Chrome.history_file
+    history_SQL = Chrome.history_SQL
