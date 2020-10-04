@@ -3,7 +3,8 @@ This module defines the generic base class and the functionaliity.
 
 All browsers from :py:mod:`browser_history.browsers` inherit this class.
 """
-
+import csv
+from io import StringIO
 from pathlib import Path
 from urllib.parse import urlparse
 from collections import defaultdict
@@ -194,10 +195,23 @@ class Outputs:
     * **entries**: List of tuples of Timestamp & URL
     :type entries: list(tuple(:py:class:`datetime.datetime`, str))
 
+    * **formats**: A tuple of strings containing all supported formats
+
+    * **fields**: The fields available for the history data returned
+
     """
+    # All formats added here should be implemented in _format_map
+    # Formats added here and in _format_map should be in lowercase
+    formats = ('csv', )
+    # Use the below fields for all formatter implementations
+    fields = ('Timestamp', 'URL')
 
     def __init__(self):
         self.entries = []
+        # format map is used by the formatted method to call the right formatter
+        self._format_map = {
+            'csv': self.to_csv,
+        }
 
     def get(self):
         """
@@ -219,3 +233,35 @@ class Outputs:
         for entry in self.entries:
             domain_histories[urlparse(entry[1]).netloc].append(entry)
         return domain_histories
+
+    def formatted(self, output_format='csv'):
+        """
+        Returns history as a :py:class:`str` formatted  as ``output_format``
+        :param output_format: One the formats in py:attr:`~formats`
+        :rtype: :py:class:`str` object
+        """
+        # convert to lower case since the formats tuple is enforced in lowercase
+        output_format = output_format.lower()
+        if self._format_map.get(output_format):
+            # fetch the required formatter and call it. The formatters are instance methods
+            # so no need to pass any arguments
+            formatter = self._format_map[output_format]
+            return formatter()
+        raise ValueError(f'Invalid format {output_format}. Should be one of {Outputs.formats}')
+
+    def to_csv(self):
+        """
+        Return history formatted as a comma separated string with the first row having the fields
+        names
+        :return:
+        """
+        # we will use csv module and let it do all the heavy lifting such as special character
+        # escaping and correct line termination escape sequences
+        # The catch is, we need to return a string but the csv module only works with files so we
+        # will use StringIO to build the csv in memory first
+        with StringIO() as output:
+            writer = csv.writer(output)
+            writer.writerow(Outputs.fields)
+            for row in self.get():
+                writer.writerow(row)
+            return output.getvalue()
