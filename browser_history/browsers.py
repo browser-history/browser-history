@@ -135,12 +135,27 @@ class Opera(Browser):
 
     linux_path = '.config/opera'
     windows_path = 'AppData/Roaming/Opera Software/Opera Stable'
-    
+
     profile_support = False
-    
+
     history_file = Chrome.history_file
 
     history_SQL = Chrome.history_SQL
 
+class OperaGX(Browser):
+    """Opera GX Browser
 
+    Supported platforms
 
+    * Windows
+
+    Profile support: No
+    """
+    name = 'OperaGX'
+
+    windows_path = 'AppData/Roaming/Opera Software/Opera GX Stable'
+
+    profile_support = False
+
+    history_file = Chrome.history_file
+    history_SQL = Chrome.history_SQL
