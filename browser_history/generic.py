@@ -97,8 +97,8 @@ class Browser:
         profile_dirs = []
         for profile_dir in file:
             profile_dirs.append(
-                profile_dir.split(str(self.history_dir) + "/", maxsplit=2)[-1].split(
-                    "/" + self.history_file, maxsplit=2
+                profile_dir.split(str(self.history_dir) + "/", maxsplit=1)[-1].split(
+                    "/" + self.history_file, maxsplit=1
                 )[0]
             )
         return profile_dirs
