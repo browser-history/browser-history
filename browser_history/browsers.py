@@ -72,10 +72,10 @@ class Firefox(Browser):
 
     history_file = "places.sqlite"
     history_SQL = """SELECT
-            datetime(last_visit_date/1000000, 'unixepoch', 'localtime') AS 'visit_time',
+            datetime(visit_date/1000000, 'unixepoch', 'localtime') AS 'visit_time',
             url
-        FROM moz_historyvisits NATURAL JOIN moz_places WHERE
-        last_visit_date IS NOT NULL AND url LIKE 'http%' AND title IS NOT NULL"""
+        FROM moz_historyvisits INNER JOIN moz_places ON moz_historyvisits.place_id = moz_places.id 
+        WHERE visit_date IS NOT NULL AND url LIKE 'http%' AND title IS NOT NULL"""
 
 class Safari(Browser):
     """Apple Safari browser
