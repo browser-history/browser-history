@@ -127,3 +127,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# DS_Stores automatically created for mac users
+**/.DS_Store
