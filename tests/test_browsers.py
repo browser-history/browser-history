@@ -2,7 +2,7 @@ import datetime
 from pathlib import Path
 
 from .context import browser_history
-from .utils import become_linux, become_windows, change_homedir # pylint: disable=unused-import
+from .utils import become_linux, become_windows, become_mac, change_homedir # pylint: disable=unused-import
 
 # pylint: disable=redefined-outer-name,unused-argument
 
@@ -62,3 +62,20 @@ def test_edge_windows(become_windows, change_homedir):
                                       tzinfo=datetime.timezone(datetime.timedelta(seconds=19800),
                                                                'India Standard Time')),
                     'https://pesos.github.io/')]
+
+def test_safari_mac(become_mac, change_homedir):
+    '''Test history is correct for Safari on macOS'''
+
+    e = browser_history.browsers.Safari()
+    output = e.fetch()
+    his = output.get()
+    assert len(his) == 5
+    assert his[0] == (datetime.datetime(2020, 9, 29, 23, 34, 28,
+                                        tzinfo=datetime.timezone(datetime.timedelta(seconds=19800),
+                                                                'IST')),
+                    'https://www.apple.com/in/')
+    assert his[1][1] == 'https://www.google.co.in/?client=safari&channel=mac_bm'
+    assert his[4] == (datetime.datetime(2020, 9, 29, 23, 35, 8,
+                                        tzinfo=datetime.timezone(datetime.timedelta(seconds=19800),
+                                                                'IST')),
+                      'https://pesos.github.io/')
