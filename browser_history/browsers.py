@@ -34,15 +34,17 @@ class Chrome(Browser):
 class Chromium(Browser):
     """Chromium Browser
 
-    Supported platforms (TODO: Windows and Mac OS support)
+    Supported platforms (TODO: Mac OS support)
 
     * Linux
+    * Windows
 
     Profile support: Yes
     """
     name = "Chromium"
 
     linux_path = '.config/chromium'
+    windows_path = 'AppData/Local/chromium/User Data'
 
     profile_support = True
     profile_dir_prefixes = Chrome.profile_dir_prefixes
@@ -74,7 +76,7 @@ class Firefox(Browser):
     history_SQL = """SELECT
             datetime(visit_date/1000000, 'unixepoch', 'localtime') AS 'visit_time',
             url
-        FROM moz_historyvisits INNER JOIN moz_places ON moz_historyvisits.place_id = moz_places.id 
+        FROM moz_historyvisits INNER JOIN moz_places ON moz_historyvisits.place_id = moz_places.id
         WHERE visit_date IS NOT NULL AND url LIKE 'http%' AND title IS NOT NULL"""
 
 class Safari(Browser):
@@ -106,17 +108,15 @@ class Safari(Browser):
 class Edge(Browser):
     """Microsoft Edge Browser
 
-    Supported platforms
+    Supported platforms (TODO: Mac OS support)
 
     * Windows
-    * Mac OS
 
     Profile support: Yes
     """
     name = "Edge"
 
     windows_path = 'AppData/Local/Microsoft/Edge/User Data'
-    mac_path = 'Library/Application Support/Microsoft Edge/Default'
 
     profile_support = True
     profile_dir_prefixes = Chrome.profile_dir_prefixes
@@ -127,19 +127,6 @@ class Edge(Browser):
 class Opera(Browser):
     """Opera Browser
 
-<<<<<<< HEAD
-    Supported platforms (TODO: Windows support)
-
-    * Mac OS
-
-    Profile support: Yes
-    """
-    name = "Opera"
-    mac_path = 'Library/Application Support/com.operasoftware.Opera/'
-
-    profile_support = True
-    profile_dir_prefixes = Chrome.profile_dir_prefixes
-=======
     Supported platforms (TODO: Mac OS support)
 
     * Linux, Windows
@@ -152,13 +139,10 @@ class Opera(Browser):
     windows_path = 'AppData/Roaming/Opera Software/Opera Stable'
 
     profile_support = False
->>>>>>> upstream/master
 
     history_file = Chrome.history_file
 
     history_SQL = Chrome.history_SQL
-<<<<<<< HEAD
-=======
 
 class OperaGX(Browser):
     """Opera GX Browser
@@ -177,4 +161,3 @@ class OperaGX(Browser):
 
     history_file = Chrome.history_file
     history_SQL = Chrome.history_SQL
->>>>>>> upstream/master
