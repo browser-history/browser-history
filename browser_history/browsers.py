@@ -34,15 +34,17 @@ class Chrome(Browser):
 class Chromium(Browser):
     """Chromium Browser
 
-    Supported platforms (TODO: Windows and Mac OS support)
+    Supported platforms (TODO: Mac OS support)
 
     * Linux
+    * Windows
 
     Profile support: Yes
     """
     name = "Chromium"
 
     linux_path = '.config/chromium'
+    windows_path = 'AppData/Local/chromium/User Data'
 
     profile_support = True
     profile_dir_prefixes = Chrome.profile_dir_prefixes
