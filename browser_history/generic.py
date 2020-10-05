@@ -91,16 +91,18 @@ class Browser:
         """
         if not self.profile_support:
             return ["."]
-        file = glob.glob(
-            str(self.history_dir) + "/**/" + str(self.history_file), recursive=True
-        )
         profile_dirs = []
-        for profile_dir in file:
-            profile_dirs.append(
-                profile_dir.split(str(self.history_dir) + "/", maxsplit=1)[-1].split(
-                    "/" + self.history_file, maxsplit=1
-                )[0]
+        for profile_dir in Path(self.history_dir).rglob(str(self.history_file)):
+            path = (
+                str(profile_dir)
+                .split(str(self.history_dir), maxsplit=1)[-1]
+                .split(self.history_file, maxsplit=1)[0]
             )
+            if path.startswith(os.sep):
+                path = path[1:]
+            if path.endswith(os.sep):
+                path = path[:-1]
+            profile_dirs.append(path)
         return profile_dirs
 
     def history_path_profile(self, profile_dir: Path) -> Path:
@@ -200,17 +202,18 @@ class Outputs:
     * **fields**: The fields available for the history data returned
 
     """
+
     # All formats added here should be implemented in _format_map
     # Formats added here and in _format_map should be in lowercase
-    formats = ('csv', )
+    formats = ("csv",)
     # Use the below fields for all formatter implementations
-    fields = ('Timestamp', 'URL')
+    fields = ("Timestamp", "URL")
 
     def __init__(self):
         self.entries = []
         # format map is used by the formatted method to call the right formatter
         self._format_map = {
-            'csv': self.to_csv,
+            "csv": self.to_csv,
         }
 
     def get(self):
@@ -234,7 +237,7 @@ class Outputs:
             domain_histories[urlparse(entry[1]).netloc].append(entry)
         return domain_histories
 
-    def formatted(self, output_format='csv'):
+    def formatted(self, output_format="csv"):
         """
         Returns history as a :py:class:`str` formatted  as ``output_format``
         :param output_format: One the formats in py:attr:`~formats`
@@ -247,7 +250,9 @@ class Outputs:
             # so no need to pass any arguments
             formatter = self._format_map[output_format]
             return formatter()
-        raise ValueError(f'Invalid format {output_format}. Should be one of {Outputs.formats}')
+        raise ValueError(
+            f"Invalid format {output_format}. Should be one of {Outputs.formats}"
+        )
 
     def to_csv(self):
         """
