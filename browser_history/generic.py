@@ -4,6 +4,7 @@ This module defines the generic base class and the functionaliity.
 All browsers from :py:mod:`browser_history.browsers` inherit this class.
 """
 import csv
+import json
 from io import StringIO
 from pathlib import Path
 from urllib.parse import urlparse
@@ -203,7 +204,8 @@ class Outputs:
 
     # All formats added here should be implemented in _format_map
     # Formats added here and in _format_map should be in lowercase
-    formats = ("csv",)
+    formats = ("csv", "json")
+  
     # Use the below fields for all formatter implementations
     fields = ("Timestamp", "URL")
 
@@ -212,6 +214,8 @@ class Outputs:
         # format map is used by the formatted method to call the right formatter
         self._format_map = {
             "csv": self.to_csv,
+            "json": self.to_json,
+            "jsonl": lambda: self.to_json(json_lines=True)
         }
 
     def get(self):
@@ -268,3 +272,35 @@ class Outputs:
             for row in self.get():
                 writer.writerow(row)
             return output.getvalue()
+
+    def to_json(self, json_lines=False):
+        """
+         Return history formatted as a JSON or JSON Lines format
+         names
+         :param json_lines: (optional) flag to specify if the json_string should be JSON Lines
+            Default value set to False.
+         :return: :py:class:`str` object
+        """
+        # custom json encoder for datetime objects
+        class DateTimeEncoder(json.JSONEncoder):
+            # Override the default method
+            def default(self, obj):
+                if isinstance(obj, (datetime.date, datetime.datetime)):
+                    return obj.isoformat()
+
+        # fetch lines
+        lines = []
+        for entry in self.entries:
+            json_record = {}
+            for field, value in zip(self.fields, entry):
+                json_record[field] = value
+            lines.append(json_record)
+
+        # if json_lines flag is true convert to JSON Lines format,
+        # otherwise convert it to Plain JSON format
+        if json_lines:
+            json_string = '\n'.join([json.dumps(line, cls=DateTimeEncoder) for line in lines])
+        else:
+            json_string = json.dumps({'history': lines}, cls=DateTimeEncoder, indent=4)
+
+        return json_string
