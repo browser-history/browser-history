@@ -34,15 +34,17 @@ class Chrome(Browser):
 class Chromium(Browser):
     """Chromium Browser
 
-    Supported platforms (TODO: Windows and Mac OS support)
+    Supported platforms (TODO: Mac OS support)
 
     * Linux
+    * Windows
 
     Profile support: Yes
     """
     name = "Chromium"
 
     linux_path = '.config/chromium'
+    windows_path = 'AppData/Local/chromium/User Data'
 
     profile_support = True
     profile_dir_prefixes = Chrome.profile_dir_prefixes
@@ -72,10 +74,10 @@ class Firefox(Browser):
 
     history_file = "places.sqlite"
     history_SQL = """SELECT
-            datetime(last_visit_date/1000000, 'unixepoch', 'localtime') AS 'visit_time',
+            datetime(visit_date/1000000, 'unixepoch', 'localtime') AS 'visit_time',
             url
-        FROM moz_historyvisits NATURAL JOIN moz_places WHERE
-        last_visit_date IS NOT NULL AND url LIKE 'http%' AND title IS NOT NULL"""
+        FROM moz_historyvisits INNER JOIN moz_places ON moz_historyvisits.place_id = moz_places.id 
+        WHERE visit_date IS NOT NULL AND url LIKE 'http%' AND title IS NOT NULL"""
 
 class Safari(Browser):
     """Apple Safari browser
@@ -118,6 +120,44 @@ class Edge(Browser):
 
     profile_support = True
     profile_dir_prefixes = Chrome.profile_dir_prefixes
+
+    history_file = Chrome.history_file
+    history_SQL = Chrome.history_SQL
+
+class Opera(Browser):
+    """Opera Browser
+
+    Supported platforms (TODO: Mac OS support)
+
+    * Linux, Windows
+
+    Profile support: No
+    """
+    name = "Opera"
+
+    linux_path = '.config/opera'
+    windows_path = 'AppData/Roaming/Opera Software/Opera Stable'
+
+    profile_support = False
+
+    history_file = Chrome.history_file
+
+    history_SQL = Chrome.history_SQL
+
+class OperaGX(Browser):
+    """Opera GX Browser
+
+    Supported platforms
+
+    * Windows
+
+    Profile support: No
+    """
+    name = 'OperaGX'
+
+    windows_path = 'AppData/Roaming/Opera Software/Opera GX Stable'
+
+    profile_support = False
 
     history_file = Chrome.history_file
     history_SQL = Chrome.history_SQL

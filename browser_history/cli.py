@@ -56,7 +56,7 @@ def main():
 
     else:
         try:
-            # gets browser class by name (string). TODO: make it case-insensitive
+            # gets browser class by name (string).
             selected_browser = args.browser
             for browser in generic.Browser.__subclasses__():
                 if browser.__name__.lower() == args.browser.lower():

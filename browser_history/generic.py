@@ -14,12 +14,13 @@ import tempfile
 import shutil
 import typing
 import datetime
-
+import os
 import browser_history.utils as utils
 
 _local_tz = datetime.datetime.now().astimezone().tzinfo
 
-class Browser():
+
+class Browser:
     """A generic class to support all major browsers with minimal configuration.
 
     Currently, only browsers which save the history in SQLite files are supported.
@@ -50,6 +51,7 @@ class Browser():
                     inferred from the system.
     :type plat: :py:class:`browser_history.utils.Platform`
     """
+
     name = "Generic"
 
     windows_path = None
@@ -86,20 +88,20 @@ class Browser():
 
     def profiles(self) -> typing.List[str]:
         """Returns a list of profile directories
-
-        (TODO: fix this)
-        The returned profiles include only the final name in the path.
-
         :rtype: list(str)
         """
         if not self.profile_support:
-            return ['.']
-        maybe_profile_dirs = []
-        for profile_dir_prefix in self.profile_dir_prefixes:
-            maybe_profile_dirs.extend(self.history_dir.glob(profile_dir_prefix))
-        profile_dirs = [profile_dir.name for profile_dir in maybe_profile_dirs
-                        if (profile_dir / self.history_file).exists()]
-
+            return ["."]
+        profile_dirs = []
+        for files in os.walk(str(self.history_dir)):
+            for item in files[2]:
+                if os.path.split(os.path.join(files[0],item))[-1] == self.history_file:
+                    path = str(files[0]).split(str(self.history_dir), maxsplit=1)[-1]
+                    if path.startswith(os.sep):
+                        path = path[1:]
+                    if path.endswith(os.sep):
+                        path = path[:-1]
+                    profile_dirs.append(path)
         return profile_dirs
 
     def history_path_profile(self, profile_dir: Path) -> Path:
@@ -119,8 +121,10 @@ class Browser():
 
         :rtype: list(:py:class:`pathlib.Path`)
         """
-        return [self.history_dir / profile_dir / self.history_file
-                for profile_dir in self.profiles()]
+        return [
+            self.history_dir / profile_dir / self.history_file
+            for profile_dir in self.profiles()
+        ]
 
     def history_profiles(self, profile_dirs):
         """Returns history of profiles given by `profile_dirs`.
@@ -132,7 +136,9 @@ class Browser():
             data member entries set to list(tuple(:py:class:`datetime.datetime`, str))
         :rtype: :py:class:`browser_history.generic.Outputs`
         """
-        history_paths = [self.history_path_profile(profile_dir) for profile_dir in profile_dirs]
+        history_paths = [
+            self.history_path_profile(profile_dir) for profile_dir in profile_dirs
+        ]
         return self.fetch(history_paths)
 
     def fetch(self, history_paths=None, sort=True, desc=False):
@@ -163,13 +169,18 @@ class Browser():
         with tempfile.TemporaryDirectory() as tmpdirname:
             for history_path in history_paths:
                 copied_history_path = shutil.copy2(history_path.absolute(), tmpdirname)
-                conn = sqlite3.connect(f'file:{copied_history_path}?mode=ro', uri=True)
+                conn = sqlite3.connect(f"file:{copied_history_path}?mode=ro", uri=True)
                 cursor = conn.cursor()
                 cursor.execute(self.history_SQL)
-                date_histories = [(datetime.datetime
-                                   .strptime(d, '%Y-%m-%d %H:%M:%S')
-                                   .replace(tzinfo=_local_tz), url)
-                                  for d, url in cursor.fetchall()]
+                date_histories = [
+                    (
+                        datetime.datetime.strptime(d, "%Y-%m-%d %H:%M:%S").replace(
+                            tzinfo=_local_tz
+                        ),
+                        url,
+                    )
+                    for d, url in cursor.fetchall()
+                ]
                 output_object.entries.extend(date_histories)
                 conn.close()
         if sort:
@@ -177,7 +188,7 @@ class Browser():
         return output_object
 
 
-class Outputs():
+class Outputs:
     """
     A generic class to encapsulate history outputs and to
     easily convert them to JSON, CSV or other formats.
@@ -190,19 +201,21 @@ class Outputs():
     * **fields**: The fields available for the history data returned
 
     """
+
     # All formats added here should be implemented in _format_map
     # Formats added here and in _format_map should be in lowercase
-    formats = ('csv', 'json')
+    formats = ("csv", "json")
+  
     # Use the below fields for all formatter implementations
-    fields = ('Timestamp', 'URL')
+    fields = ("Timestamp", "URL")
 
     def __init__(self):
         self.entries = []
         # format map is used by the formatted method to call the right formatter
         self._format_map = {
-            'csv': self.to_csv,
-            'json': lambda: self.to_json(json_lines=False),
-            'jsonl': self.to_json
+            "csv": self.to_csv,
+            "json": lambda: self.to_json(json_lines=False),
+            "jsonl": self.to_json
         }
 
     def get(self):
@@ -226,7 +239,7 @@ class Outputs():
             domain_histories[urlparse(entry[1]).netloc].append(entry)
         return domain_histories
 
-    def formatted(self, output_format='csv'):
+    def formatted(self, output_format="csv"):
         """
         Returns history as a :py:class:`str` formatted  as ``output_format``
         :param output_format: One the formats in py:attr:`~formats`
@@ -239,7 +252,9 @@ class Outputs():
             # so no need to pass any arguments
             formatter = self._format_map[output_format]
             return formatter()
-        raise ValueError(f'Invalid format {output_format}. Should be one of {Outputs.formats}')
+        raise ValueError(
+            f"Invalid format {output_format}. Should be one of {Outputs.formats}"
+        )
 
     def to_csv(self):
         """
