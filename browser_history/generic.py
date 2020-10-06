@@ -92,15 +92,15 @@ class Browser:
         if not self.profile_support:
             return ["."]
         profile_dirs = []
-        for root, subFolder, files in os.walk(str(self.history_dir)):
-            for item in files:
-                if os.path.split(os.path.join(root,item))[-1] == self.history_file:
-                    path = str(root).split(str(self.history_dir), maxsplit=1)[-1]
+        for files in os.walk(str(self.history_dir)):
+            for item in files[2]:
+                if os.path.split(os.path.join(files[0],item))[-1] == self.history_file:
+                    path = str(files[0]).split(str(self.history_dir), maxsplit=1)[-1]
                     if path.startswith(os.sep):
                         path = path[1:]
                     if path.endswith(os.sep):
                         path = path[:-1]
-                    profile_dirs.append(path)                            
+                    profile_dirs.append(path)
         return profile_dirs
 
     def history_path_profile(self, profile_dir: Path) -> Path:
