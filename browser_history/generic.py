@@ -214,8 +214,8 @@ class Outputs:
         # format map is used by the formatted method to call the right formatter
         self._format_map = {
             "csv": self.to_csv,
-            "json": lambda: self.to_json(json_lines=False),
-            "jsonl": self.to_json
+            "json": self.to_json,
+            "jsonl": lambda: self.to_json(json_lines=True)
         }
 
     def get(self):
@@ -273,10 +273,12 @@ class Outputs:
                 writer.writerow(row)
             return output.getvalue()
 
-    def to_json(self, json_lines=True):
+    def to_json(self, json_lines=False):
         """
-         Return history formatted as a JSON Lines or Plain JSON format
+         Return history formatted as a JSON or JSON Lines format
          names
+         :param json_lines: (optional) flag to specify if the json_string should be JSON Lines
+            Default value set to False.
          :return: :py:class:`str` object
         """
         # custom json encoder for datetime objects
@@ -299,6 +301,6 @@ class Outputs:
         if json_lines:
             json_string = '\n'.join([json.dumps(line, cls=DateTimeEncoder) for line in lines])
         else:
-            json_string = json.dumps({'history': lines}, cls=DateTimeEncoder)
+            json_string = json.dumps({'history': lines}, cls=DateTimeEncoder, indent=4)
 
         return json_string
