@@ -13,7 +13,6 @@ import tempfile
 import shutil
 import typing
 import datetime
-import glob
 import os
 import browser_history.utils as utils
 
