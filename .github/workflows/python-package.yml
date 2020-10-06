@@ -5,9 +5,9 @@ name: tests
 
 on:
   push:
-    branches: [ master, dev ]
+    branches: [ master, 'feature-*' ]
   pull_request:
-    branches: [ master, dev ]
+    branches: [ master, 'feature-*' ]
 
 jobs:
   build:
@@ -18,7 +18,7 @@ jobs:
         platform: [ubuntu-latest, windows-latest, macos-latest]
 
     runs-on: ${{ matrix.platform }}
-    
+
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
