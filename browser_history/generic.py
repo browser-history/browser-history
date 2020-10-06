@@ -201,7 +201,8 @@ class Outputs():
         # format map is used by the formatted method to call the right formatter
         self._format_map = {
             'csv': self.to_csv,
-            'json': self.to_json
+            'json': lambda: self.to_json(json_lines=False),
+            'jsonl': self.to_json
         }
 
     def get(self):
@@ -273,16 +274,16 @@ class Outputs():
         # fetch lines
         lines = []
         for entry in self.entries:
-            json_record = json.dumps(
-                {self.fields[0]: entry[0], self.fields[1]: entry[1]}, cls=DateTimeEncoder
-            )
+            json_record = {}
+            for field, value in zip(self.fields, entry):
+                json_record[field] = value
             lines.append(json_record)
 
         # if json_lines flag is true convert to JSON Lines format,
         # otherwise convert it to Plain JSON format
         if json_lines:
-            json_string = '\n'.join(lines)
+            json_string = '\n'.join([json.dumps(line, cls=DateTimeEncoder) for line in lines])
         else:
-            json_string = json.dumps({'history': lines})
+            json_string = json.dumps({'history': lines}, cls=DateTimeEncoder)
 
         return json_string
