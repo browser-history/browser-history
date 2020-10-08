@@ -46,6 +46,11 @@ class Browser:
       processed using the
       `datetime <https://www.sqlitetutorial.net/sqlite-date-functions/sqlite-datetime-function/>`_
       function with the modifier ``localtime``.
+    * **bookmarks_SQL**: SQL query required to extract bookmarks from the ``bookmarks_file``. The
+      query must return four columns: ``added_time`` , ``url`` , ``Title`` , ``Folder``. The ``added_time`` must be
+      processed using the
+      `datetime <https://www.sqlitetutorial.net/sqlite-date-functions/sqlite-datetime-function/>`_
+      function with the modifier ``localtime``.
 
     :param plat: the current platform. A value of ``None`` means the platform will be
                     inferred from the system.
@@ -211,11 +216,14 @@ class Browser:
 
 class Outputs:
     """
-    A generic class to encapsulate history outputs and to
+    A generic class to encapsulate history and bookmark outputs and to
     easily convert them to JSON, CSV or other formats.
 
-    * **entries**: List of tuples of Timestamp & URL
-    :type entries: list(tuple(:py:class:`datetime.datetime`, str))
+    * **history_entries**: List of tuples of Timestamp & URL
+    :type history_entries: list(tuple(:py:class:`datetime.datetime`, str))
+
+    * **bookmark_entries** List of tuples of Timestamp , URL , Title , Folder
+    :type bookmark_entries: list(tuple(:py:class:`datetime.datetime`, str,str,str))
 
     * **formats**: A tuple of strings containing all supported formats
 
@@ -264,13 +272,13 @@ class Outputs:
                 :type dict.value: list(tuple(:py:class:`datetime.datetime`, str))
         """
         domain_histories = defaultdict(list)
-        for entry in self.entries:
+        for entry in self.history_entries:
             domain_histories[urlparse(entry[1]).netloc].append(entry)
         return domain_histories
 
     def formatted(self, output_format="csv",type = 'history'):
         """
-        Returns history as a :py:class:`str` formatted  as ``output_format``
+        Returns history or bookmarks as a :py:class:`str` formatted  as ``output_format``
         :param output_format: One the formats in py:attr:`~formats`
         :rtype: :py:class:`str` object
         """
@@ -287,7 +295,7 @@ class Outputs:
 
     def to_csv(self,type = "history"):
         """
-        Return history formatted as a comma separated string with the first row having the fields
+        Return history or bookmarks formatted as a comma separated string with the first row having the fields
         names
         :return:
         """
@@ -311,7 +319,7 @@ class Outputs:
 
     def to_json(self, json_lines=False,type = 'history'):
         """
-         Return history formatted as a JSON or JSON Lines format
+         Return history or bookmarks formatted as a JSON or JSON Lines format
          names
          :param json_lines: (optional) flag to specify if the json_string should be JSON Lines
             Default value set to False.
