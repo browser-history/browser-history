@@ -3,11 +3,12 @@ command line interface of browser-history."""
 
 import sys
 import argparse
-from browser_history import get_history, generic, browsers
+from browser_history import get_history, generic, browsers,get_bookmarks
 
 # get list of all implemented browser by finding subclasses of generic.Browser
 AVAILABLE_BROWSERS = ', '.join(b.__name__ for b in generic.Browser.__subclasses__())
 AVAILABLE_FORMATS = ', '.join(generic.Outputs.formats)
+AVAILABLE_TYPES='history,bookmarks'
 
 def make_parser():
     """Creates an ArgumentParser, configures and returns it.
@@ -23,11 +24,18 @@ def make_parser():
                                             Checkout the GitHub repo https://github.com/pesos/browser-history
                                             if you have any issues or want to help contribute''')
 
+    parser_.add_argument('-t','--type',
+                        default='all',
+                        help=f'''
+                                argument to decide whether to retrieve history or bookmarks.
+                                Should be one of all, {AVAILABLE_TYPES}.
+                                Default is all (gets both histories and bookmarks)
+                                .''')
     parser_.add_argument('-b', '--browser',
                          default='all',
                          help=f'''
-                                browser to retrieve history from. Should be one of all, {AVAILABLE_BROWSERS}.
-                                Default is all (gets history from all browsers).''')
+                                browser to retrieve history or bookmarks from. Should be one of all, {AVAILABLE_BROWSERS}.
+                                Default is all (gets history or bookmarks from all browsers).''')
 
     parser_.add_argument('-f', '--format',
                          default="csv",
@@ -35,14 +43,21 @@ def make_parser():
                                 Format to be used in output. Should be one of {AVAILABLE_FORMATS}.
                                 Default is csv''')
 
-    parser_.add_argument('-o', '--output',
+    parser_.add_argument('-h_o', '--history_output',
                          default=None,
                          help='''
-                                File where output is to be written. 
-                                If not provided standard output is used.''')
+                                File where history output is to be written. 
+                                If not provided and type is history or all 
+                                ,standard output is used.''')
+    parser_.add_argument('-b_o', '--bookmarks_output',
+                         default=None,
+                         help='''
+                                File where bookmarks output is to be written. 
+                                If not provided and type is bookmarks or all
+                                ,standard output is used.''')
     return parser_
 
-parser = make_parser()
+parser = make_parser()    
 
 def main():
     """Entrypoint to the command-line interface (CLI) of browser-history.
@@ -50,10 +65,15 @@ def main():
     It parses arguments from sys.argv and performs the appropriate actions.
     """
     args = parser.parse_args()
-
+    assert args.type in ['history','bookmarks','all']
     if args.browser == 'all':
-        outputs = get_history()
-
+        if args.type == 'history':
+            h_outputs = get_history()
+        elif args.type == 'bookmarks':
+            h_outputs = get_bookmarks()
+        elif args.type == 'all':
+            h_outputs = get_history()
+            b_outputs = get_bookmarks()
     else:
         try:
             # gets browser class by name (string).
@@ -68,22 +88,43 @@ def main():
             sys.exit(1)
 
         try:
-            browser = browser_class().fetch()
-            outputs = browser
+            if args.type == 'history':
+                browser = browser_class().fetch(type = args.type)
+                h_outputs = browser
+            elif args.type == 'bookmarks':
+                browser = browser_class().fetch(type = args.type)
+                b_outputs = browser
+            elif args.type == 'all':
+                browser = browser_class().fetch(type = 'history')
+                h_outputs = browser
+                browser = browser_class().fetch(type = 'bookmarks')              
+                b_outputs = browser
         except AssertionError as e:
             print(e)
             sys.exit(1)
 
     # Format the output
     try:
-        formatted = outputs.formatted(args.format)
+        if args.type == 'all':
+            h_formatted = h_outputs.formatted(args.format,'history')
+            b_formatted = b_outputs.formatted(args.format,'bookmarks')
+        elif args.type == 'history':
+            h_formatted = h_outputs.formatted(args.format,args.type)
+        elif args.type == 'bookmarks':
+            b_formatted = b_outputs.formatted(args.format,args.type)
     except ValueError as e:
         print(e)
         sys.exit(1)
-
-    if args.output is None:
-        print(formatted)
-    else:
-        filename = args.output
+    
+    if args.history_output is None and args.type in ['history','all']:
+        print(h_formatted)
+    if args.bookmarks_output is None and args.type in ['bookmarks','all']:
+        print(b_formatted)
+    if (not args.history_output is None) and args.type in ['history','all']:
+        filename = args.history_output
         with open(filename, 'w') as output_file:
-            output_file.write(formatted)
+            output_file.write(h_formatted)
+    elif (not args.bookmarks_output is None) and args.type in ['bookmarks','all']:
+        filename = args.bookmarks_output
+        with open(filename, 'w') as output_file:
+            output_file.write(b_formatted)

@@ -64,6 +64,7 @@ class Browser:
     history_file = None
 
     history_SQL = None
+    bookmarks_SQL = None
 
     def __init__(self, plat: utils.Platform = None):
         if plat is None:
@@ -141,7 +142,7 @@ class Browser:
         ]
         return self.fetch(history_paths)
 
-    def fetch(self, history_paths=None, sort=True, desc=False):
+    def fetch(self, history_paths=None, sort=True, desc=False,type = 'history'):
         """Returns history of all available profiles.
 
         The returned datetimes are timezone-aware with the local timezone set by default.
@@ -167,24 +168,44 @@ class Browser:
             history_paths = self.history_paths()
         output_object = Outputs()
         with tempfile.TemporaryDirectory() as tmpdirname:
+            length = 0
             for history_path in history_paths:
                 copied_history_path = shutil.copy2(history_path.absolute(), tmpdirname)
                 conn = sqlite3.connect(f"file:{copied_history_path}?mode=ro", uri=True)
                 cursor = conn.cursor()
-                cursor.execute(self.history_SQL)
-                date_histories = [
-                    (
-                        datetime.datetime.strptime(d, "%Y-%m-%d %H:%M:%S").replace(
-                            tzinfo=_local_tz
-                        ),
-                        url,
-                    )
-                    for d, url in cursor.fetchall()
-                ]
-                output_object.entries.extend(date_histories)
+                if type=='history':
+                    cursor.execute(self.history_SQL)
+                    date_histories = [
+                        (
+                            datetime.datetime.strptime(d, "%Y-%m-%d %H:%M:%S").replace(
+                                tzinfo=_local_tz
+                            ),
+                            url,
+                        )
+                        for d, url in cursor.fetchall()
+                    ]
+                    output_object.history_entries.extend(date_histories)
+                    if sort:
+                        output_object.history_entries.sort(reverse=desc)
+                elif type == 'bookmarks':
+                    cursor.execute(self.bookmarks_SQL)
+                    date_bookmarks = [
+                        (
+                            datetime.datetime.strptime(d, "%Y-%m-%d %H:%M:%S").replace(
+                                tzinfo=_local_tz
+                            ),
+                            url,
+                            title,
+                            folder,
+                        )
+                        for d, url,title,folder in cursor.fetchall()
+                    ]
+                    if(len(date_bookmarks)<=length):
+                        continue
+                    output_object.bookmark_entries.extend(date_bookmarks)
+                    if sort:
+                        output_object.bookmark_entries.sort(reverse=desc)
                 conn.close()
-        if sort:
-            output_object.entries.sort(reverse=desc)
         return output_object
 
 
@@ -207,10 +228,12 @@ class Outputs:
     formats = ("csv", "json")
   
     # Use the below fields for all formatter implementations
-    fields = ("Timestamp", "URL")
+    history_fields = ("Timestamp", "URL")
+    bookmark_fields = ("Timestamp","URL","Title","Folder")
 
     def __init__(self):
-        self.entries = []
+        self.history_entries = []
+        self.bookmark_entries =[]
         # format map is used by the formatted method to call the right formatter
         self._format_map = {
             "csv": self.to_csv,
@@ -218,14 +241,20 @@ class Outputs:
             "jsonl": lambda: self.to_json(json_lines=True)
         }
 
-    def get(self):
+    def get_history(self):
         """
         Return the list of tuples of Timestamps & URLs.
         :rtype: list(tuple(:py:class:`datetime.datetime`, str))
         """
 
-        return self.entries
-
+        return self.history_entries
+    def get_bookmarks(self):
+        """
+        Return the list of tuples of Timestamps, URLs, Title and Folders
+        :rtype: list(tuple(:py:class:`datetime.datetime`, str, str, str))
+        """
+        
+        return self.bookmark_entries
     def sort_domain(self):
         """
         Returns the history sorted according to the domain-name.
@@ -239,7 +268,7 @@ class Outputs:
             domain_histories[urlparse(entry[1]).netloc].append(entry)
         return domain_histories
 
-    def formatted(self, output_format="csv"):
+    def formatted(self, output_format="csv",type = 'history'):
         """
         Returns history as a :py:class:`str` formatted  as ``output_format``
         :param output_format: One the formats in py:attr:`~formats`
@@ -251,12 +280,12 @@ class Outputs:
             # fetch the required formatter and call it. The formatters are instance methods
             # so no need to pass any arguments
             formatter = self._format_map[output_format]
-            return formatter()
+            return formatter(type)
         raise ValueError(
             f"Invalid format {output_format}. Should be one of {Outputs.formats}"
         )
 
-    def to_csv(self):
+    def to_csv(self,type = "history"):
         """
         Return history formatted as a comma separated string with the first row having the fields
         names
@@ -268,12 +297,19 @@ class Outputs:
         # will use StringIO to build the csv in memory first
         with StringIO() as output:
             writer = csv.writer(output)
-            writer.writerow(Outputs.fields)
-            for row in self.get():
-                writer.writerow(row)
+            if type == 'history':
+                print(1)
+                writer.writerow(Outputs.history_fields)
+                for row in self.get_history():
+                    print(row)
+                    writer.writerow(row)
+            elif type=='bookmarks':
+                writer.writerow(Outputs.bookmark_fields)
+                for row in self.get_bookmarks():
+                    writer.writerow(row)
             return output.getvalue()
 
-    def to_json(self, json_lines=False):
+    def to_json(self, json_lines=False,type = 'history'):
         """
          Return history formatted as a JSON or JSON Lines format
          names
@@ -290,17 +326,23 @@ class Outputs:
 
         # fetch lines
         lines = []
-        for entry in self.entries:
-            json_record = {}
-            for field, value in zip(self.fields, entry):
-                json_record[field] = value
-            lines.append(json_record)
-
+        if type=='bookmarks':
+            for entry in self.bookmark_entries:
+                json_record = {}
+                for field, value in zip(self.bookmark_fields, entry):
+                    json_record[field] = value
+                lines.append(json_record)
+        elif type=='history':
+            for entry in self.history_entries:
+                json_record = {}
+                for field, value in zip(self.history_fields, entry):
+                    json_record[field] = value
+                lines.append(json_record)
         # if json_lines flag is true convert to JSON Lines format,
         # otherwise convert it to Plain JSON format
         if json_lines:
             json_string = '\n'.join([json.dumps(line, cls=DateTimeEncoder) for line in lines])
         else:
-            json_string = json.dumps({'history': lines}, cls=DateTimeEncoder, indent=4)
+           json_string = json.dumps({type: lines}, cls=DateTimeEncoder, indent=4)
 
         return json_string
