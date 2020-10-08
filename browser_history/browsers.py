@@ -1,18 +1,14 @@
 """This module defines all supported browsers and their functionality.
-
 All browsers must inherit from :py:mod:`browser_history.generic.Browser`.
 """
 from browser_history.generic import Browser
 
 class Chrome(Browser):
     """Google Chrome Browser
-
     Supported platforms:
-
     * Windows
     * Linux
     * Mac OS
-
     Profile support: Yes
     """
     name = 'Chrome'
@@ -33,18 +29,13 @@ class Chrome(Browser):
 
 class Chromium(Browser):
     """Chromium Browser
-
-    Supported platforms (TODO: Mac OS support)
-
+    Supported platforms (TODO: Windows and Mac OS support)
     * Linux
-    * Windows
-
     Profile support: Yes
     """
     name = "Chromium"
 
     linux_path = '.config/chromium'
-    windows_path = 'AppData/Local/chromium/User Data'
 
     profile_support = True
     profile_dir_prefixes = Chrome.profile_dir_prefixes
@@ -55,13 +46,10 @@ class Chromium(Browser):
 
 class Firefox(Browser):
     """Mozilla Firefox Browser
-
     Supported platforms:
-
     * Windows
     * Linux
     * Mac OS
-
     Profile support: Yes
     """
     name = "Firefox"
@@ -74,18 +62,15 @@ class Firefox(Browser):
 
     history_file = "places.sqlite"
     history_SQL = """SELECT
-            datetime(visit_date/1000000, 'unixepoch', 'localtime') AS 'visit_time',
+            datetime(last_visit_date/1000000, 'unixepoch', 'localtime') AS 'visit_time',
             url
-        FROM moz_historyvisits INNER JOIN moz_places ON moz_historyvisits.place_id = moz_places.id
-        WHERE visit_date IS NOT NULL AND url LIKE 'http%' AND title IS NOT NULL"""
+        FROM moz_historyvisits NATURAL JOIN moz_places WHERE
+        last_visit_date IS NOT NULL AND url LIKE 'http%' AND title IS NOT NULL"""
 
 class Safari(Browser):
     """Apple Safari browser
-
     Supported platforms:
-
     * Mac OS
-
     Profile support: No
     """
     name = "Safari"
@@ -107,16 +92,15 @@ class Safari(Browser):
 
 class Edge(Browser):
     """Microsoft Edge Browser
-
-    Supported platforms (TODO: Mac OS support)
-
+    Supported platforms
     * Windows
-
+    * Mac OS
     Profile support: Yes
     """
     name = "Edge"
 
     windows_path = 'AppData/Local/Microsoft/Edge/User Data'
+    mac_path = 'Library/Application Support/Microsoft Edge/Default'
 
     profile_support = True
     profile_dir_prefixes = Chrome.profile_dir_prefixes
@@ -126,38 +110,16 @@ class Edge(Browser):
 
 class Opera(Browser):
     """Opera Browser
-
-    Supported platforms (TODO: Mac OS support)
-
-    * Linux, Windows
-
-    Profile support: No
+    Supported platforms (TODO: Windows support)
+    * Mac OS
+    Profile support: Yes
     """
     name = "Opera"
+    mac_path = 'Library/Application Support/com.operasoftware.Opera/'
 
-    linux_path = '.config/opera'
-    windows_path = 'AppData/Roaming/Opera Software/Opera Stable'
-
-    profile_support = False
-
-    history_file = Chrome.history_file
-
-    history_SQL = Chrome.history_SQL
-
-class OperaGX(Browser):
-    """Opera GX Browser
-
-    Supported platforms
-
-    * Windows
-
-    Profile support: No
-    """
-    name = 'OperaGX'
-
-    windows_path = 'AppData/Roaming/Opera Software/Opera GX Stable'
-
-    profile_support = False
+    profile_support = True
+    profile_dir_prefixes = Chrome.profile_dir_prefixes
 
     history_file = Chrome.history_file
+
     history_SQL = Chrome.history_SQL
