@@ -143,6 +143,7 @@ class Edge(Browser):
     history_SQL = Chrome.history_SQL
 
 class Opera(Browser):
+    """
     Opera Browser
 
     Supported platforms (TODO: Mac OS support)
@@ -153,7 +154,8 @@ class Opera(Browser):
     
 
     name = "Opera"
-
+    """
+    
     linux_path = ".config/opera"
     windows_path = "AppData/Roaming/Opera Software/Opera Stable"
 
