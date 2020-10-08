@@ -26,6 +26,32 @@ def test_firefox_linux(become_linux, change_homedir):
                                                                  'IST')),
                       'https://www.mozilla.org/en-US/privacy/firefox/')
 
+
+def test_firefox_windows(become_windows, change_homedir):
+    """Test history is correct on Firefox for Windows"""
+    f = browser_history.browsers.Firefox()
+    output = f.fetch()
+    his = output.get()
+    assert len(his) == 8
+    profs = f.profiles()
+    assert len(profs) == 2
+    # the history list is long so just check the first and last item
+    assert his[0] == (datetime.datetime(2020, 10, 1, 11, 43, 35,
+                                        tzinfo=datetime.timezone(datetime.timedelta(seconds=10800),
+                                                                 'E. Africa Standard Time')),
+                      'https://www.youtube.com/')
+    assert his[-1] == (datetime.datetime(2020, 10, 4, 14, 2, 14,
+                                         tzinfo=datetime.timezone(datetime.timedelta(seconds=10800),
+                                                                  'E. Africa Standard Time')),
+                       'https://www.reddit.com/')
+    # get history for second profile
+    his = f.history_profiles(["Profile 2"]).get()
+    assert his == [(datetime.datetime(2020, 10, 4, 14, 2, 14,
+                                      tzinfo=datetime.timezone(datetime.timedelta(seconds=10800),
+                                                               'E. Africa Standard Time')),
+                    'https://www.reddit.com/')]
+
+
 def test_edge_windows(become_windows, change_homedir):
     """Test history is correct for Edge on Windows"""
     e = browser_history.browsers.Edge()
