@@ -142,9 +142,9 @@ class Edge(Browser):
     history_file = Chrome.history_file
     history_SQL = Chrome.history_SQL
 
+
 class Opera(Browser):
-    """
-    Opera Browser
+    """Opera Browser
 
     Supported platforms (TODO: Mac OS support)
 

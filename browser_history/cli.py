@@ -43,13 +43,13 @@ def make_parser():
                                 Format to be used in output. Should be one of {AVAILABLE_FORMATS}.
                                 Default is csv''')
 
-    parser_.add_argument('-h_o', '--history_output',
+    parser_.add_argument('--history_output',
                          default=None,
                          help='''
                                 File where history output is to be written. 
                                 If not provided and type is history or all 
                                 ,standard output is used.''')
-    parser_.add_argument('-b_o', '--bookmarks_output',
+    parser_.add_argument('--bookmarks_output',
                          default=None,
                          help='''
                                 File where bookmarks output is to be written. 
@@ -70,7 +70,7 @@ def main():
         if args.type == 'history':
             h_outputs = get_history()
         elif args.type == 'bookmarks':
-            h_outputs = get_bookmarks()
+            b_outputs = get_bookmarks()
         elif args.type == 'all':
             h_outputs = get_history()
             b_outputs = get_bookmarks()

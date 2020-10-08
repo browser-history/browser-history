@@ -207,6 +207,7 @@ class Browser:
                     ]
                     if(len(date_bookmarks)<=length):
                         continue
+                    length  = len(date_bookmarks)
                     output_object.bookmark_entries.extend(date_bookmarks)
                     if sort:
                         output_object.bookmark_entries.sort(reverse=desc)

@@ -39,7 +39,7 @@ def get_bookmarks():
         if('Firefox' in str(browser_class)):
             try:
                 browser_object = browser_class()
-                browser_output_object = browser_object.fetch(fetch_type='bookmarks')
+                browser_output_object = browser_object.fetch(type='bookmarks')
                 output_object.bookmark_entries.extend(browser_output_object.get_bookmarks())
             except AssertionError:
                 utils.logger.info("%s browser is not supported", browser_class.name)
