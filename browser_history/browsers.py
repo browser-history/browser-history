@@ -142,7 +142,6 @@ class Edge(Browser):
     history_file = Chrome.history_file
     history_SQL = Chrome.history_SQL
 
-"""
 class Opera(Browser):
     Opera Browser
 
@@ -164,7 +163,6 @@ class Opera(Browser):
 
     history_SQL = Chrome.history_SQL
 
-"""
 class OperaGX(Browser):
     """Opera GX Browser
 
