@@ -65,8 +65,7 @@ def main():
     It parses arguments from sys.argv and performs the appropriate actions.
     """
     args = parser.parse_args()
-    assert args.type in ['history','bookmarks','all']
-    function_call = {'history':get_history(),'bookmarks':get_bookmarks()}
+    assert args.type in ['history','bookmarks','all'], f"Type should be one of all, {AVAILABLE_TYPES}"
     if args.browser == 'all':
         
     else:
