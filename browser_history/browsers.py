@@ -84,7 +84,7 @@ class Firefox(Browser):
             url
         FROM moz_historyvisits INNER JOIN moz_places ON moz_historyvisits.place_id = moz_places.id 
         WHERE visit_date IS NOT NULL AND url LIKE 'http%' AND title IS NOT NULL"""
-    bookmarks_SQL = """SELECT 
+    bookmarks_SQL = """SELECT
             datetime(moz_bookmarks.dateAdded/1000000,'unixepoch','localtime') 
             AS added_time,url,moz_bookmarks.title ,moz_folder.title
             FROM moz_bookmarks INNER JOIN moz_places,moz_bookmarks as moz_folder 
@@ -151,11 +151,10 @@ class Opera(Browser):
     * Linux, Windows
 
     Profile support: No
-    
+    """
 
     name = "Opera"
-    """
-    
+
     linux_path = ".config/opera"
     windows_path = "AppData/Roaming/Opera Software/Opera Stable"
 
@@ -164,6 +163,7 @@ class Opera(Browser):
     history_file = Chrome.history_file
 
     history_SQL = Chrome.history_SQL
+
 
 class OperaGX(Browser):
     """Opera GX Browser

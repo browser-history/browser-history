@@ -47,8 +47,8 @@ class Browser:
       `datetime <https://www.sqlitetutorial.net/sqlite-date-functions/sqlite-datetime-function/>`_
       function with the modifier ``localtime``.
     * **bookmarks_SQL**: SQL query required to extract bookmarks from the ``bookmarks_file``. The
-      query must return four columns: ``added_time`` , ``url`` , ``Title`` , ``Folder``. The ``added_time`` must be
-      processed using the
+      query must return four columns: ``added_time`` , ``url`` , ``Title`` , ``Folder``.
+      The ``added_time`` must be processed using the
       `datetime <https://www.sqlitetutorial.net/sqlite-date-functions/sqlite-datetime-function/>`_
       function with the modifier ``localtime``.
 
@@ -147,7 +147,7 @@ class Browser:
         ]
         return self.fetch(history_paths)
 
-    def fetch(self, history_paths=None, sort=True, desc=False,type = 'history'):
+    def fetch(self, history_paths=None, sort=True, desc=False,fetch_type = 'history'):
         """Returns history of all available profiles.
 
         The returned datetimes are timezone-aware with the local timezone set by default.
@@ -178,7 +178,7 @@ class Browser:
                 copied_history_path = shutil.copy2(history_path.absolute(), tmpdirname)
                 conn = sqlite3.connect(f"file:{copied_history_path}?mode=ro", uri=True)
                 cursor = conn.cursor()
-                if type=='history':
+                if fetch_type=='history':
                     cursor.execute(self.history_SQL)
                     date_histories = [
                         (
@@ -192,7 +192,7 @@ class Browser:
                     output_object.history_entries.extend(date_histories)
                     if sort:
                         output_object.history_entries.sort(reverse=desc)
-                elif type == 'bookmarks':
+                elif fetch_type == 'bookmarks':
                     cursor.execute(self.bookmarks_SQL)
                     date_bookmarks = [
                         (
@@ -205,7 +205,7 @@ class Browser:
                         )
                         for d, url,title,folder in cursor.fetchall()
                     ]
-                    if(len(date_bookmarks)<=length):
+                    if len(date_bookmarks)<=length:
                         continue
                     length  = len(date_bookmarks)
                     output_object.bookmark_entries.extend(date_bookmarks)
@@ -235,7 +235,7 @@ class Outputs:
     # All formats added here should be implemented in _format_map
     # Formats added here and in _format_map should be in lowercase
     formats = ("csv", "json")
-  
+
     # Use the below fields for all formatter implementations
     history_fields = ("Timestamp", "URL")
     bookmark_fields = ("Timestamp","URL","Title","Folder")
@@ -262,7 +262,7 @@ class Outputs:
         Return the list of tuples of Timestamps, URLs, Title and Folders
         :rtype: list(tuple(:py:class:`datetime.datetime`, str, str, str))
         """
-        
+
         return self.bookmark_entries
     def sort_domain(self):
         """
@@ -277,7 +277,7 @@ class Outputs:
             domain_histories[urlparse(entry[1]).netloc].append(entry)
         return domain_histories
 
-    def formatted(self, output_format="csv",type = 'history'):
+    def formatted(self, output_format="csv",fetch_type = 'history'):
         """
         Returns history or bookmarks as a :py:class:`str` formatted  as ``output_format``
         :param output_format: One the formats in py:attr:`~formats`
@@ -289,15 +289,15 @@ class Outputs:
             # fetch the required formatter and call it. The formatters are instance methods
             # so no need to pass any arguments
             formatter = self._format_map[output_format]
-            return formatter(type)
+            return formatter(fetch_type=fetch_type)
         raise ValueError(
             f"Invalid format {output_format}. Should be one of {Outputs.formats}"
         )
 
-    def to_csv(self,type = "history"):
+    def to_csv(self,fetch_type = "history"):
         """
-        Return history or bookmarks formatted as a comma separated string with the first row having the fields
-        names
+        Return history or bookmarks formatted as a comma separated string with the first row
+        having the fields names
         :return:
         """
         # we will use csv module and let it do all the heavy lifting such as special character
@@ -306,19 +306,19 @@ class Outputs:
         # will use StringIO to build the csv in memory first
         with StringIO() as output:
             writer = csv.writer(output)
-            if type == 'history':
+            if fetch_type == 'history':
                 print(1)
                 writer.writerow(Outputs.history_fields)
                 for row in self.get_history():
                     print(row)
                     writer.writerow(row)
-            elif type=='bookmarks':
+            elif fetch_type=='bookmarks':
                 writer.writerow(Outputs.bookmark_fields)
                 for row in self.get_bookmarks():
                     writer.writerow(row)
             return output.getvalue()
 
-    def to_json(self, json_lines=False,type = 'history'):
+    def to_json(self, json_lines=False,fetch_type = 'history'):
         """
          Return history or bookmarks formatted as a JSON or JSON Lines format
          names
@@ -335,13 +335,13 @@ class Outputs:
 
         # fetch lines
         lines = []
-        if type=='bookmarks':
+        if fetch_type=='bookmarks':
             for entry in self.bookmark_entries:
                 json_record = {}
                 for field, value in zip(self.bookmark_fields, entry):
                     json_record[field] = value
                 lines.append(json_record)
-        elif type=='history':
+        elif fetch_type=='history':
             for entry in self.history_entries:
                 json_record = {}
                 for field, value in zip(self.history_fields, entry):
@@ -352,6 +352,6 @@ class Outputs:
         if json_lines:
             json_string = '\n'.join([json.dumps(line, cls=DateTimeEncoder) for line in lines])
         else:
-           json_string = json.dumps({type: lines}, cls=DateTimeEncoder, indent=4)
+           json_string = json.dumps({fetch_type: lines}, cls=DateTimeEncoder, indent=4)
 
         return json_string

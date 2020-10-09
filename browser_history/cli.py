@@ -57,7 +57,7 @@ def make_parser():
                                 ,standard output is used.''')
     return parser_
 
-parser = make_parser()    
+parser = make_parser()
 
 def main():
     """Entrypoint to the command-line interface (CLI) of browser-history.
@@ -66,14 +66,9 @@ def main():
     """
     args = parser.parse_args()
     assert args.type in ['history','bookmarks','all']
+    function_call = {'history':get_history(),'bookmarks':get_bookmarks()}
     if args.browser == 'all':
-        if args.type == 'history':
-            h_outputs = get_history()
-        elif args.type == 'bookmarks':
-            b_outputs = get_bookmarks()
-        elif args.type == 'all':
-            h_outputs = get_history()
-            b_outputs = get_bookmarks()
+        
     else:
         try:
             # gets browser class by name (string).
@@ -97,7 +92,7 @@ def main():
             elif args.type == 'all':
                 browser = browser_class().fetch(type = 'history')
                 h_outputs = browser
-                browser = browser_class().fetch(type = 'bookmarks')              
+                browser = browser_class().fetch(type = 'bookmarks')
                 b_outputs = browser
         except AssertionError as e:
             print(e)
@@ -115,7 +110,7 @@ def main():
     except ValueError as e:
         print(e)
         sys.exit(1)
-    
+
     if args.history_output is None and args.type in ['history','all']:
         print(h_formatted)
     if args.bookmarks_output is None and args.type in ['bookmarks','all']:
