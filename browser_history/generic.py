@@ -87,9 +87,13 @@ class Browser:
             self.profile_dir_prefixes.append("*")
 
     def profiles(self) -> typing.List[str]:
-        """Returns a list of profile directories
+        """Returns a list of profile directories. If the browser is supported on the current
+        platform but is not installed an empty list will be returned
         :rtype: list(str)
         """
+        if not os.path.exists(self.history_dir):
+            utils.logger.info('%s browser is not installed', self.name)
+            return []
         if not self.profile_support:
             return ["."]
         profile_dirs = []
@@ -160,7 +164,8 @@ class Browser:
             Default value set to False.
         :type asc: boolean
         :return: Object of class :py:class:`browser_history.generic.Outputs` with the
-            data member entries set to list(tuple(:py:class:`datetime.datetime`, str))
+            data member entries set to list(tuple(:py:class:`datetime.datetime`, str)).
+            If the browser is not installed, this object will be empty.
         :rtype: :py:class:`browser_history.generic.Outputs`
         """
         if history_paths is None:
