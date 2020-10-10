@@ -20,11 +20,11 @@ def make_parser():
     """
     parser_ = argparse.ArgumentParser(
         description="""
-                                            A tool to retrieve history from
-                                            (almost) any browser on (almost) any platform""",
+                    A tool to retrieve history from
+                    (almost) any browser on (almost) any platform""",
         epilog="""
-                                            Checkout the GitHub repo https://github.com/pesos/browser-history
-                                            if you have any issues or want to help contribute""",
+                Checkout the GitHub repo https://github.com/pesos/browser-history
+                if you have any issues or want to help contribute""",
     )
 
     parser_.add_argument(
@@ -32,18 +32,17 @@ def make_parser():
         "--type",
         default="history",
         help=f"""
-                                argument to decide whether to retrieve history or bookmarks.
-                                Should be one of all, {AVAILABLE_TYPES}.
-                                Default is history
-                                .""",
+                argument to decide whether to retrieve history or bookmarks.
+                Should be one of all, {AVAILABLE_TYPES}.
+                Default is history.""",
     )
     parser_.add_argument(
         "-b",
         "--browser",
         default="all",
         help=f"""
-                                browser to retrieve history or bookmarks from. Should be one of all, {AVAILABLE_BROWSERS}.
-                                Default is all (gets history or bookmarks from all browsers).""",
+                browser to retrieve history or bookmarks from. Should be one of all, {AVAILABLE_BROWSERS}.
+                Default is all (gets history or bookmarks from all browsers).""",
     )
 
     parser_.add_argument(
@@ -51,8 +50,8 @@ def make_parser():
         "--format",
         default="csv",
         help=f"""
-                                Format to be used in output. Should be one of {AVAILABLE_FORMATS}.
-                                Default is csv""",
+            Format to be used in output. Should be one of {AVAILABLE_FORMATS}.
+            Default is csv""",
     )
 
     parser_.add_argument(
@@ -60,8 +59,8 @@ def make_parser():
         "--output",
         default=None,
         help="""
-                                File/Folder where history output and/or bookmark output is to be written. 
-                                If not provided, standard output is used.""",
+                File where history output or bookmark output is to be written. 
+                If not provided, standard output is used.""",
     )
 
     return parser_
@@ -76,17 +75,15 @@ def main():
     It parses arguments from sys.argv and performs the appropriate actions.
     """
     args = parser.parse_args()
-    assert args.type in [
-        "history",
-        "bookmarks",
-        "all",
-    ], f"Type should be one of all, {AVAILABLE_TYPES}"
-
     h_outputs = b_outputs = None
     fetch_map = {
         "history": [h_outputs, get_history],
         "bookmarks": [b_outputs, get_bookmarks],
     }
+
+    assert (
+        args.type in fetch_map.keys()
+    ), f"Type should be one of all, {AVAILABLE_TYPES}"
 
     if args.browser == "all":
         fetch_map[args.type][0] = fetch_map[args.type][1]()

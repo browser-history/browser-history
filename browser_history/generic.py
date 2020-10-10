@@ -274,7 +274,7 @@ class Outputs:
 
         self.fetch_type = fetch_type
 
-        self._fetch_map = {
+        self._field_map = {
             "history": [self.histories, ("Timestamp", "URL")],
             "bookmarks": [self.bookmarks, ("Timestamp", "URL", "Title", "Folder")],
         }
@@ -321,8 +321,8 @@ class Outputs:
         # will use StringIO to build the csv in memory first
         with StringIO() as output:
             writer = csv.writer(output)
-            writer.writerow(self._fetch_map[self.fetch_type][1])
-            for row in self._fetch_map[self.fetch_type][0]:
+            writer.writerow(self._field_map[self.fetch_type][1])
+            for row in self._field_map[self.fetch_type][0]:
                 writer.writerow(row)
             return output.getvalue()
 
@@ -345,7 +345,7 @@ class Outputs:
         lines = []
         for entry in self._fetch_map[self.fetch_type][0]:
             json_record = {}
-            for field, value in zip(self._fetch_map[self.fetch_type][1], entry):
+            for field, value in zip(self._field_map[self.fetch_type][1], entry):
                 json_record[field] = value
             lines.append(json_record)
 
