@@ -12,7 +12,7 @@ def get_history():
 
     :rtype: :py:class:`browser_history.generic.Outputs`
     """
-    output_object = generic.Outputs(fetch_type = 'history')
+    output_object = generic.Outputs(fetch_type="history")
     subclasses = generic.Browser.__subclasses__()
     for browser_class in subclasses:
         try:
@@ -24,6 +24,7 @@ def get_history():
     output_object.histories.sort()
     return output_object
 
+
 def get_bookmarks():
     """This method is used to obtain browser bookmarks of all available and supported
     browsers for the system platform.
@@ -33,7 +34,7 @@ def get_bookmarks():
 
     :rtype: :py:class:`browser_history.generic.Outputs`
     """
-    output_object = generic.Outputs(fetch_type = 'bookmarks')
+    output_object = generic.Outputs(fetch_type="bookmarks")
     subclasses = generic.Browser.__subclasses__()
     for browser_class in subclasses:
         try:
@@ -42,6 +43,8 @@ def get_bookmarks():
             browser_output_object = browser_object.fetch_bookmarks()
             output_object.bookmarks.extend(browser_output_object.bookmarks)
         except AssertionError:
-            utils.logger.info("%s browser is not supported for bookmarks", browser_class.name)
+            utils.logger.info(
+                "%s browser is not supported for bookmarks", browser_class.name
+            )
     output_object.bookmarks.sort()
     return output_object

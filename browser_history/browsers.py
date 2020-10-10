@@ -8,6 +8,7 @@ import datetime
 import os
 from browser_history.generic import Browser
 
+
 class Chrome(Browser):
     """Google Chrome Browser
 
@@ -37,7 +38,7 @@ class Chrome(Browser):
         urls.url from urls,visits
         WHERE urls.id = visits.url ORDER BY visit_time DESC"""
 
-    def bookmarks_parser(self,bookmark_path):
+    def bookmarks_parser(self, bookmark_path):
         """Returns bookmarks of a single profile for Chrome based browsers
         The returned datetimes are timezone-aware with the local timezone set by default
 
@@ -47,31 +48,35 @@ class Chrome(Browser):
         :rtype: list(tuple(:py:class:`datetime.datetime`, str, str, str))
         """
 
-        def _deeper(array,folder,bookmarks_list):
+        def _deeper(array, folder, bookmarks_list):
             for node in array:
-                if node['type'] == 'url':
-                    d_t =datetime.datetime(1601, 1, 1) + \
-                        datetime.timedelta(microseconds=int(node['date_added']))
-                    bookmarks_list.append((
-                        d_t.replace(
-                                    microsecond =0 ,tzinfo=self._local_tz
-                                ),
-                        node['url'],
-                        node['name'],
-                        folder,
-                    ))
+                if node["type"] == "url":
+                    d_t = datetime.datetime(1601, 1, 1) + datetime.timedelta(
+                        microseconds=int(node["date_added"])
+                    )
+                    bookmarks_list.append(
+                        (
+                            d_t.replace(microsecond=0, tzinfo=self._local_tz),
+                            node["url"],
+                            node["name"],
+                            folder,
+                        )
+                    )
                 else:
-                    bookmarks_list = _deeper(node['children'],
-                                            folder+os.sep+node['name'],
-                                            bookmarks_list)
+                    bookmarks_list = _deeper(
+                        node["children"], folder + os.sep + node["name"], bookmarks_list
+                    )
             return bookmarks_list
 
         with open(bookmark_path) as b_p:
             b_m = json.load(b_p)
             bookmarks_list = []
-            for root in b_m['roots']:
-                bookmarks_list = _deeper(b_m['roots'][root]['children'],root, bookmarks_list)
+            for root in b_m["roots"]:
+                bookmarks_list = _deeper(
+                    b_m["roots"][root]["children"], root, bookmarks_list
+                )
         return bookmarks_list
+
 
 class Chromium(Browser):
     """Chromium Browser
@@ -98,6 +103,7 @@ class Chromium(Browser):
     history_SQL = Chrome.history_SQL
 
     bookmarks_parser = Chrome.bookmarks_parser
+
 
 class Firefox(Browser):
     """Mozilla Firefox Browser
@@ -128,7 +134,7 @@ class Firefox(Browser):
         FROM moz_historyvisits INNER JOIN moz_places ON moz_historyvisits.place_id = moz_places.id 
         WHERE visit_date IS NOT NULL AND url LIKE 'http%' AND title IS NOT NULL"""
 
-    def bookmarks_parser(self,bookmark_path):
+    def bookmarks_parser(self, bookmark_path):
         """Returns bookmarks of a single profile for Firefox based browsers
         The returned datetimes are timezone-aware with the local timezone set by default
 
@@ -150,17 +156,18 @@ class Firefox(Browser):
         cursor = conn.cursor()
         cursor.execute(bookmarks_sql)
         date_bookmarks = [
-                            (
-                                datetime.datetime.strptime(d, "%Y-%m-%d %H:%M:%S").replace(
-                                    tzinfo=self._local_tz
-                                ),
-                                url,
-                                title,
-                                folder,
-                            )
-                            for d, url ,title ,folder in cursor.fetchall()
-                        ]
+            (
+                datetime.datetime.strptime(d, "%Y-%m-%d %H:%M:%S").replace(
+                    tzinfo=self._local_tz
+                ),
+                url,
+                title,
+                folder,
+            )
+            for d, url, title, folder in cursor.fetchall()
+        ]
         return date_bookmarks
+
 
 class Safari(Browser):
     """Apple Safari browser
@@ -215,6 +222,7 @@ class Edge(Browser):
 
     bookmarks_parser = Chrome.bookmarks_parser
 
+
 class Opera(Browser):
     """Opera Browser
 
@@ -224,6 +232,7 @@ class Opera(Browser):
 
     Profile support: No
     """
+
     name = "Opera"
 
     linux_path = ".config/opera"
@@ -238,6 +247,7 @@ class Opera(Browser):
 
     bookmarks_parser = Chrome.bookmarks_parser
 
+
 class OperaGX(Browser):
     """Opera GX Browser
 
@@ -247,6 +257,7 @@ class OperaGX(Browser):
 
     Profile support: No
     """
+
     name = "OperaGX"
 
     windows_path = "AppData/Roaming/Opera Software/Opera GX Stable"
@@ -259,6 +270,7 @@ class OperaGX(Browser):
     history_SQL = Chrome.history_SQL
 
     bookmarks_parser = Chrome.bookmarks_parser
+
 
 class Brave(Browser):
     """Brave Browser
