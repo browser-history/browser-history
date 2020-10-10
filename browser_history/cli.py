@@ -3,13 +3,12 @@ command line interface of browser-history."""
 
 import sys
 import argparse
-import os
 from browser_history import get_history, get_bookmarks, generic, browsers
 
 # get list of all implemented browser by finding subclasses of generic.Browser
 AVAILABLE_BROWSERS = ', '.join(b.__name__ for b in generic.Browser.__subclasses__())
 AVAILABLE_FORMATS = ', '.join(generic.Outputs.formats)
-AVAILABLE_TYPES='history,bookmarks,all'
+AVAILABLE_TYPES='history,bookmarks'
 
 def make_parser():
     """Creates an ArgumentParser, configures and returns it.
@@ -26,11 +25,11 @@ def make_parser():
                                             if you have any issues or want to help contribute''')
 
     parser_.add_argument('-t','--type',
-                        default='all',
+                        default='history',
                         help=f'''
                                 argument to decide whether to retrieve history or bookmarks.
                                 Should be one of all, {AVAILABLE_TYPES}.
-                                Default is all (gets both histories and bookmarks)
+                                Default is history
                                 .''')
     parser_.add_argument('-b', '--browser',
                          default='all',
@@ -64,14 +63,11 @@ def main():
                         f"Type should be one of all, {AVAILABLE_TYPES}"
 
     h_outputs = b_outputs =None
-    fetch_map = {'history':[h_outputs ,get_history(),'history'+args.format],
-                 'bookmarks':[b_outputs,get_bookmarks(),'bookmarks'+args.format]}
+    fetch_map = {'history':[h_outputs ,get_history()],
+                 'bookmarks':[b_outputs,get_bookmarks()]}
+
     if args.browser == 'all':
-        if not args.type == 'all':
-            fetch_map[args.type][0] = fetch_map[args.type][1]
-        else:
-            fetch_map['history'][0] = fetch_map['history'][1]
-            fetch_map['bookmarks'][0] = fetch_map['bookmarks'][1]
+        fetch_map[args.type][0] = fetch_map[args.type][1]
     else:
         try:
             # gets browser class by name (string).
@@ -81,34 +77,27 @@ def main():
                     selected_browser = browser.__name__
                     break
             browser_class = getattr(browsers, selected_browser)
-            if args.type == 'all':
-                fetch_map['history'][0] = browser_class().fetch(fetch_type = 'history')
-                fetch_map['bookmarks'][0] = browser_class().fetch(fetch_type = 'bookmarks')
-            else:
-                fetch_map[args.type][0] = browser_class().fetch(fetch_type = args.type)
         except AttributeError:
             print(f'Browser {args.browser} is unavailable. Check --help for available browsers')
             sys.exit(1)
+
+        try:
+            if args.type == 'history':
+                fetch_map[args.type][0] = browser_class().fetch_history()
+            elif args.type =='bookmarks':
+                fetch_map[args.type][0] = browser_class().fetch_bookmarks()
         except AssertionError as e:
             print(e)
             sys.exit(1)
 
     try:
-        if args.output is None and args.type == 'all':
-            print('history:\n' + fetch_map['history'][0].formatted(args.format,'history'))
-            print('bookmarks\n' + fetch_map['bookmarks'][0].formatted(args.format,'bookmarks'))
-        elif (not args.output is None) and args.type == 'all':
-            os.mkdir(args.output)
-            with open(fetch_map['history'][2], 'w') as output_file:
-                output_file.write(fetch_map['history'][0].formatted(args.format,'history'))
-
-            with open(fetch_map['bookmarks'][2], 'w') as output_file:
-                output_file.write(fetch_map['bookmarks'][0].formatted(args.format,'bookmarks'))
+        if args.output is None:
+            print(args.type+':\n')
+            print(fetch_map[args.type][0].formatted(args.format,args.type))
         elif not args.output is None:
             with open(args.output, 'w') as output_file:
                 output_file.write(fetch_map[args.type][0].formatted(args.format,args.type))
-        else:
-            print(args.type+':\n' + fetch_map[args.type][0].formatted(args.format,args.type))
+
     except ValueError as e:
         print(e)
         sys.exit(1)

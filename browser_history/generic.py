@@ -38,16 +38,13 @@ class Browser:
     * **profile_dir_prefixes**: (optional) list of possible prefixes for the
       profile directories. Keep empty to check all subdirectories in the browser path.
     * **history_file**: name of the (SQLite) file which stores the history.
+    * **bookmarks_file**: name of the (SQLite, JSON or PLIST) file which stores the bookmarks
     * **history_SQL**: SQL query required to extract history from the ``history_file``. The
       query must return two columns: ``visit_time`` and ``url``. The ``visit_time`` must be
       processed using the
       `datetime <https://www.sqlitetutorial.net/sqlite-date-functions/sqlite-datetime-function/>`_
       function with the modifier ``localtime``.
-    * **bookmarks_SQL**: SQL query required to extract bookmarks from the ``bookmarks_file``. The
-      query must return four columns: ``added_time`` , ``url`` , ``Title`` , ``Folder``.
-      The ``added_time`` must be processed using the
-      `datetime <https://www.sqlitetutorial.net/sqlite-date-functions/sqlite-datetime-function/>`_
-      function with the modifier ``localtime``.
+    * **bookmarks_parser**: a function to parse bookmarks and convert to readable format
 
     :param plat: the current platform. A value of ``None`` means the platform will be
                     inferred from the system.
@@ -67,11 +64,10 @@ class Browser:
     bookmarks_file = None
 
     history_SQL = None
-    bookmarks_SQL = None
+
+    bookmarks_parser = lambda: None
 
     _local_tz = datetime.datetime.now().astimezone().tzinfo
-
-    bookmarks = lambda: None
 
     def __init__(self, plat: utils.Platform = None):
         if plat is None:
@@ -232,7 +228,7 @@ class Browser:
         with tempfile.TemporaryDirectory() as tmpdirname:
             for bookmarks_path in bookmarks_paths:
                 copied_bookmark_path = shutil.copy2(bookmarks_path.absolute(), tmpdirname)
-                date_bookmarks = self.bookmarks(copied_bookmark_path)
+                date_bookmarks = self.bookmarks_parser(copied_bookmark_path)
                 output_object.bookmarks.extend(date_bookmarks)
                 if sort:
                     output_object.bookmarks.sort(reverse = desc)
@@ -250,8 +246,6 @@ class Outputs:
     :type bookmark_entries: list(tuple(:py:class:`datetime.datetime`, str,str,str))
 
     * **formats**: A tuple of strings containing all supported formats
-
-    * **fields**: The fields available for the history data returned
 
     """
 
