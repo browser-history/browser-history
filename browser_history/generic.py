@@ -275,8 +275,8 @@ class Outputs:
         self.fetch_type = fetch_type
 
         self._field_map = {
-            "history": [self.histories, ("Timestamp", "URL")],
-            "bookmarks": [self.bookmarks, ("Timestamp", "URL", "Title", "Folder")],
+            "history": {'var':self.histories, 'fields':("Timestamp", "URL")},
+            "bookmarks": {'var':self.bookmarks, 'fields':("Timestamp", "URL", "Title", "Folder")},
         }
 
     def sort_domain(self):
@@ -300,10 +300,10 @@ class Outputs:
         """
         # convert to lower case since the formats tuple is enforced in lowercase
         output_format = output_format.lower()
-        if self._field_map.get(output_format):
+        if self._format_map.get(output_format):
             # fetch the required formatter and call it. The formatters are instance methods
             # so no need to pass any arguments
-            formatter = self._field_map[output_format]
+            formatter = self._format_map[output_format]
             return formatter()
         raise ValueError(
             f"Invalid format {output_format}. Should be one of {Outputs.formats}"
@@ -321,8 +321,8 @@ class Outputs:
         # will use StringIO to build the csv in memory first
         with StringIO() as output:
             writer = csv.writer(output)
-            writer.writerow(self._field_map[self.fetch_type][1])
-            for row in self._field_map[self.fetch_type][0]:
+            writer.writerow(self._field_map[self.fetch_type]['fields'])
+            for row in self._field_map[self.fetch_type]['var']:
                 writer.writerow(row)
             return output.getvalue()
 
@@ -343,9 +343,9 @@ class Outputs:
 
         # fetch lines
         lines = []
-        for entry in self._field_map[self.fetch_type][0]:
+        for entry in self._field_map[self.fetch_type]['var']:
             json_record = {}
-            for field, value in zip(self._field_map[self.fetch_type][1], entry):
+            for field, value in zip(self._field_map[self.fetch_type]['fields'], entry):
                 json_record[field] = value
             lines.append(json_record)
 
