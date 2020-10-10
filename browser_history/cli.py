@@ -8,7 +8,7 @@ from browser_history import get_history, get_bookmarks, generic, browsers
 # get list of all implemented browser by finding subclasses of generic.Browser
 AVAILABLE_BROWSERS = ", ".join(b.__name__ for b in generic.Browser.__subclasses__())
 AVAILABLE_FORMATS = ", ".join(generic.Outputs.formats)
-AVAILABLE_TYPES = "history,bookmarks"
+AVAILABLE_TYPES = "history, bookmarks"
 
 
 def make_parser():
@@ -84,12 +84,12 @@ def main():
 
     h_outputs = b_outputs = None
     fetch_map = {
-        "history": [h_outputs, get_history()],
-        "bookmarks": [b_outputs, get_bookmarks()],
+        "history": [h_outputs, get_history],
+        "bookmarks": [b_outputs, get_bookmarks],
     }
 
     if args.browser == "all":
-        fetch_map[args.type][0] = fetch_map[args.type][1]
+        fetch_map[args.type][0] = fetch_map[args.type][1]()
     else:
         try:
             # gets browser class by name (string).

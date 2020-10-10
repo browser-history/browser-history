@@ -246,10 +246,10 @@ class Outputs:
     A generic class to encapsulate history and bookmark outputs and to
     easily convert them to JSON, CSV or other formats.
 
-    * **history_entries**: List of tuples of Timestamp & URL
+    * **histories**: List of tuples of Timestamp & URL
     :type history_entries: list(tuple(:py:class:`datetime.datetime`, str))
 
-    * **bookmark_entries** List of tuples of Timestamp , URL , Title , Folder
+    * **bookmarks** List of tuples of Timestamp , URL , Title , Folder
     :type bookmark_entries: list(tuple(:py:class:`datetime.datetime`, str,str,str))
 
     * **formats**: A tuple of strings containing all supported formats
