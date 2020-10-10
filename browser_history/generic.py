@@ -343,7 +343,7 @@ class Outputs:
 
         # fetch lines
         lines = []
-        for entry in self._fetch_map[self.fetch_type][0]:
+        for entry in self._field_map[self.fetch_type][0]:
             json_record = {}
             for field, value in zip(self._field_map[self.fetch_type][1], entry):
                 json_record[field] = value
