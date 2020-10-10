@@ -17,9 +17,6 @@ import datetime
 import os
 import browser_history.utils as utils
 
-_local_tz = datetime.datetime.now().astimezone().tzinfo
-
-
 class Browser:
     """A generic class to support all major browsers with minimal configuration.
 
@@ -67,9 +64,14 @@ class Browser:
     profile_dir_prefixes = []
 
     history_file = None
+    bookmarks_file = None
 
     history_SQL = None
     bookmarks_SQL = None
+
+    _local_tz = datetime.datetime.now().astimezone().tzinfo
+
+    bookmarks = lambda: None
 
     def __init__(self, plat: utils.Platform = None):
         if plat is None:
@@ -92,7 +94,7 @@ class Browser:
         if self.profile_support and not self.profile_dir_prefixes:
             self.profile_dir_prefixes.append("*")
 
-    def profiles(self) -> typing.List[str]:
+    def profiles(self,profile_file) -> typing.List[str]:
         """Returns a list of profile directories
         :rtype: list(str)
         """
@@ -101,7 +103,7 @@ class Browser:
         profile_dirs = []
         for files in os.walk(str(self.history_dir)):
             for item in files[2]:
-                if os.path.split(os.path.join(files[0],item))[-1] == self.history_file:
+                if os.path.split(os.path.join(files[0],item))[-1] == profile_file:
                     path = str(files[0]).split(str(self.history_dir), maxsplit=1)[-1]
                     if path.startswith(os.sep):
                         path = path[1:]
@@ -122,14 +124,14 @@ class Browser:
         """
         return self.history_dir / profile_dir / self.history_file
 
-    def history_paths(self):
+    def paths(self, profile_file):
         """Returns a list of history file paths, for all profiles.
 
         :rtype: list(:py:class:`pathlib.Path`)
         """
         return [
-            self.history_dir / profile_dir / self.history_file
-            for profile_dir in self.profiles()
+            self.history_dir / profile_dir / profile_file
+            for profile_dir in self.profiles(profile_file = profile_file)
         ]
 
     def history_profiles(self, profile_dirs):
@@ -145,10 +147,10 @@ class Browser:
         history_paths = [
             self.history_path_profile(profile_dir) for profile_dir in profile_dirs
         ]
-        return self.fetch(history_paths)
+        return self.fetch_history(history_paths)
 
-    def fetch(self, history_paths=None, sort=True, desc=False,fetch_type = 'history'):
-        """Returns history of all available profiles.
+    def fetch_history(self, history_paths=None, sort=True, desc=False):
+        """Returns history of all available profiles stored in SQL.
 
         The returned datetimes are timezone-aware with the local timezone set by default.
 
@@ -170,50 +172,63 @@ class Browser:
         :rtype: :py:class:`browser_history.generic.Outputs`
         """
         if history_paths is None:
-            history_paths = self.history_paths()
+            history_paths = self.paths(profile_file = self.history_file)
         output_object = Outputs()
         with tempfile.TemporaryDirectory() as tmpdirname:
-            length = 0
             for history_path in history_paths:
                 copied_history_path = shutil.copy2(history_path.absolute(), tmpdirname)
                 conn = sqlite3.connect(f"file:{copied_history_path}?mode=ro", uri=True)
                 cursor = conn.cursor()
-                if fetch_type=='history':
-                    cursor.execute(self.history_SQL)
-                    date_histories = [
-                        (
-                            datetime.datetime.strptime(d, "%Y-%m-%d %H:%M:%S").replace(
-                                tzinfo=_local_tz
-                            ),
-                            url,
-                        )
-                        for d, url in cursor.fetchall()
-                    ]
-                    output_object.history_entries.extend(date_histories)
-                    if sort:
-                        output_object.history_entries.sort(reverse=desc)
-                elif fetch_type == 'bookmarks':
-                    cursor.execute(self.bookmarks_SQL)
-                    date_bookmarks = [
-                        (
-                            datetime.datetime.strptime(d, "%Y-%m-%d %H:%M:%S").replace(
-                                tzinfo=_local_tz
-                            ),
-                            url,
-                            title,
-                            folder,
-                        )
-                        for d, url,title,folder in cursor.fetchall()
-                    ]
-                    if len(date_bookmarks)<=length:
-                        continue
-                    length  = len(date_bookmarks)
-                    output_object.bookmark_entries.extend(date_bookmarks)
-                    if sort:
-                        output_object.bookmark_entries.sort(reverse=desc)
+                cursor.execute(self.history_SQL)
+                date_histories = [
+                    (
+                        datetime.datetime.strptime(d, "%Y-%m-%d %H:%M:%S").replace(
+                            tzinfo=self._local_tz
+                        ),
+                        url,
+                    )
+                    for d, url in cursor.fetchall()
+                ]
+                output_object.histories.extend(date_histories)
+                if sort:
+                    output_object.histories.sort(reverse=desc)
                 conn.close()
         return output_object
 
+    def fetch_bookmarks(self, bookmarks_paths = None, sort = True, desc = False):
+        """Returns bookmarks of all available profiles stored in SQL or JSON or plist.
+
+        The returned datetimes are timezone-aware with the local timezone set by default.
+
+        The bookmark files are first copied to a temporary location and then queried, this might
+        lead to some additional overhead and results returned might not be the latest if the
+        browser is in use. This is done because the SQlite files are locked by the browser when
+        in use.
+
+        :param bookmarks_paths: (optional) a list of bookmark files.
+        :type bookmarks_paths: list(:py:class:`pathlib.Path`)
+        :param sort: (optional) flag to specify if the output should be sorted.
+            Default value set to True.
+        :type sort: boolean
+        :param desc: (optional)  flag to speicify asc/desc (Applicable iff sort is True)
+            Default value set to False.
+        :type asc: boolean
+        :return: Object of class :py:class:`browser_history.generic.Outputs` with the
+            data member entries set to list(tuple(:py:class:`datetime.datetime`, str))
+        :rtype: :py:class:`browser_history.generic.Outputs`
+        """
+
+        if bookmarks_paths is None:
+            bookmarks_paths = self.paths(profile_file = self.bookmarks_file)
+        output_object = Outputs()
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            for bookmarks_path in bookmarks_paths:
+                copied_bookmark_path = shutil.copy2(bookmarks_path.absolute(), tmpdirname)
+                date_bookmarks = self.bookmarks(copied_bookmark_path)
+                output_object.bookmarks.extend(date_bookmarks)
+                if sort:
+                    output_object.bookmarks.sort(reverse = desc)
+        return output_object
 
 class Outputs:
     """
@@ -237,33 +252,21 @@ class Outputs:
     formats = ("csv", "json")
 
     # Use the below fields for all formatter implementations
-    history_fields = ("Timestamp", "URL")
-    bookmark_fields = ("Timestamp","URL","Title","Folder")
 
     def __init__(self):
-        self.history_entries = []
-        self.bookmark_entries =[]
+        self.histories = []
+        self.bookmarks =[]
         # format map is used by the formatted method to call the right formatter
         self._format_map = {
             "csv": self.to_csv,
             "json": self.to_json,
             "jsonl": lambda: self.to_json(json_lines=True)
         }
+        self._fetch_map = {
+            "history": [self.histories,("Timestamp", "URL")],
+            "bookmarks": [self.bookmarks,("Timestamp","URL","Title","Folder")]
+        }
 
-    def get_history(self):
-        """
-        Return the list of tuples of Timestamps & URLs.
-        :rtype: list(tuple(:py:class:`datetime.datetime`, str))
-        """
-
-        return self.history_entries
-    def get_bookmarks(self):
-        """
-        Return the list of tuples of Timestamps, URLs, Title and Folders
-        :rtype: list(tuple(:py:class:`datetime.datetime`, str, str, str))
-        """
-
-        return self.bookmark_entries
     def sort_domain(self):
         """
         Returns the history sorted according to the domain-name.
@@ -273,7 +276,7 @@ class Outputs:
                 :type dict.value: list(tuple(:py:class:`datetime.datetime`, str))
         """
         domain_histories = defaultdict(list)
-        for entry in self.history_entries:
+        for entry in self.histories:
             domain_histories[urlparse(entry[1]).netloc].append(entry)
         return domain_histories
 
@@ -306,16 +309,9 @@ class Outputs:
         # will use StringIO to build the csv in memory first
         with StringIO() as output:
             writer = csv.writer(output)
-            if fetch_type == 'history':
-                print(1)
-                writer.writerow(Outputs.history_fields)
-                for row in self.get_history():
-                    print(row)
-                    writer.writerow(row)
-            elif fetch_type=='bookmarks':
-                writer.writerow(Outputs.bookmark_fields)
-                for row in self.get_bookmarks():
-                    writer.writerow(row)
+            writer.writerow(self._fetch_map[fetch_type][1])
+            for row in self._fetch_map[fetch_type][0]:
+                writer.writerow(row)
             return output.getvalue()
 
     def to_json(self, json_lines=False,fetch_type = 'history'):
@@ -335,18 +331,12 @@ class Outputs:
 
         # fetch lines
         lines = []
-        if fetch_type=='bookmarks':
-            for entry in self.bookmark_entries:
-                json_record = {}
-                for field, value in zip(self.bookmark_fields, entry):
-                    json_record[field] = value
-                lines.append(json_record)
-        elif fetch_type=='history':
-            for entry in self.history_entries:
-                json_record = {}
-                for field, value in zip(self.history_fields, entry):
-                    json_record[field] = value
-                lines.append(json_record)
+        for entry in self._fetch_map[fetch_type][0]:
+            json_record = {}
+            for field, value in zip(self._fetch_map[fetch_type][1], entry):
+                json_record[field] = value
+            lines.append(json_record)
+
         # if json_lines flag is true convert to JSON Lines format,
         # otherwise convert it to Plain JSON format
         if json_lines:

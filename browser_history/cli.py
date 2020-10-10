@@ -3,12 +3,13 @@ command line interface of browser-history."""
 
 import sys
 import argparse
-from browser_history import get_history, generic, browsers,get_bookmarks
+import os
+from browser_history import get_history, get_bookmarks, generic, browsers
 
 # get list of all implemented browser by finding subclasses of generic.Browser
 AVAILABLE_BROWSERS = ', '.join(b.__name__ for b in generic.Browser.__subclasses__())
 AVAILABLE_FORMATS = ', '.join(generic.Outputs.formats)
-AVAILABLE_TYPES='history,bookmarks'
+AVAILABLE_TYPES='history,bookmarks,all'
 
 def make_parser():
     """Creates an ArgumentParser, configures and returns it.
@@ -43,18 +44,12 @@ def make_parser():
                                 Format to be used in output. Should be one of {AVAILABLE_FORMATS}.
                                 Default is csv''')
 
-    parser_.add_argument('--history_output',
+    parser_.add_argument('-o', '--output',
                          default=None,
                          help='''
-                                File where history output is to be written. 
-                                If not provided and type is history or all 
-                                ,standard output is used.''')
-    parser_.add_argument('--bookmarks_output',
-                         default=None,
-                         help='''
-                                File where bookmarks output is to be written. 
-                                If not provided and type is bookmarks or all
-                                ,standard output is used.''')
+                                File/Folder where history output and/or bookmark output is to be written. 
+                                If not provided, standard output is used.''')
+
     return parser_
 
 parser = make_parser()
@@ -65,9 +60,18 @@ def main():
     It parses arguments from sys.argv and performs the appropriate actions.
     """
     args = parser.parse_args()
-    assert args.type in ['history','bookmarks','all'], f"Type should be one of all, {AVAILABLE_TYPES}"
+    assert args.type in ['history','bookmarks','all'], \
+                        f"Type should be one of all, {AVAILABLE_TYPES}"
+
+    h_outputs = b_outputs =None
+    fetch_map = {'history':[h_outputs ,get_history(),'history'+args.format],
+                 'bookmarks':[b_outputs,get_bookmarks(),'bookmarks'+args.format]}
     if args.browser == 'all':
-        
+        if not args.type == 'all':
+            fetch_map[args.type][0] = fetch_map[args.type][1]
+        else:
+            fetch_map['history'][0] = fetch_map['history'][1]
+            fetch_map['bookmarks'][0] = fetch_map['bookmarks'][1]
     else:
         try:
             # gets browser class by name (string).
@@ -77,48 +81,34 @@ def main():
                     selected_browser = browser.__name__
                     break
             browser_class = getattr(browsers, selected_browser)
+            if args.type == 'all':
+                fetch_map['history'][0] = browser_class().fetch(fetch_type = 'history')
+                fetch_map['bookmarks'][0] = browser_class().fetch(fetch_type = 'bookmarks')
+            else:
+                fetch_map[args.type][0] = browser_class().fetch(fetch_type = args.type)
         except AttributeError:
             print(f'Browser {args.browser} is unavailable. Check --help for available browsers')
             sys.exit(1)
-
-        try:
-            if args.type == 'history':
-                browser = browser_class().fetch(type = args.type)
-                h_outputs = browser
-            elif args.type == 'bookmarks':
-                browser = browser_class().fetch(type = args.type)
-                b_outputs = browser
-            elif args.type == 'all':
-                browser = browser_class().fetch(type = 'history')
-                h_outputs = browser
-                browser = browser_class().fetch(type = 'bookmarks')
-                b_outputs = browser
         except AssertionError as e:
             print(e)
             sys.exit(1)
 
-    # Format the output
     try:
-        if args.type == 'all':
-            h_formatted = h_outputs.formatted(args.format,'history')
-            b_formatted = b_outputs.formatted(args.format,'bookmarks')
-        elif args.type == 'history':
-            h_formatted = h_outputs.formatted(args.format,args.type)
-        elif args.type == 'bookmarks':
-            b_formatted = b_outputs.formatted(args.format,args.type)
+        if args.output is None and args.type == 'all':
+            print('history:\n' + fetch_map['history'][0].formatted(args.format,'history'))
+            print('bookmarks\n' + fetch_map['bookmarks'][0].formatted(args.format,'bookmarks'))
+        elif (not args.output is None) and args.type == 'all':
+            os.mkdir(args.output)
+            with open(fetch_map['history'][2], 'w') as output_file:
+                output_file.write(fetch_map['history'][0].formatted(args.format,'history'))
+
+            with open(fetch_map['bookmarks'][2], 'w') as output_file:
+                output_file.write(fetch_map['bookmarks'][0].formatted(args.format,'bookmarks'))
+        elif not args.output is None:
+            with open(args.output, 'w') as output_file:
+                output_file.write(fetch_map[args.type][0].formatted(args.format,args.type))
+        else:
+            print(args.type+':\n' + fetch_map[args.type][0].formatted(args.format,args.type))
     except ValueError as e:
         print(e)
         sys.exit(1)
-
-    if args.history_output is None and args.type in ['history','all']:
-        print(h_formatted)
-    if args.bookmarks_output is None and args.type in ['bookmarks','all']:
-        print(b_formatted)
-    if (not args.history_output is None) and args.type in ['history','all']:
-        filename = args.history_output
-        with open(filename, 'w') as output_file:
-            output_file.write(h_formatted)
-    elif (not args.bookmarks_output is None) and args.type in ['bookmarks','all']:
-        filename = args.bookmarks_output
-        with open(filename, 'w') as output_file:
-            output_file.write(b_formatted)

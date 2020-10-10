@@ -17,11 +17,11 @@ def get_history():
     for browser_class in subclasses:
         try:
             browser_object = browser_class()
-            browser_output_object = browser_object.fetch()
-            output_object.history_entries.extend(browser_output_object.get_history())
+            browser_output_object = browser_object.fetch_history()
+            output_object.histories.extend(browser_output_object.histories)
         except AssertionError:
             utils.logger.info("%s browser is not supported", browser_class.name)
-    output_object.history_entries.sort()
+    output_object.histories.sort()
     return output_object
 
 def get_bookmarks():
@@ -36,12 +36,12 @@ def get_bookmarks():
     output_object = generic.Outputs()
     subclasses = generic.Browser.__subclasses__()
     for browser_class in subclasses:
-        if('Firefox' in str(browser_class)):
-            try:
-                browser_object = browser_class()
-                browser_output_object = browser_object.fetch(fetch_type='bookmarks')
-                output_object.bookmark_entries.extend(browser_output_object.get_bookmarks())
-            except AssertionError:
-                utils.logger.info("%s browser is not supported", browser_class.name)
-    output_object.bookmark_entries.sort()
+        try:
+            browser_object = browser_class()
+            assert browser_object.bookmarks_SQL is not None
+            browser_output_object = browser_object.fetch_bookmarks()
+            output_object.bookmarks.extend(browser_output_object.bookmarks)
+        except AssertionError:
+            utils.logger.info("%s browser is not supported", browser_class.name)
+    output_object.bookmarks.sort()
     return output_object

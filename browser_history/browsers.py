@@ -2,8 +2,9 @@
 
 All browsers must inherit from :py:mod:`browser_history.generic.Browser`.
 """
+import sqlite3
+import datetime
 from browser_history.generic import Browser
-
 
 class Chrome(Browser):
     """Google Chrome Browser
@@ -27,6 +28,7 @@ class Chrome(Browser):
     profile_dir_prefixes = ["Default*", "Profile*"]
 
     history_file = "History"
+    bookmarks_file = "Bookmarks"
 
     history_SQL = """SELECT
             datetime(visits.visit_time/1000000-11644473600, 'unixepoch', 'localtime') as 'visit_time',
@@ -54,6 +56,7 @@ class Chromium(Browser):
     profile_dir_prefixes = Chrome.profile_dir_prefixes
 
     history_file = Chrome.history_file
+    bookmarks_file = Chrome.bookmarks_file
 
     history_SQL = Chrome.history_SQL
 
@@ -79,11 +82,14 @@ class Firefox(Browser):
     profile_support = True
 
     history_file = "places.sqlite"
+    bookmarks_file = "places.sqlite"
+
     history_SQL = """SELECT
             datetime(visit_date/1000000, 'unixepoch', 'localtime') AS 'visit_time',
             url
         FROM moz_historyvisits INNER JOIN moz_places ON moz_historyvisits.place_id = moz_places.id 
         WHERE visit_date IS NOT NULL AND url LIKE 'http%' AND title IS NOT NULL"""
+
     bookmarks_SQL = """SELECT
             datetime(moz_bookmarks.dateAdded/1000000,'unixepoch','localtime') 
             AS added_time,url,moz_bookmarks.title ,moz_folder.title
@@ -92,7 +98,23 @@ class Firefox(Browser):
             WHERE moz_bookmarks.dateAdded IS NOT NULL AND url LIKE 'http%' 
             AND moz_bookmarks.title IS NOT NULL
                     """
+    def bookmarks(self,bookmark_path):
 
+        conn = sqlite3.connect(f"file:{bookmark_path}?mode=ro", uri=True)
+        cursor = conn.cursor()
+        cursor.execute(self.bookmarks_SQL)
+        date_bookmarks = [
+                            (
+                                datetime.datetime.strptime(d, "%Y-%m-%d %H:%M:%S").replace(
+                                    tzinfo=self._local_tz
+                                ),
+                                url,
+                                title,
+                                folder,
+                            )
+                            for d, url ,title ,folder in cursor.fetchall()
+                        ]
+        return date_bookmarks
 
 class Safari(Browser):
     """Apple Safari browser
@@ -111,6 +133,8 @@ class Safari(Browser):
     profile_support = False
 
     history_file = "History.db"
+    bookmarks_file = "Bookmarks.plist"
+
     history_SQL = """SELECT
         datetime(visit_time + 978307200, 'unixepoch', 'localtime') as visit_time, url
         FROM
@@ -140,8 +164,9 @@ class Edge(Browser):
     profile_dir_prefixes = Chrome.profile_dir_prefixes
 
     history_file = Chrome.history_file
-    history_SQL = Chrome.history_SQL
+    bookmarks_file = Chrome.bookmarks_file
 
+    history_SQL = Chrome.history_SQL
 
 class Opera(Browser):
     """Opera Browser
@@ -152,7 +177,6 @@ class Opera(Browser):
 
     Profile support: No
     """
-
     name = "Opera"
 
     linux_path = ".config/opera"
@@ -161,6 +185,7 @@ class Opera(Browser):
     profile_support = False
 
     history_file = Chrome.history_file
+    bookmarks_file = Chrome.bookmarks_file
 
     history_SQL = Chrome.history_SQL
 
@@ -174,7 +199,6 @@ class OperaGX(Browser):
 
     Profile support: No
     """
-
     name = "OperaGX"
 
     windows_path = "AppData/Roaming/Opera Software/Opera GX Stable"
@@ -182,6 +206,8 @@ class OperaGX(Browser):
     profile_support = False
 
     history_file = Chrome.history_file
+    bookmarks_file = Chrome.bookmarks_file
+
     history_SQL = Chrome.history_SQL
 
 
@@ -203,4 +229,6 @@ class Brave(Browser):
     profile_dir_prefixes = Chrome.profile_dir_prefixes
 
     history_file = Chrome.history_file
+    bookmarks_file = Chrome.bookmarks_file
+
     history_SQL = Chrome.history_SQL
