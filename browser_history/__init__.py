@@ -12,7 +12,7 @@ def get_history():
 
     :rtype: :py:class:`browser_history.generic.Outputs`
     """
-    output_object = generic.Outputs()
+    output_object = generic.Outputs(fetch_type = 'history')
     subclasses = generic.Browser.__subclasses__()
     for browser_class in subclasses:
         try:
@@ -33,7 +33,7 @@ def get_bookmarks():
 
     :rtype: :py:class:`browser_history.generic.Outputs`
     """
-    output_object = generic.Outputs()
+    output_object = generic.Outputs(fetch_type = 'bookmarks')
     subclasses = generic.Browser.__subclasses__()
     for browser_class in subclasses:
         try:

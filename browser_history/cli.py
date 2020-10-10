@@ -92,11 +92,11 @@ def main():
 
     try:
         if args.output is None:
-            print(args.type+':\n')
-            print(fetch_map[args.type][0].formatted(args.format,args.type))
+            print(args.type+":")
+            print(fetch_map[args.type][0].formatted(args.format))
         elif not args.output is None:
             with open(args.output, 'w') as output_file:
-                output_file.write(fetch_map[args.type][0].formatted(args.format,args.type))
+                output_file.write(fetch_map[args.type][0].formatted(args.format))
 
     except ValueError as e:
         print(e)

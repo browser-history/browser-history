@@ -177,7 +177,7 @@ class Browser:
         """
         if history_paths is None:
             history_paths = self.paths(profile_file = self.history_file)
-        output_object = Outputs()
+        output_object = Outputs(fetch_type = 'history')
         with tempfile.TemporaryDirectory() as tmpdirname:
             for history_path in history_paths:
                 copied_history_path = shutil.copy2(history_path.absolute(), tmpdirname)
@@ -224,7 +224,7 @@ class Browser:
 
         if bookmarks_paths is None:
             bookmarks_paths = self.paths(profile_file = self.bookmarks_file)
-        output_object = Outputs()
+        output_object = Outputs(fetch_type = 'bookmarks')
         with tempfile.TemporaryDirectory() as tmpdirname:
             for bookmarks_path in bookmarks_paths:
                 copied_bookmark_path = shutil.copy2(bookmarks_path.absolute(), tmpdirname)
@@ -255,7 +255,7 @@ class Outputs:
 
     # Use the below fields for all formatter implementations
 
-    def __init__(self):
+    def __init__(self,fetch_type):
         self.histories = []
         self.bookmarks =[]
         # format map is used by the formatted method to call the right formatter
@@ -264,6 +264,9 @@ class Outputs:
             "json": self.to_json,
             "jsonl": lambda: self.to_json(json_lines=True)
         }
+        
+        self.fetch_type = fetch_type
+
         self._fetch_map = {
             "history": [self.histories,("Timestamp", "URL")],
             "bookmarks": [self.bookmarks,("Timestamp","URL","Title","Folder")]
@@ -282,7 +285,7 @@ class Outputs:
             domain_histories[urlparse(entry[1]).netloc].append(entry)
         return domain_histories
 
-    def formatted(self, output_format="csv",fetch_type = 'history'):
+    def formatted(self, output_format="csv"):
         """
         Returns history or bookmarks as a :py:class:`str` formatted  as ``output_format``
         :param output_format: One the formats in py:attr:`~formats`
@@ -294,12 +297,12 @@ class Outputs:
             # fetch the required formatter and call it. The formatters are instance methods
             # so no need to pass any arguments
             formatter = self._format_map[output_format]
-            return formatter(fetch_type=fetch_type)
+            return formatter()
         raise ValueError(
             f"Invalid format {output_format}. Should be one of {Outputs.formats}"
         )
 
-    def to_csv(self,fetch_type = "history"):
+    def to_csv(self):
         """
         Return history or bookmarks formatted as a comma separated string with the first row
         having the fields names
@@ -311,8 +314,8 @@ class Outputs:
         # will use StringIO to build the csv in memory first
         with StringIO() as output:
             writer = csv.writer(output)
-            writer.writerow(self._fetch_map[fetch_type][1])
-            for row in self._fetch_map[fetch_type][0]:
+            writer.writerow(self._fetch_map[self.fetch_type][1])
+            for row in self._fetch_map[self.fetch_type][0]:
                 writer.writerow(row)
             return output.getvalue()
 
@@ -333,9 +336,9 @@ class Outputs:
 
         # fetch lines
         lines = []
-        for entry in self._fetch_map[fetch_type][0]:
+        for entry in self._fetch_map[self.fetch_type][0]:
             json_record = {}
-            for field, value in zip(self._fetch_map[fetch_type][1], entry):
+            for field, value in zip(self._fetch_map[self.fetch_type][1], entry):
                 json_record[field] = value
             lines.append(json_record)
 
@@ -344,6 +347,6 @@ class Outputs:
         if json_lines:
             json_string = '\n'.join([json.dumps(line, cls=DateTimeEncoder) for line in lines])
         else:
-           json_string = json.dumps({fetch_type: lines}, cls=DateTimeEncoder, indent=4)
+           json_string = json.dumps({self.fetch_type: lines}, cls=DateTimeEncoder, indent=4)
 
         return json_string

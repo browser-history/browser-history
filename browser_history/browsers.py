@@ -97,6 +97,7 @@ class Chromium(Browser):
 
     history_SQL = Chrome.history_SQL
 
+    bookmarks_parser = Chrome.bookmarks_parser
 
 class Firefox(Browser):
     """Mozilla Firefox Browser
