@@ -106,7 +106,7 @@ def main():
             if args.type == "history":
                 fetch_map[args.type]['var'] = browser_class().fetch_history()
             elif args.type == "bookmarks":
-                fetch_map[args.type]['fun'] = browser_class().fetch_bookmarks()
+                fetch_map[args.type]['var'] = browser_class().fetch_bookmarks()
         except AssertionError as e:
             print(e)
             sys.exit(1)
