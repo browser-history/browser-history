@@ -7,8 +7,8 @@ from browser_history import get_history, get_bookmarks, generic, browsers
 
 # get list of all implemented browser by finding subclasses of generic.Browser
 AVAILABLE_BROWSERS = ", ".join(b.__name__ for b in generic.Browser.__subclasses__())
-AVAILABLE_FORMATS = ", ".join(generic.Outputs.formats)
-AVAILABLE_TYPES = "history, bookmarks"
+AVAILABLE_FORMATS = ", ".join(generic.Outputs(fetch_type=None).format_map.keys())
+AVAILABLE_TYPES = ", ".join(generic.Outputs(fetch_type=None).field_map.keys())
 
 
 def make_parser():
@@ -77,8 +77,8 @@ def main():
     args = parser.parse_args()
     h_outputs = b_outputs = None
     fetch_map = {
-        "history": {'var':h_outputs, 'fun':get_history},
-        "bookmarks": {'var':b_outputs, 'fun':get_bookmarks},
+        "history": {"var": h_outputs, "fun": get_history},
+        "bookmarks": {"var": b_outputs, "fun": get_bookmarks},
     }
 
     assert (
@@ -86,7 +86,7 @@ def main():
     ), f"Type should be one of all, {AVAILABLE_TYPES}"
 
     if args.browser == "all":
-        fetch_map[args.type]['var'] = fetch_map[args.type]['fun']()
+        fetch_map[args.type]["var"] = fetch_map[args.type]["fun"]()
     else:
         try:
             # gets browser class by name (string).
@@ -104,9 +104,9 @@ def main():
 
         try:
             if args.type == "history":
-                fetch_map[args.type]['var'] = browser_class().fetch_history()
+                fetch_map[args.type]["var"] = browser_class().fetch_history()
             elif args.type == "bookmarks":
-                fetch_map[args.type]['var'] = browser_class().fetch_bookmarks()
+                fetch_map[args.type]["var"] = browser_class().fetch_bookmarks()
         except AssertionError as e:
             print(e)
             sys.exit(1)
@@ -114,10 +114,10 @@ def main():
     try:
         if args.output is None:
             print(args.type + ":")
-            print(fetch_map[args.type]['var'].formatted(args.format))
+            print(fetch_map[args.type]["var"].formatted(args.format))
         elif not args.output is None:
             with open(args.output, "w") as output_file:
-                output_file.write(fetch_map[args.type]['var'].formatted(args.format))
+                output_file.write(fetch_map[args.type]["var"].formatted(args.format))
 
     except ValueError as e:
         print(e)

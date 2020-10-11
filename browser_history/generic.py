@@ -236,8 +236,8 @@ class Browser:
                 )
                 date_bookmarks = self.bookmarks_parser(copied_bookmark_path)
                 output_object.bookmarks.extend(date_bookmarks)
-                if sort:
-                    output_object.bookmarks.sort(reverse=desc)
+            if sort:
+                output_object.bookmarks.sort(reverse=desc)
         return output_object
 
 
@@ -247,66 +247,77 @@ class Outputs:
     easily convert them to JSON, CSV or other formats.
 
     * **histories**: List of tuples of Timestamp & URL
-    :type history_entries: list(tuple(:py:class:`datetime.datetime`, str))
+    :type histories: list(tuple(:py:class:`datetime.datetime`, str))
 
-    * **bookmarks** List of tuples of Timestamp , URL , Title , Folder
-    :type bookmark_entries: list(tuple(:py:class:`datetime.datetime`, str,str,str))
+    * **bookmarks**: List of tuples of Timestamp , URL , Title , Folder
+    :type bookmarks: list(tuple(:py:class:`datetime.datetime`, str, str, str))
 
-    * **formats**: A tuple of strings containing all supported formats
+    * **fetch_type**: string argument to select history output or bookmarks output
+    :type fetch_type: str
 
+    * **field_map**: Dictionary which maps fetch_type to the
+                        respective variables and formatting fields
+
+    * **format_map**: Dictionary which maps output formats to their respective functions
     """
-
-    # All formats added here should be implemented in _format_map
-    # Formats added here and in _format_map should be in lowercase
-    formats = ("csv", "json")
-
-    # Use the below fields for all formatter implementations
 
     def __init__(self, fetch_type):
         self.histories = []
         self.bookmarks = []
-        # format map is used by the formatted method to call the right formatter
-        self._format_map = {
+
+        self.fetch_type = fetch_type
+
+        self.field_map = {
+            "history": {
+                "var": self.histories,
+                "fields": ("Timestamp", "URL")
+            },
+
+            "bookmarks": {
+                "var": self.bookmarks,
+                "fields": ("Timestamp", "URL", "Title", "Folder"),
+            },
+        }
+
+        self.format_map = {
             "csv": self.to_csv,
             "json": self.to_json,
             "jsonl": lambda: self.to_json(json_lines=True),
         }
 
-        self.fetch_type = fetch_type
-
-        self._field_map = {
-            "history": {'var':self.histories, 'fields':("Timestamp", "URL")},
-            "bookmarks": {'var':self.bookmarks, 'fields':("Timestamp", "URL", "Title", "Folder")},
-        }
-
     def sort_domain(self):
         """
-        Returns the history sorted according to the domain-name.
+        Returns the history/bookamarks sorted according to the domain-name.
 
         :rtype: dict()
                 :type dict.key: str
                 :type dict.value: list(tuple(:py:class:`datetime.datetime`, str))
+                or
+                dict()
+                :type dict.key: str
+                :type dict.value: list(tuple(:py:class:`datetime.datetime`, str, str, str))
         """
         domain_histories = defaultdict(list)
-        for entry in self.histories:
+        for entry in self.field_map[self.fetch_type]['var']:
             domain_histories[urlparse(entry[1]).netloc].append(entry)
         return domain_histories
 
     def formatted(self, output_format="csv"):
         """
         Returns history or bookmarks as a :py:class:`str` formatted  as ``output_format``
-        :param output_format: One the formats in py:attr:`~formats`
+        :param output_format: One the formats in `csv , json , jsonl`
         :rtype: :py:class:`str` object
         """
         # convert to lower case since the formats tuple is enforced in lowercase
         output_format = output_format.lower()
-        if self._format_map.get(output_format):
+        if self.format_map.get(output_format):
             # fetch the required formatter and call it. The formatters are instance methods
             # so no need to pass any arguments
-            formatter = self._format_map[output_format]
+            formatter = self.format_map[output_format]
             return formatter()
         raise ValueError(
-            f"Invalid format {output_format}. Should be one of {Outputs.formats}"
+            f"Invalid format {output_format}. Should be one of \
+            {self.format_map.keys()}"
         )
 
     def to_csv(self):
@@ -321,8 +332,8 @@ class Outputs:
         # will use StringIO to build the csv in memory first
         with StringIO() as output:
             writer = csv.writer(output)
-            writer.writerow(self._field_map[self.fetch_type]['fields'])
-            for row in self._field_map[self.fetch_type]['var']:
+            writer.writerow(self.field_map[self.fetch_type]["fields"])
+            for row in self.field_map[self.fetch_type]["var"]:
                 writer.writerow(row)
             return output.getvalue()
 
@@ -343,9 +354,9 @@ class Outputs:
 
         # fetch lines
         lines = []
-        for entry in self._field_map[self.fetch_type]['var']:
+        for entry in self.field_map[self.fetch_type]["var"]:
             json_record = {}
-            for field, value in zip(self._field_map[self.fetch_type]['fields'], entry):
+            for field, value in zip(self.field_map[self.fetch_type]["fields"], entry):
                 json_record[field] = value
             lines.append(json_record)
 

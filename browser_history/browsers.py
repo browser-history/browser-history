@@ -72,7 +72,7 @@ class Chrome(Browser):
             b_m = json.load(b_p)
             bookmarks_list = []
             for root in b_m["roots"]:
-                if isinstance(b_m["roots"][root],dict):
+                if isinstance(b_m["roots"][root], dict):
                     bookmarks_list = _deeper(
                         b_m["roots"][root]["children"], root, bookmarks_list
                     )
