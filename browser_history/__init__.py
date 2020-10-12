@@ -40,12 +40,10 @@ def get_bookmarks():
     for browser_class in subclasses:
         try:
             browser_object = browser_class()
-            assert browser_object.bookmarks_file is not None
+            assert browser_object.bookmarks_file is not None, f"Bookmarks are not supported on {browser_class.name}"
             browser_output_object = browser_object.fetch_bookmarks()
             output_object.bookmarks.extend(browser_output_object.bookmarks)
-        except AssertionError:
-            utils.logger.info(
-                "%s browser is not supported for bookmarks", browser_class.name
-            )
+        except AssertionError as e:
+            utils.logger.info("%s", e)
     output_object.bookmarks.sort()
     return output_object
