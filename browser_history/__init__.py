@@ -8,7 +8,7 @@ def get_history():
     browsers for the system platform.
 
     :return: Object of class :py:class:`browser_history.generic.Outputs` with the
-        data member entries set to list(tuple(:py:class:`datetime.datetime`, str))
+        data member histories set to list(tuple(:py:class:`datetime.datetime`, str))
 
     :rtype: :py:class:`browser_history.generic.Outputs`
     """
@@ -30,7 +30,7 @@ def get_bookmarks():
     browsers for the system platform.
 
     :return: Object of class :py:class:`browser_history.generic.Outputs` with the
-        data member bookmark_entries set to
+        data member bookmarks set to
         list(tuple(:py:class:`datetime.datetime`, str, str, str))
 
     :rtype: :py:class:`browser_history.generic.Outputs`
