@@ -108,15 +108,17 @@ class Safari(Browser):
 class Edge(Browser):
     """Microsoft Edge Browser
 
-    Supported platforms (TODO: Mac OS support)
+    Supported platforms
 
     * Windows
+    * Mac OS
 
     Profile support: Yes
     """
     name = "Edge"
 
     windows_path = 'AppData/Local/Microsoft/Edge/User Data'
+    mac_path = 'Library/Application Support/Microsoft Edge'
 
     profile_support = True
     profile_dir_prefixes = Chrome.profile_dir_prefixes
@@ -127,9 +129,9 @@ class Edge(Browser):
 class Opera(Browser):
     """Opera Browser
 
-    Supported platforms (TODO: Mac OS support)
+    Supported platforms
 
-    * Linux, Windows
+    * Linux, Windows, Mac OS
 
     Profile support: No
     """
@@ -137,6 +139,7 @@ class Opera(Browser):
 
     linux_path = '.config/opera'
     windows_path = 'AppData/Roaming/Opera Software/Opera Stable'
+    mac_path = 'Library/Application Support/com.operasoftware.Opera'
 
     profile_support = False
 
@@ -168,12 +171,15 @@ class Brave(Browser):
     Supported platforms:
 
     * Linux
+    * Mac OS
 
     Profile support: Yes
     """
     name = "Brave"
 
     linux_path = '.config/BraveSoftware/Brave-Browser'
+    mac_path = 'Library/Application Support/BraveSoftware/Brave-Browser'
+
 
     profile_support = True
     profile_dir_prefixes = Chrome.profile_dir_prefixes
