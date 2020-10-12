@@ -96,6 +96,9 @@ class Browser:
         """Returns a list of profile directories. If the browser is supported on the current
         platform but is not installed an empty list will be returned
 
+        :param profile_file: file to search for in the profile directories.
+            This should be either ``history_file`` or ``bookmarks_file``.
+        :type profile_file: str
         :rtype: list(str)
 
         """
@@ -146,7 +149,7 @@ class Browser:
             :py:meth:`profiles`
         :type profile_dirs: list(str)
         :return: Object of class :py:class:`browser_history.generic.Outputs` with the
-            data member entries set to list(tuple(:py:class:`datetime.datetime`, str))
+            data member histories set to list(tuple(:py:class:`datetime.datetime`, str))
         :rtype: :py:class:`browser_history.generic.Outputs`
         """
         history_paths = [
@@ -173,7 +176,7 @@ class Browser:
             Default value set to False.
         :type asc: boolean
         :return: Object of class :py:class:`browser_history.generic.Outputs` with the
-            data member entries set to list(tuple(:py:class:`datetime.datetime`, str)).
+            data member histories set to list(tuple(:py:class:`datetime.datetime`, str)).
             If the browser is not installed, this object will be empty.
         :rtype: :py:class:`browser_history.generic.Outputs`
         """
@@ -220,7 +223,7 @@ class Browser:
             Default value set to False.
         :type asc: boolean
         :return: Object of class :py:class:`browser_history.generic.Outputs` with the
-            data member entries set to list(tuple(:py:class:`datetime.datetime`, str))
+            attribute bookmarks set to a list of (timestamp, url, title, folder) tuples
         :rtype: :py:class:`browser_history.generic.Outputs`
         """
 
@@ -247,18 +250,15 @@ class Outputs:
     easily convert them to JSON, CSV or other formats.
 
     * **histories**: List of tuples of Timestamp & URL
-    :type histories: list(tuple(:py:class:`datetime.datetime`, str))
-
+        :type histories: list(tuple(:py:class:`datetime.datetime`, str))
     * **bookmarks**: List of tuples of Timestamp , URL , Title , Folder
-    :type bookmarks: list(tuple(:py:class:`datetime.datetime`, str, str, str))
-
+        :type bookmarks: list(tuple(:py:class:`datetime.datetime`, str, str, str))
     * **fetch_type**: string argument to select history output or bookmarks output
-    :type fetch_type: str
-
+        :type fetch_type: str
     * **field_map**: Dictionary which maps fetch_type to the
-                        respective variables and formatting fields
-
+        respective variables and formatting fields
     * **format_map**: Dictionary which maps output formats to their respective functions
+
     """
 
     def __init__(self, fetch_type):
@@ -301,7 +301,9 @@ class Outputs:
     def formatted(self, output_format="csv"):
         """
         Returns history or bookmarks as a :py:class:`str` formatted  as ``output_format``
-        :param output_format: One the formats in `csv , json , jsonl`
+
+        :param output_format: One the formats in `csv`, `json`, `jsonl`
+        :return: A string representing the outputs in specified format
         :rtype: :py:class:`str` object
         """
         # convert to lower case since the formats tuple is enforced in lowercase
@@ -320,7 +322,9 @@ class Outputs:
         """
         Return history or bookmarks formatted as a comma separated string with the first row
         having the fields names
-        :return:
+
+        :return: string with the output in CSV format
+        :rtype: :py:class:`str`
         """
         # we will use csv module and let it do all the heavy lifting such as special character
         # escaping and correct line termination escape sequences
@@ -337,16 +341,21 @@ class Outputs:
         """
         Return history or bookmarks formatted as a JSON or JSON Lines format
         names
-        :param json_lines: (optional) flag to specify if the json_string should be JSON Lines
-           Default value set to False.
-        :return: :py:class:`str` object
+
+        :param json_lines: (optional) flag to specify if the json_string should be JSON Lines.
+           Default is False.
+        :return: string with the output in JSON/JSONL format
+        :return: :py:class:`str`
         """
         # custom json encoder for datetime objects
         class DateTimeEncoder(json.JSONEncoder):
+            """Custom JSON encoder to encode datetime objects"""
+
             # Override the default method
-            def default(self, obj):
-                if isinstance(obj, (datetime.date, datetime.datetime)):
-                    return obj.isoformat()
+            def default(self, o):
+                if isinstance(o, (datetime.date, datetime.datetime)):
+                    return o.isoformat()
+                return super().default(o)
 
         # fetch lines
         lines = []
