@@ -33,10 +33,17 @@ class Chrome(Browser):
     history_file = "History"
     bookmarks_file = "Bookmarks"
 
-    history_SQL = """SELECT
+    history_SQL = """
+        SELECT
             datetime(visits.visit_time/1000000-11644473600, 'unixepoch', 'localtime') as 'visit_time',
-        urls.url from urls,visits
-        WHERE urls.id = visits.url ORDER BY visit_time DESC"""
+            urls.url
+        FROM
+            urls, visits
+        WHERE
+            urls.id = visits.url
+        ORDER BY
+            visit_time DESC
+    """
 
     def bookmarks_parser(self, bookmark_path):
         """Returns bookmarks of a single profile for Chrome based browsers
@@ -129,11 +136,19 @@ class Firefox(Browser):
     history_file = "places.sqlite"
     bookmarks_file = "places.sqlite"
 
-    history_SQL = """SELECT
+    history_SQL = """
+        SELECT
             datetime(visit_date/1000000, 'unixepoch', 'localtime') AS 'visit_time',
             url
-        FROM moz_historyvisits INNER JOIN moz_places ON moz_historyvisits.place_id = moz_places.id 
-        WHERE visit_date IS NOT NULL AND url LIKE 'http%' AND title IS NOT NULL"""
+        FROM
+            moz_historyvisits
+        INNER JOIN
+            moz_places
+        ON
+            moz_historyvisits.place_id = moz_places.id
+        WHERE
+            visit_date IS NOT NULL AND url LIKE 'http%' AND title IS NOT NULL
+    """
 
     def bookmarks_parser(self, bookmark_path):
         """Returns bookmarks of a single profile for Firefox based browsers
@@ -145,14 +160,18 @@ class Firefox(Browser):
         :rtype: list(tuple(:py:class:`datetime.datetime`, str, str, str))
         """
 
-        bookmarks_sql = """SELECT
-            datetime(moz_bookmarks.dateAdded/1000000,'unixepoch','localtime') 
-            AS added_time,url,moz_bookmarks.title ,moz_folder.title
-            FROM moz_bookmarks INNER JOIN moz_places,moz_bookmarks as moz_folder 
-            ON moz_bookmarks.fk = moz_places.id AND moz_bookmarks.parent = moz_folder.id
-            WHERE moz_bookmarks.dateAdded IS NOT NULL AND url LIKE 'http%' 
-            AND moz_bookmarks.title IS NOT NULL
-                    """
+        bookmarks_sql = """
+            SELECT
+                datetime(moz_bookmarks.dateAdded/1000000,'unixepoch','localtime') AS added_time,
+                url, moz_bookmarks.title, moz_folder.title
+            FROM
+                moz_bookmarks INNER JOIN moz_places, moz_bookmarks as moz_folder
+            ON
+                moz_bookmarks.fk = moz_places.id AND moz_bookmarks.parent = moz_folder.id
+            WHERE
+                moz_bookmarks.dateAdded IS NOT NULL AND url LIKE 'http%'
+                AND moz_bookmarks.title IS NOT NULL
+        """
         conn = sqlite3.connect(f"file:{bookmark_path}?mode=ro", uri=True)
         cursor = conn.cursor()
         cursor.execute(bookmarks_sql)
@@ -188,15 +207,19 @@ class Safari(Browser):
 
     history_file = "History.db"
 
-    history_SQL = """SELECT
-        datetime(visit_time + 978307200, 'unixepoch', 'localtime') as visit_time, url
+    history_SQL = """
+        SELECT
+            datetime(visit_time + 978307200, 'unixepoch', 'localtime') as visit_time,
+            url
         FROM
             history_visits
         INNER JOIN
-        history_items ON
+            history_items
+        ON
             history_items.id = history_visits.history_item
         ORDER BY
-            visit_time DESC"""
+            visit_time DESC
+    """
 
 
 class Edge(Browser):

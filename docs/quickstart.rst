@@ -13,6 +13,8 @@ Installation
 Get started
 -----------
 
+History
+^^^^^^^
 
 To get history from all installed browsers:
 ::
@@ -21,10 +23,8 @@ To get history from all installed browsers:
 
     outputs = get_history()
 
-    his = outputs.get()
-
-- ``his`` is a list of ``(datetime.datetime, url)`` tuples.
-
+    # his is a list of (datetime.datetime, url) tuples
+    his = outputs.histories
 
 If you want history from a specific browser:
 ::
@@ -32,11 +32,36 @@ If you want history from a specific browser:
     from browser_history.browsers import Firefox
 
     f = Firefox()
+    outputs = f.fetch_history()
 
-    his = f.fetch().get()
+    # his is a list of (datetime.datetime, url) tuples
+    his = outputs.histories
 
 - ``Firefox`` in the above snippet can be replaced with any of the :ref:`supported_browsers`.
-- ``his`` is a list of ``(datetime.datetime, url)`` tuples.
+
+Bookmarks
+^^^^^^^^^
+
+To get bookmarks from all installed browsers:
+::
+
+    from browser_history import get_bookmarks
+
+    outputs = get_bookmarks()
+
+    # bms is a list of (datetime.datetime, url, title, folder) tuples
+    bms = outputs.bookmarks
+
+To get bookmarks from a specific browser:
+::
+
+    from browser_history.browsers import Firefox
+
+    f = Firefox()
+    outputs = f.fetch_bookmarks()
+
+    # bms is a list of (datetime.datetime, url, title, folder) tuples
+    bms = outputs.bookmarks
 
 Command Line
 ------------
