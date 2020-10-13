@@ -8,6 +8,16 @@
 ``browser-history`` is a simple, zero-dependencies, developer-friendly python
 package to retrieve (almost) any browser's history on (almost) any platform.
 
+## Features
+
+ - Supports most **popular browsers**. See [this](https://browser-history.readthedocs.io/en/latest/browsers.html) for a full list.
+ - Supports all major platforms - **Windows, Mac and Linux**.
+ - A **command-line tool**: simply run `browser-history --help` from your terminal.
+ - **History**: browsing history with exact timestamp and URL.
+ - **Bookmarks**: browser bookmarks with timestamp, URL, title and folder.
+ - Developer friendly: you can add support for new browsers or add a new feature very easily.
+ - Fully open source: this project is developed by [PES Open Source](https://github.com/pesos) and will always be open source, with the Apache License.
+
 # Quick Start
 
 ## Installation
