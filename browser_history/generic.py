@@ -210,7 +210,7 @@ class Outputs:
     # All formats added here should be implemented in _format_map
     # Formats added here and in _format_map should be in lowercase
     formats = ("csv", "json")
-  
+
     # Use the below fields for all formatter implementations
     fields = ("Timestamp", "URL")
 
