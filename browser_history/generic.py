@@ -15,7 +15,7 @@ from collections import defaultdict
 from functools import partial
 from io import StringIO
 from pathlib import Path
-from typing import Any, Dict, List, Tuple, Union
+from typing import Any, Callable, Dict, List, Tuple, Union
 from urllib.parse import urlparse
 
 import browser_history.utils as utils
@@ -257,25 +257,27 @@ class Outputs:
 
     :param fetch_type: string argument to select history output or bookmarks output
     """
-    histories: HistoryVar = [] #: List of tuples of Timestamp & URL
-    bookmarks: BookmarkVar = []
-    """List of tuples of Timestamp , URL , Title , Folder."""
-    field_map = {
-        "history": {"var": histories, "fields": ("Timestamp", "URL")},
-        "bookmarks": {
-            "var": bookmarks,
-            "fields": ("Timestamp", "URL", "Title", "Folder"),
-        },
-    }
+
+    # type hint for histories and bookmarks have to be manually written for docs
+    # instead of using HistoryVar and BookmarkVar respectively
+    histories: List[Tuple[datetime.datetime, str]]  #: List of tuples of Timestamp & URL
+    bookmarks: List[Tuple[datetime.datetime, str, str, str]]
+    """List of tuples of Timestamp, URL, Title, Folder."""
+
+    field_map: Dict[str, Dict[str, Any]]
     """Dictionary which maps fetch_type to the respective variables and formatting fields."""
-    formats: Tuple[str, ...] = ("csv", "json")
-    """A tuple of strings containing all supported formats.
-    All formats added here should be implemented in :py:attr:`.format_map`.
-    Formats added here and in :py:attr:`.format_map` should be in lowercase
-    """
 
     def __init__(self, fetch_type):
         self.fetch_type = fetch_type
+        self.histories = []
+        self.bookmarks = []
+        self.field_map = {
+            "history": {"var": self.histories, "fields": ("Timestamp", "URL")},
+            "bookmarks": {
+                "var": self.bookmarks,
+                "fields": ("Timestamp", "URL", "Title", "Folder"),
+            },
+        }
 
     def sort_domain(self) -> Union[HistoryVar, BookmarkVar]:
         """
@@ -290,8 +292,8 @@ class Outputs:
         ...     [datetime(2020, 1, 1), 'https://google.com/imghp?hl=EN'],
         ...     [datetime(2020, 1, 1), 'https://example.com'],
         ... ]
-        ... obj = generic.Outputs()
-        ... obj.entries = entries
+        ... obj = generic.Outputs('history')
+        ... obj.histories = entries
         ... obj.sort_domain()
         defaultdict(<class 'list'>, {
             'example.com': [[datetime.datetime(2020, 1, 1, 0, 0), 'https://example.com']],
@@ -305,7 +307,7 @@ class Outputs:
             domain_histories[urlparse(entry[1]).netloc].append(entry)
         return domain_histories
 
-    def formatted(self, output_format: str="csv") -> str:
+    def formatted(self, output_format: str = "csv") -> str:
         """
         Returns history or bookmarks as a :py:class:`str` formatted  as ``output_format``
 
@@ -338,8 +340,8 @@ class Outputs:
         ...     [datetime(2020, 1, 1), 'https://google.com'],
         ...     [datetime(2020, 1, 1), 'https://example.com'],
         ... ]
-        ... obj = generic.Outputs()
-        ... obj.entries = entries
+        ... obj = generic.Outputs('history')
+        ... obj.histories = entries
         ... print(obj.to_csv())
         Timestamp,URL
         2020-01-01 00:00:00,https://google.com
@@ -357,11 +359,11 @@ class Outputs:
                 writer.writerow(row)
             return output.getvalue()
 
-    def to_json(self, json_lines:bool = False) -> str:
+    def to_json(self, json_lines: bool = False) -> str:
         """
         Return history or bookmarks formatted as a JSON or JSON Lines format
         names. If ``json_lines`` flag is `True` convert to JSON Lines format,
-         otherwise convert it to Plain JSON format.
+        otherwise convert it to Plain JSON format.
 
         :param json_lines: flag to specify if the json_string should be JSON Lines.
         :return: string with the output in JSON/JSONL format
@@ -442,9 +444,9 @@ class Outputs:
         with open(filename, "w") as out_file:
             out_file.write(self.formatted(output_format))
 
-    format_map: Dict[str, Any] = {
-        'csv': to_csv,
-        'json': to_json,
-        'jsonl': partial(to_json, json_lines=True)
+    format_map: Dict[str, Callable] = {
+        "csv": to_csv,
+        "json": to_json,
+        "jsonl": partial(to_json, json_lines=True),
     }
     """Dictionary which maps output formats to their respective functions."""
