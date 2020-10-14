@@ -377,3 +377,22 @@ class Outputs:
             )
 
         return json_string
+
+    def save(self, filename, output_format="infer"):
+        """
+        Saves history or bookmarks to a file. Infers the type from the given filename
+        extension. If the type could not be inferred, it defaults to csv.
+
+        :param filename: the name of the file.
+        :param output_format: (optional)One the formats in `csv`, `json`, `jsonl`.
+            If not given, it will automatically be inferd from the file's extension
+        """
+        if output_format == "infer":
+            file_extension = os.path.splitext(filename)[1][1:]
+            if file_extension == "json":
+                output_format = "json"
+            else:
+                output_format = "csv"
+
+        with open(filename, "w") as out_file:
+            out_file.write(self.formatted(output_format))
