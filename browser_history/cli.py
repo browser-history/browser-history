@@ -48,10 +48,11 @@ def make_parser():
     parser_.add_argument(
         "-f",
         "--format",
-        default="csv",
+        default="infer",
         help=f"""
             Format to be used in output. Should be one of {AVAILABLE_FORMATS}.
-            Default is csv""",
+            Default is infer (it tries to infer it from the output file's extension. If no output file is given or
+            if the format can't be inferred, it defaults to csv)""",
     )
 
     parser_.add_argument(
@@ -113,11 +114,12 @@ def main():
 
     try:
         if args.output is None:
+            if args.format == "infer":
+                args.format = "csv"
             print(args.type + ":")
             print(fetch_map[args.type]["var"].formatted(args.format))
         elif not args.output is None:
-            with open(args.output, "w") as output_file:
-                output_file.write(fetch_map[args.type]["var"].formatted(args.format))
+            fetch_map[args.type]["var"].save(args.output, args.format)
 
     except ValueError as e:
         print(e)
