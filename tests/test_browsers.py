@@ -112,50 +112,8 @@ def test_edge_windows(become_windows, change_homedir):
     output = e.fetch_history()
     his = output.histories
     # test history from all profiles
-    assert len(his) == 4
+    assert len(his) == 1
     assert his == [
-        (
-            datetime.datetime(
-                2020,
-                9,
-                23,
-                10,
-                22,
-                37,
-                tzinfo=datetime.timezone(
-                    datetime.timedelta(seconds=19800), "India Standard Time"
-                ),
-            ),
-            "http://www.google.com/",
-        ),
-        (
-            datetime.datetime(
-                2020,
-                9,
-                23,
-                10,
-                22,
-                37,
-                tzinfo=datetime.timezone(
-                    datetime.timedelta(seconds=19800), "India Standard Time"
-                ),
-            ),
-            "https://www.google.com/?gws_rd=ssl",
-        ),
-        (
-            datetime.datetime(
-                2020,
-                9,
-                23,
-                10,
-                22,
-                37,
-                tzinfo=datetime.timezone(
-                    datetime.timedelta(seconds=19800), "India Standard Time"
-                ),
-            ),
-            "https://www.google.com/?gws_rd=ssl",
-        ),
         (
             datetime.datetime(
                 2020,
