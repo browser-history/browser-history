@@ -388,11 +388,12 @@ class Outputs:
             If not given, it will automatically be inferd from the file's extension
         """
         if output_format == "infer":
-            file_extension = os.path.splitext(filename)[1][1:]
-            if file_extension == "json":
-                output_format = "json"
-            else:
-                output_format = "csv"
+            output_format = os.path.splitext(filename)[1][1:]
+            if  not output_format in self.format_map:
+                raise ValueError(
+                    f"Invalid extension .{output_format}. Should be one of "
+                    f"{', '.join(self.format_map.keys())}"
+                )
 
         with open(filename, "w") as out_file:
             out_file.write(self.formatted(output_format))
