@@ -38,9 +38,9 @@ class Chrome(Browser):
             datetime(visits.visit_time/1000000-11644473600, 'unixepoch', 'localtime') as 'visit_time',
             urls.url
         FROM
-            urls, visits
+            visits INNER JOIN urls ON visits.url = urls.id
         WHERE
-            urls.id = visits.url
+            visits.visit_duration > 0
         ORDER BY
             visit_time DESC
     """
