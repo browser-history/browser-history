@@ -267,6 +267,9 @@ class Outputs:
     field_map: Dict[str, Dict[str, Any]]
     """Dictionary which maps fetch_type to the respective variables and formatting fields."""
 
+    format_map: Dict[str, Callable]
+    """Dictionary which maps output formats to their respective functions."""
+
     def __init__(self, fetch_type):
         self.fetch_type = fetch_type
         self.histories = []
@@ -277,6 +280,11 @@ class Outputs:
                 "var": self.bookmarks,
                 "fields": ("Timestamp", "URL", "Title", "Folder"),
             },
+        }
+        self.format_map = {
+            "csv": self.to_csv,
+            "json": self.to_json,
+            "jsonl": partial(self.to_json, json_lines=True),
         }
 
     def sort_domain(self) -> Union[HistoryVar, BookmarkVar]:
@@ -443,10 +451,3 @@ class Outputs:
 
         with open(filename, "w") as out_file:
             out_file.write(self.formatted(output_format))
-
-    format_map: Dict[str, Callable] = {
-        "csv": to_csv,
-        "json": to_json,
-        "jsonl": partial(to_json, json_lines=True),
-    }
-    """Dictionary which maps output formats to their respective functions."""
