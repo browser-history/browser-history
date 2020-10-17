@@ -3,7 +3,7 @@ command line interface of browser-history."""
 
 import sys
 import argparse
-from browser_history import get_history, generic, browsers
+from browser_history import get_history, generic, browsers, utils
 
 # get list of all implemented browser by finding subclasses of generic.Browser
 AVAILABLE_BROWSERS = ', '.join(b.__name__ for b in generic.Browser.__subclasses__())
@@ -64,21 +64,22 @@ def main():
                     break
             browser_class = getattr(browsers, selected_browser)
         except AttributeError:
-            print(f'Browser {args.browser} is unavailable. Check --help for available browsers')
+            utils.logger.error('Browser %s is unavailable. Check --help for available browsers',
+                               args.browser)
             sys.exit(1)
 
         try:
             browser = browser_class().fetch()
             outputs = browser
         except AssertionError as e:
-            print(e)
+            utils.logger.error(e)
             sys.exit(1)
 
     # Format the output
     try:
         formatted = outputs.formatted(args.format)
     except ValueError as e:
-        print(e)
+        utils.logger.error(e)
         sys.exit(1)
 
     if args.output is None:
