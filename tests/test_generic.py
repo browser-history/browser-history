@@ -11,9 +11,10 @@ from browser_history import generic
 
 def test_outputs_init():
     """test Outputs init"""
-    obj = generic.Outputs()
-    assert not obj.entries
-    assert obj._format_map
+    obj = generic.Outputs("history")
+    assert not obj.histories
+    assert obj.format_map
+    assert obj.field_map
 
 @pytest.mark.parametrize(
     'entries, exp_res', [
@@ -30,8 +31,8 @@ def test_outputs_init():
 )
 def test_output_to_csv(entries, exp_res):
     """test Outputs.to_csv"""
-    obj = generic.Outputs()
-    obj.entries = entries
+    obj = generic.Outputs("history")
+    obj.histories.extend(entries)
     assert obj.to_csv() == exp_res
 
 
@@ -54,6 +55,6 @@ def test_output_to_csv(entries, exp_res):
 )
 def test_output_sort_domain(entries, exp_res):
     """test Outputs.sort_domain"""
-    obj = generic.Outputs()
-    obj.entries = entries
+    obj = generic.Outputs("history")
+    obj.histories.extend(entries)
     assert list(obj.sort_domain().items()) == exp_res

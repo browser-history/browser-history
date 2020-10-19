@@ -8,10 +8,11 @@ import logging
 
 logger = logging.getLogger(__name__)
 handler = logging.StreamHandler()
-formatter = logging.Formatter('%(levelname)s: %(message)s')
+formatter = logging.Formatter("%(levelname)s: %(message)s")
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 logger.setLevel(logging.INFO)
+
 
 class Platform(enum.Enum):
     """An enum used to indicate the system's platform
@@ -27,10 +28,12 @@ class Platform(enum.Enum):
 
     See :py:func:`get_platform` to infer the platform from the system.
     """
+
     OTHER = 0
     LINUX = 1
     MAC = 2
     WINDOWS = 3
+
 
 def get_platform():
     """Returns the current platform

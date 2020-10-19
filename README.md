@@ -8,6 +8,16 @@
 ``browser-history`` is a simple, zero-dependencies, developer-friendly python
 package to retrieve (almost) any browser's history on (almost) any platform.
 
+## Features
+
+ - Supports most **popular browsers**. See [this](https://browser-history.readthedocs.io/en/latest/browsers.html) for a full list.
+ - Supports all major platforms - **Windows, Mac and Linux**.
+ - A **command-line tool**: simply run `browser-history --help` from your terminal.
+ - **History**: browsing history with exact timestamp and URL.
+ - **Bookmarks**: browser bookmarks with timestamp, URL, title and folder.
+ - Developer friendly: you can add support for new browsers or add a new feature very easily.
+ - Fully open source: this project is developed by [PES Open Source](https://github.com/pesos) and will always be open source, with the Apache License.
+
 # Quick Start
 
 ## Installation
@@ -16,28 +26,53 @@ package to retrieve (almost) any browser's history on (almost) any platform.
 
 ## Usage
 
+### History
+
 To get history from all installed browsers:
 ```python
 from browser_history import get_history
 
 outputs = get_history()
 
-his = outputs.get()
+# his is a list of (datetime.datetime, url) tuples
+his = outputs.histories
 ```
- - `his` is a list of `(datetime.datetime, url)` tuples.
-
 
 If you want history from a specific browser:
 ```python
 from browser_history.browsers import Firefox
 
 f = Firefox()
+outputs = f.fetch_history()
 
-his = f.fetch().get()
+# his is a list of (datetime.datetime, url) tuples
+his = outputs.histories
 ```
 
  - `Firefox` in the above snippet can be replaced with any of the [supported browsers](https://browser-history.readthedocs.io/en/latest/browsers.html).
- - `his` is a list of `(datetime.datetime, url)` tuples.
+
+### Bookmarks
+
+To get bookmarks from all installed browsers:
+```python
+from browser_history import get_bookmarks
+
+outputs = get_bookmarks()
+
+# bms is a list of (datetime.datetime, url, title, folder) tuples
+bms = outputs.bookmarks
+```
+
+To get bookmarks from a specific browser:
+```python
+from browser_history.browsers import Firefox
+
+f = Firefox()
+outputs = f.fetch_bookmarks()
+
+# bms is a list of (datetime.datetime, url, title, folder) tuples
+bms = outputs.bookmarks
+```
 
 Check out the [documentation](https://browser-history.readthedocs.io/en/latest/) for more details.
 
