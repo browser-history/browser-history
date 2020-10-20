@@ -84,7 +84,9 @@ class Browser:
 
         error_string = self.name + " browser is not supported on {}"
         if plat == utils.Platform.WINDOWS:
-            assert self.windows_path is not None, error_string.format("windows")
+            assert self.windows_path is not None, error_string.format(
+                "windows"
+            )
             self.history_dir = homedir / self.windows_path
         elif plat == utils.Platform.MAC:
             assert self.mac_path is not None, error_string.format("Mac OS")
@@ -117,8 +119,13 @@ class Browser:
         profile_dirs = []
         for files in os.walk(str(self.history_dir)):
             for item in files[2]:
-                if os.path.split(os.path.join(files[0], item))[-1] == profile_file:
-                    path = str(files[0]).split(str(self.history_dir), maxsplit=1)[-1]
+                if (
+                    os.path.split(os.path.join(files[0], item))[-1]
+                    == profile_file
+                ):
+                    path = str(files[0]).split(
+                        str(self.history_dir), maxsplit=1
+                    )[-1]
                     if path.startswith(os.sep):
                         path = path[1:]
                     if path.endswith(os.sep):
@@ -159,7 +166,8 @@ class Browser:
         :rtype: :py:class:`browser_history.generic.Outputs`
         """
         history_paths = [
-            self.history_path_profile(profile_dir) for profile_dir in profile_dirs
+            self.history_path_profile(profile_dir)
+            for profile_dir in profile_dirs
         ]
         return self.fetch_history(history_paths)
 
@@ -191,15 +199,19 @@ class Browser:
         output_object = Outputs(fetch_type="history")
         with tempfile.TemporaryDirectory() as tmpdirname:
             for history_path in history_paths:
-                copied_history_path = shutil.copy2(history_path.absolute(), tmpdirname)
-                conn = sqlite3.connect(f"file:{copied_history_path}?mode=ro", uri=True)
+                copied_history_path = shutil.copy2(
+                    history_path.absolute(), tmpdirname
+                )
+                conn = sqlite3.connect(
+                    f"file:{copied_history_path}?mode=ro", uri=True
+                )
                 cursor = conn.cursor()
                 cursor.execute(self.history_SQL)
                 date_histories = [
                     (
-                        datetime.datetime.strptime(d, "%Y-%m-%d %H:%M:%S").replace(
-                            tzinfo=self._local_tz
-                        ),
+                        datetime.datetime.strptime(
+                            d, "%Y-%m-%d %H:%M:%S"
+                        ).replace(tzinfo=self._local_tz),
                         url,
                     )
                     for d, url in cursor.fetchall()
@@ -260,7 +272,9 @@ class Outputs:
 
     # type hint for histories and bookmarks have to be manually written for docs
     # instead of using HistoryVar and BookmarkVar respectively
-    histories: List[Tuple[datetime.datetime, str]]  #: List of tuples of Timestamp & URL
+    histories: List[
+        Tuple[datetime.datetime, str]
+    ]  #: List of tuples of Timestamp & URL
     bookmarks: List[Tuple[datetime.datetime, str, str, str]]
     """List of tuples of Timestamp, URL, Title, Folder."""
 
@@ -417,7 +431,9 @@ class Outputs:
         lines = []
         for entry in self.field_map[self.fetch_type]["var"]:
             json_record = {}
-            for field, value in zip(self.field_map[self.fetch_type]["fields"], entry):
+            for field, value in zip(
+                self.field_map[self.fetch_type]["fields"], entry
+            ):
                 json_record[field] = value
             lines.append(json_record)
 
@@ -443,7 +459,7 @@ class Outputs:
         """
         if output_format == "infer":
             output_format = os.path.splitext(filename)[1][1:]
-            if  not output_format in self.format_map:
+            if not output_format in self.format_map:
                 raise ValueError(
                     f"Invalid extension .{output_format}. Should be one of "
                     f"{', '.join(self.format_map.keys())}"

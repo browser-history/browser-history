@@ -3,11 +3,21 @@ command line interface of browser-history."""
 
 import sys
 import argparse
-from browser_history import get_history, get_bookmarks, generic, browsers, utils
+from browser_history import (
+    get_history,
+    get_bookmarks,
+    generic,
+    browsers,
+    utils,
+)
 
 # get list of all implemented browser by finding subclasses of generic.Browser
-AVAILABLE_BROWSERS = ", ".join(b.__name__ for b in generic.Browser.__subclasses__())
-AVAILABLE_FORMATS = ", ".join(generic.Outputs(fetch_type=None).format_map.keys())
+AVAILABLE_BROWSERS = ", ".join(
+    b.__name__ for b in generic.Browser.__subclasses__()
+)
+AVAILABLE_FORMATS = ", ".join(
+    generic.Outputs(fetch_type=None).format_map.keys()
+)
 AVAILABLE_TYPES = ", ".join(generic.Outputs(fetch_type=None).field_map.keys())
 
 
@@ -98,8 +108,10 @@ def main():
                     break
             browser_class = getattr(browsers, selected_browser)
         except AttributeError:
-            utils.logger.error('Browser %s is unavailable. Check --help for available browsers',
-                               args.browser)
+            utils.logger.error(
+                "Browser %s is unavailable. Check --help for available browsers",
+                args.browser,
+            )
             sys.exit(1)
 
         try:

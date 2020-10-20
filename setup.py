@@ -4,7 +4,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="browser-history", # Replace with your own username
+    name="browser-history",  # Replace with your own username
     version="0.2.1",
     author="Samyak S Sarnayak",
     author_email="samyak201@gmail.com",
@@ -18,8 +18,8 @@ setuptools.setup(
         "License :: OSI Approved :: Apache Software License",
         "Operating System :: OS Independent",
     ],
-    python_requires='>=3.6',
-    entry_points = {
-        'console_scripts': ['browser-history=browser_history.cli:main'],
-    }
+    python_requires=">=3.6",
+    entry_points={
+        "console_scripts": ["browser-history=browser_history.cli:main"],
+    },
 )

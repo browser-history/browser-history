@@ -71,7 +71,9 @@ class Chrome(Browser):
                     )
                 else:
                     bookmarks_list = _deeper(
-                        node["children"], folder + os.sep + node["name"], bookmarks_list
+                        node["children"],
+                        folder + os.sep + node["name"],
+                        bookmarks_list,
                     )
             return bookmarks_list
 
@@ -235,8 +237,8 @@ class Edge(Browser):
 
     name = "Edge"
 
-    windows_path = 'AppData/Local/Microsoft/Edge/User Data'
-    mac_path = 'Library/Application Support/Microsoft Edge'
+    windows_path = "AppData/Local/Microsoft/Edge/User Data"
+    mac_path = "Library/Application Support/Microsoft Edge"
 
     profile_support = True
     profile_dir_prefixes = Chrome.profile_dir_prefixes
@@ -261,9 +263,9 @@ class Opera(Browser):
 
     name = "Opera"
 
-    linux_path = '.config/opera'
-    windows_path = 'AppData/Roaming/Opera Software/Opera Stable'
-    mac_path = 'Library/Application Support/com.operasoftware.Opera'
+    linux_path = ".config/opera"
+    windows_path = "AppData/Roaming/Opera Software/Opera Stable"
+    mac_path = "Library/Application Support/com.operasoftware.Opera"
 
     profile_support = False
 
@@ -312,8 +314,8 @@ class Brave(Browser):
 
     name = "Brave"
 
-    linux_path = '.config/BraveSoftware/Brave-Browser'
-    mac_path = 'Library/Application Support/BraveSoftware/Brave-Browser'
+    linux_path = ".config/BraveSoftware/Brave-Browser"
+    mac_path = "Library/Application Support/BraveSoftware/Brave-Browser"
 
     profile_support = True
     profile_dir_prefixes = Chrome.profile_dir_prefixes
