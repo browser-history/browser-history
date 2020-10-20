@@ -3,8 +3,8 @@ Module defines Platform class enumerates the popular Operating Systems.
 
 """
 import enum
-import platform
 import logging
+import platform
 
 logger = logging.getLogger(__name__)
 handler = logging.StreamHandler()

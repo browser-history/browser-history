@@ -2,10 +2,11 @@
 
 All browsers must inherit from :py:mod:`browser_history.generic.Browser`.
 """
-import sqlite3
-import json
 import datetime
+import json
 import os
+import sqlite3
+
 from browser_history.generic import Browser
 
 

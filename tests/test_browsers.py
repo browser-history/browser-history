@@ -4,10 +4,10 @@ from pathlib import Path
 from .context import browser_history
 from .utils import (
     become_linux,
+    become_mac,  # pylint: disable=unused-import
     become_windows,
-    become_mac,
     change_homedir,
-)  # pylint: disable=unused-import
+)
 
 # pylint: disable=redefined-outer-name,unused-argument
 

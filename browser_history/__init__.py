@@ -1,6 +1,4 @@
-from . import generic
-from . import browsers
-from . import utils
+from . import browsers, generic, utils
 
 
 def get_history():

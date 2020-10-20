@@ -1,13 +1,14 @@
 """This module defines functions and globals required for the
 command line interface of browser-history."""
 
-import sys
 import argparse
+import sys
+
 from browser_history import (
-    get_history,
-    get_bookmarks,
-    generic,
     browsers,
+    generic,
+    get_bookmarks,
+    get_history,
     utils,
 )
 

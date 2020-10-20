@@ -5,7 +5,6 @@
 from datetime import datetime
 
 import pytest
-
 from browser_history import generic
 
 
