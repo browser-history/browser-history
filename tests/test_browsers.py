@@ -48,6 +48,82 @@ def test_firefox_linux(become_linux, change_homedir):
         "https://www.mozilla.org/en-US/privacy/firefox/",
     )
 
+def test_chrome_linux(become_linux, change_homedir):
+    """Test history is correct on Chrome for Linux"""
+    f = browser_history.browsers.Chrome()
+    output = f.fetch_history()
+    his = output.histories
+    assert len(his) == 2
+    assert his[0] == (
+        datetime.datetime(
+            2020,
+            10,
+            15,
+            15,
+            34,
+            30,
+            tzinfo=datetime.timezone(datetime.timedelta(seconds=7200), "CEST"),
+        ),
+        "www.github.com",
+    )
+    profs = f.profiles(f.history_file)
+    his_path = f.history_path_profile(profs[0])
+    assert his_path == Path.home() / ".config/google-chrome/History"
+    his = f.history_profiles(profs).histories
+    assert len(his) == 2
+    assert his[0] == (
+        datetime.datetime(
+            2020,
+            10,
+            15,
+            15,
+            34,
+            30,
+            tzinfo=datetime.timezone(datetime.timedelta(seconds=7200), "CEST"),
+        ),
+        "www.github.com",
+    )
+
+
+def test_chromium_linux(become_linux, change_homedir):
+    """Test history is correct on Chromium for Linux"""
+    f = browser_history.browsers.Chromium()
+    output = f.fetch_history()
+    his = output.histories
+    assert len(his) == 2
+    assert his[0] == (
+        datetime.datetime(
+            2020,
+            10,
+            15,
+            15,
+            34,
+            30,
+            tzinfo=datetime.timezone(datetime.timedelta(seconds=7200), "CEST"),
+        ),
+        "www.github.com",
+    )
+    profs = f.profiles(f.history_file)
+    his_path = f.history_path_profile(profs[0])
+    assert his_path in [
+        Path.home() / ".config/chromium/Default/History",
+        Path.home() / ".config/chromium/Profile/History",
+    ]
+    his = f.history_profiles(profs).histories
+    assert len(his) == 2
+    assert his[0] == (
+        datetime.datetime(
+            2020,
+            10,
+            15,
+            15,
+            34,
+            30,
+            tzinfo=datetime.timezone(datetime.timedelta(seconds=7200), "CEST"),
+        ),
+        "www.github.com",
+    )
+
 
 def test_firefox_windows(become_windows, change_homedir):
     """Test history is correct on Firefox for Windows"""
