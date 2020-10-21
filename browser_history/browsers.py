@@ -36,7 +36,9 @@ class Chrome(Browser):
 
     history_SQL = """
         SELECT
-            datetime(visits.visit_time/1000000-11644473600, 'unixepoch', 'localtime') as 'visit_time',
+            datetime(
+                visits.visit_time/1000000-11644473600, 'unixepoch', 'localtime'
+            ) as 'visit_time',
             urls.url
         FROM
             visits INNER JOIN urls ON visits.url = urls.id
@@ -48,7 +50,8 @@ class Chrome(Browser):
 
     def bookmarks_parser(self, bookmark_path):
         """Returns bookmarks of a single profile for Chrome based browsers
-        The returned datetimes are timezone-aware with the local timezone set by default
+        The returned datetimes are timezone-aware with the local timezone set
+        by default
 
         :param bookmark_path : the path of the bookmark file
         :type bookmark_path : str
@@ -141,7 +144,9 @@ class Firefox(Browser):
 
     history_SQL = """
         SELECT
-            datetime(visit_date/1000000, 'unixepoch', 'localtime') AS 'visit_time',
+            datetime(
+                visit_date/1000000, 'unixepoch', 'localtime'
+            ) AS 'visit_time',
             url
         FROM
             moz_historyvisits
@@ -155,7 +160,8 @@ class Firefox(Browser):
 
     def bookmarks_parser(self, bookmark_path):
         """Returns bookmarks of a single profile for Firefox based browsers
-        The returned datetimes are timezone-aware with the local timezone set by default
+        The returned datetimes are timezone-aware with the local timezone set
+        by default
 
         :param bookmark_path : the path of the bookmark file
         :type bookmark_path : str
@@ -165,12 +171,15 @@ class Firefox(Browser):
 
         bookmarks_sql = """
             SELECT
-                datetime(moz_bookmarks.dateAdded/1000000,'unixepoch','localtime') AS added_time,
+                datetime(
+                    moz_bookmarks.dateAdded/1000000,'unixepoch','localtime'
+                ) AS added_time,
                 url, moz_bookmarks.title, moz_folder.title
             FROM
-                moz_bookmarks INNER JOIN moz_places, moz_bookmarks as moz_folder
+                moz_bookmarks JOIN moz_places, moz_bookmarks as moz_folder
             ON
-                moz_bookmarks.fk = moz_places.id AND moz_bookmarks.parent = moz_folder.id
+                moz_bookmarks.fk = moz_places.id
+                AND moz_bookmarks.parent = moz_folder.id
             WHERE
                 moz_bookmarks.dateAdded IS NOT NULL AND url LIKE 'http%'
                 AND moz_bookmarks.title IS NOT NULL
@@ -212,7 +221,9 @@ class Safari(Browser):
 
     history_SQL = """
         SELECT
-            datetime(visit_time + 978307200, 'unixepoch', 'localtime') as visit_time,
+            datetime(
+                visit_time + 978307200, 'unixepoch', 'localtime'
+            ) as visit_time,
             url
         FROM
             history_visits

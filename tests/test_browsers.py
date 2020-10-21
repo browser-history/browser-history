@@ -2,9 +2,9 @@ import datetime
 from pathlib import Path
 
 from .context import browser_history
-from .utils import (
+from .utils import (  # noqa: F401; pylint: disable=unused-import
     become_linux,
-    become_mac,  # pylint: disable=unused-import
+    become_mac,
     become_windows,
     change_homedir,
 )
@@ -12,7 +12,7 @@ from .utils import (
 # pylint: disable=redefined-outer-name,unused-argument
 
 
-def test_firefox_linux(become_linux, change_homedir):
+def test_firefox_linux(become_linux, change_homedir):  # noqa: F811
     """Test history is correct on Firefox for Linux"""
     f = browser_history.browsers.Firefox()
     output = f.fetch_history()
@@ -49,7 +49,7 @@ def test_firefox_linux(become_linux, change_homedir):
     )
 
 
-def test_firefox_windows(become_windows, change_homedir):
+def test_firefox_windows(become_windows, change_homedir):  # noqa: F811
     """Test history is correct on Firefox for Windows"""
     f = browser_history.browsers.Firefox()
     output = f.fetch_history()
@@ -107,7 +107,7 @@ def test_firefox_windows(become_windows, change_homedir):
     ]
 
 
-def test_edge_windows(become_windows, change_homedir):
+def test_edge_windows(become_windows, change_homedir):  # noqa: F811
     """Test history is correct for Edge on Windows"""
     e = browser_history.browsers.Edge()
     output = e.fetch_history()
@@ -160,7 +160,7 @@ def test_edge_windows(become_windows, change_homedir):
     ]
 
 
-def test_safari_mac(become_mac, change_homedir):
+def test_safari_mac(become_mac, change_homedir):  # noqa: F811
     """Test history is correct for Safari on macOS"""
 
     e = browser_history.browsers.Safari()

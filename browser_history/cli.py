@@ -34,7 +34,8 @@ def make_parser():
                     A tool to retrieve history from
                     (almost) any browser on (almost) any platform""",
         epilog="""
-                Checkout the GitHub repo https://github.com/pesos/browser-history
+                Checkout the GitHub repo
+                https://github.com/pesos/browser-history
                 if you have any issues or want to help contribute""",
     )
 
@@ -52,8 +53,10 @@ def make_parser():
         "--browser",
         default="all",
         help=f"""
-                browser to retrieve history or bookmarks from. Should be one of all, {AVAILABLE_BROWSERS}.
-                Default is all (gets history or bookmarks from all browsers).""",
+                browser to retrieve history or bookmarks from. Should be one
+                of all, {AVAILABLE_BROWSERS}.
+                Default is all (gets history or bookmarks from all browsers).
+                """,
     )
 
     parser_.add_argument(
@@ -62,8 +65,8 @@ def make_parser():
         default="infer",
         help=f"""
             Format to be used in output. Should be one of {AVAILABLE_FORMATS}.
-            Default is infer (it tries to infer it from the output file's extension. If no output file is given
-            it defaults to csv)""",
+            Default is infer (it tries to infer it from the output file's
+            extension. If no output file is given it defaults to csv)""",
     )
 
     parser_.add_argument(
@@ -71,7 +74,7 @@ def make_parser():
         "--output",
         default=None,
         help="""
-                File where history output or bookmark output is to be written. 
+                File where history output or bookmark output is to be written.
                 If not provided, standard output is used.""",
     )
 
@@ -110,7 +113,8 @@ def main():
             browser_class = getattr(browsers, selected_browser)
         except AttributeError:
             utils.logger.error(
-                "Browser %s is unavailable. Check --help for available browsers",
+                "Browser %s is unavailable."
+                "Check --help for available browsers",
                 args.browser,
             )
             sys.exit(1)
@@ -130,7 +134,7 @@ def main():
                 args.format = "csv"
             print(args.type + ":")
             print(fetch_map[args.type]["var"].formatted(args.format))
-        elif not args.output is None:
+        elif args.output is not None:
             fetch_map[args.type]["var"].save(args.output, args.format)
 
     except ValueError as e:
