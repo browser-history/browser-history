@@ -5,11 +5,12 @@ Development Dependencies
 ------------------------
 
 #. Python 3 (versions 3.6 to 3.8 are currently supported)
-#. ``pip install pylint pytest pytest-cov``
+#. ``pip install pylint pytest pytest-cov pre-commit``
 
     * ``pylint`` to check for errors and to enforce code style.
     * ``pytest`` to run the tests.
     * ``pytest-cov`` to check for code coverage.
+    * ``pre-commit`` to automate code style checks.
 
 #. If you're making changes to the documentation, install the documentation dependencies: ``pip install -r docs/requirements.txt``.
 
@@ -22,6 +23,7 @@ Development Process - Short Version
 #. Fork the repository.
 #. ``git clone`` the forked version of the project.
 #. Work on the master branch for smaller patches and a separate branch for new features.
+#. Initialize pre-commit hook (only on first commit) by running: ``pre-commit install``
 #. Make changes, ``git add`` and then commit. Make sure to link the issue number in the commit message.
 #. Run the following commands: ``pylint browser_history``, ``pytest --cov=./browser_history``
 #. (Optional) If you're updating the documentation, make sure you update ``docs/quickstart.rst`` and ``README.md`` simultaneously.
@@ -51,6 +53,10 @@ Development Process - Long Version
 
    * To create a new feature branch and use it, run: ``git checkout -b feature-<feature-name>``.
    * If a feature branch already exists, switch to it before committing: ``git checkout feature-<feature-name>``
+
+#. Initialize the pre-commit hook, if you are committing changes for the first time:
+
+   * ``pre-commit install`` - to setup git hook scripts that will help you check your code each time you commit.
 
 #. Make changes, ``git add`` and then commit. Make sure to link the issue number in the commit message.
 
