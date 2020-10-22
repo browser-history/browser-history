@@ -270,3 +270,41 @@ def test_safari_mac(become_mac, change_homedir):  # noqa: F811
         ),
         "https://pesos.github.io/",
     )
+
+
+def test_opera_windows(become_windows, change_homedir):
+    o = browser_history.browsers.Opera()
+    outputs = o.fetch_history()
+    his = outputs.histories
+    assert len(his) == 2
+    assert his == [
+        (
+            datetime.datetime(
+                2020,
+                10,
+                13,
+                12,
+                4,
+                51,
+                tzinfo=datetime.timezone(
+                    datetime.timedelta(seconds=10800), "E. Africa Standard Time"
+                ),
+            ),
+            "https://www.youtube.com/",
+        ),
+        (
+            datetime.datetime(
+                2020,
+                10,
+                13,
+                12,
+                4,
+                59,
+                tzinfo=datetime.timezone(
+                    datetime.timedelta(seconds=10800), "E. Africa Standard Time"
+                ),
+            ),
+            "https://github.com/",
+        ),
+    ]
+    assert len(o.profiles(o.history_file)) == 1
