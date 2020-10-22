@@ -2,17 +2,17 @@ import datetime
 from pathlib import Path
 
 from .context import browser_history
-from .utils import (
+from .utils import (  # noqa: F401; pylint: disable=unused-import
     become_linux,
-    become_windows,
     become_mac,
+    become_windows,
     change_homedir,
-)  # pylint: disable=unused-import
+)
 
 # pylint: disable=redefined-outer-name,unused-argument
 
 
-def test_firefox_linux(become_linux, change_homedir):
+def test_firefox_linux(become_linux, change_homedir):  # noqa: F811
     """Test history is correct on Firefox for Linux"""
     f = browser_history.browsers.Firefox()
     output = f.fetch_history()
@@ -125,7 +125,7 @@ def test_chromium_linux(become_linux, change_homedir):
     )
 
 
-def test_firefox_windows(become_windows, change_homedir):
+def test_firefox_windows(become_windows, change_homedir):  # noqa: F811
     """Test history is correct on Firefox for Windows"""
     f = browser_history.browsers.Firefox()
     output = f.fetch_history()
@@ -174,7 +174,8 @@ def test_firefox_windows(become_windows, change_homedir):
                 2,
                 14,
                 tzinfo=datetime.timezone(
-                    datetime.timedelta(seconds=10800), "E. Africa Standard Time"
+                    datetime.timedelta(seconds=10800),
+                    "E. Africa Standard Time",
                 ),
             ),
             "https://www.reddit.com/",
@@ -182,7 +183,7 @@ def test_firefox_windows(become_windows, change_homedir):
     ]
 
 
-def test_edge_windows(become_windows, change_homedir):
+def test_edge_windows(become_windows, change_homedir):  # noqa: F811
     """Test history is correct for Edge on Windows"""
     e = browser_history.browsers.Edge()
     output = e.fetch_history()
@@ -212,7 +213,8 @@ def test_edge_windows(become_windows, change_homedir):
     his_path = e.history_path_profile("Profile 2")
     assert (
         his_path
-        == Path.home() / "AppData/Local/Microsoft/Edge/User Data/Profile 2/History"
+        == Path.home()
+        / "AppData/Local/Microsoft/Edge/User Data/Profile 2/History"
     )
     his = e.history_profiles(["Profile 2"]).histories
     assert len(his) == 1
@@ -234,7 +236,7 @@ def test_edge_windows(become_windows, change_homedir):
     ]
 
 
-def test_safari_mac(become_mac, change_homedir):
+def test_safari_mac(become_mac, change_homedir):  # noqa: F811
     """Test history is correct for Safari on macOS"""
 
     e = browser_history.browsers.Safari()
@@ -253,7 +255,9 @@ def test_safari_mac(become_mac, change_homedir):
         ),
         "https://www.apple.com/in/",
     )
-    assert his[1][1] == "https://www.google.co.in/?client=safari&channel=mac_bm"
+    assert (
+        his[1][1] == "https://www.google.co.in/?client=safari&channel=mac_bm"
+    )
     assert his[4] == (
         datetime.datetime(
             2020,

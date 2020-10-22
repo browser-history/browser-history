@@ -1,5 +1,5 @@
 """
-This module defines the generic base class and the functionaliity.
+This module defines the generic base class and the functionality.
 
 All browsers from :py:mod:`browser_history.browsers` inherit this class.
 """
@@ -25,16 +25,20 @@ BookmarkVar = List[Tuple[datetime.datetime, str, str, str]]
 
 
 class Browser:
-    """A generic class to support all major browsers with minimal configuration.
+    """A generic class to support all major browsers with minimal
+    configuration.
 
-    Currently, only browsers which save the history in SQLite files are supported.
+    Currently, only browsers which save the history in SQLite files are
+    supported.
 
     To create a new browser type, the following class variables must be set.
 
-    * **name**: A name for the browser. Not used anywhere except for logging and errors.
-    * *Paths*: A path string, relative to the home directory, where the browsers data is saved.
-      This path should be one level above the profile directories if they exist. At least one
-      of the following must be set.
+    * **name**: A name for the browser. Not used anywhere except for logging
+      and errors.
+    * *Paths*: A path string, relative to the home directory, where the
+      browsers data is saved.
+      This path should be one level above the profile directories if they
+      exist. At least one of the following must be set.
 
         * **windows_path**: browser path on Windows.
         * **mac_path**: browser path on Mac OS
@@ -43,19 +47,23 @@ class Browser:
     * **profile_support**: (optional) boolean indicating whether
       the browser supports multiple profiles.
     * **profile_dir_prefixes**: (optional) list of possible prefixes for the
-      profile directories. Keep empty to check all subdirectories in the browser path.
+      profile directories. Keep empty to check all subdirectories in the
+      browser path.
     * **history_file**: name of the (SQLite) file which stores the history.
-    * **bookmarks_file**: name of the (SQLite, JSON or PLIST) file which stores the bookmarks
-    * **history_SQL**: SQL query required to extract history from the ``history_file``. The
-      query must return two columns: ``visit_time`` and ``url``. The ``visit_time`` must be
-      processed using the
-      `datetime <https://www.sqlitetutorial.net/sqlite-date-functions/sqlite-datetime-function/>`_
+    * **bookmarks_file**: name of the (SQLite, JSON or PLIST) file which
+      stores the bookmarks
+    * **history_SQL**: SQL query required to extract history from the
+      ``history_file``. The query must return two columns: ``visit_time`` and
+      ``url``. The ``visit_time`` must be processed using the
+      `datetime <https://www.sqlitetutorial.net/sqlite-date-functions/sqlite-datetime-function/>`_  # noqa: E501
       function with the modifier ``localtime``.
-    * **bookmarks_parser**: a function to parse bookmarks and convert to readable format
-    * **_local_tz**: gets a datetime object of the current time as per the users timezone
+    * **bookmarks_parser**: a function to parse bookmarks and convert to
+      readable format
+    * **_local_tz**: gets a datetime object of the current time as per the
+      users timezone
 
-    :param plat: the current platform. A value of ``None`` means the platform will be
-                    inferred from the system.
+    :param plat: the current platform. A value of ``None`` means the platform
+       will be inferred from the system.
     :type plat: :py:class:`browser_history.utils.Platform`
     """
 
@@ -73,7 +81,7 @@ class Browser:
 
     history_SQL = None
 
-    bookmarks_parser = lambda bookmark_path: None
+    bookmarks_parser = lambda bookmark_path: None  # noqa: E731
 
     _local_tz = datetime.datetime.now().astimezone().tzinfo
 
@@ -84,7 +92,9 @@ class Browser:
 
         error_string = self.name + " browser is not supported on {}"
         if plat == utils.Platform.WINDOWS:
-            assert self.windows_path is not None, error_string.format("windows")
+            assert self.windows_path is not None, error_string.format(
+                "windows"
+            )
             self.history_dir = homedir / self.windows_path
         elif plat == utils.Platform.MAC:
             assert self.mac_path is not None, error_string.format("Mac OS")
@@ -99,7 +109,8 @@ class Browser:
             self.profile_dir_prefixes.append("*")
 
     def profiles(self, profile_file) -> typing.List[str]:
-        """Returns a list of profile directories. If the browser is supported on the current
+        """Returns a list of profile directories. If the browser is supported
+        on the current
         platform but is not installed an empty list will be returned
 
         :param profile_file: file to search for in the profile directories.
@@ -117,8 +128,13 @@ class Browser:
         profile_dirs = []
         for files in os.walk(str(self.history_dir)):
             for item in files[2]:
-                if os.path.split(os.path.join(files[0], item))[-1] == profile_file:
-                    path = str(files[0]).split(str(self.history_dir), maxsplit=1)[-1]
+                if (
+                    os.path.split(os.path.join(files[0], item))[-1]
+                    == profile_file
+                ):
+                    path = str(files[0]).split(
+                        str(self.history_dir), maxsplit=1
+                    )[-1]
                     if path.startswith(os.sep):
                         path = path[1:]
                     if path.endswith(os.sep):
@@ -129,9 +145,11 @@ class Browser:
     def history_path_profile(self, profile_dir: Path) -> Path:
         """Returns path of the history file for the given ``profile_dir``
 
-        The ``profile_dir`` should be one of the outputs from :py:meth:`profiles`
+        The ``profile_dir`` should be one of the outputs from
+        :py:meth:`profiles`
 
-        :param profile_dir: Profile directory (should be a single name, relative to ``history_dir``)
+        :param profile_dir: Profile directory (should be a single name,
+            relative to ``history_dir``)
         :type profile_dir: :py:class:`pathlib.Path`
         :return: path to history file of the profile
         :rtype: :py:class:`pathlib.Path`
@@ -151,38 +169,42 @@ class Browser:
     def history_profiles(self, profile_dirs):
         """Returns history of profiles given by `profile_dirs`.
 
-        :param profile_dirs: List or iterable of profile directories. Can be obtained from
-            :py:meth:`profiles`
+        :param profile_dirs: List or iterable of profile directories. Can be
+            obtained from :py:meth:`profiles`
         :type profile_dirs: list(str)
-        :return: Object of class :py:class:`browser_history.generic.Outputs` with the
-            data member histories set to list(tuple(:py:class:`datetime.datetime`, str))
+        :return: Object of class :py:class:`browser_history.generic.Outputs`
+            with the data member histories set to
+            list(tuple(:py:class:`datetime.datetime`, str))
         :rtype: :py:class:`browser_history.generic.Outputs`
         """
         history_paths = [
-            self.history_path_profile(profile_dir) for profile_dir in profile_dirs
+            self.history_path_profile(profile_dir)
+            for profile_dir in profile_dirs
         ]
         return self.fetch_history(history_paths)
 
     def fetch_history(self, history_paths=None, sort=True, desc=False):
         """Returns history of all available profiles stored in SQL.
 
-        The returned datetimes are timezone-aware with the local timezone set by default.
+        The returned datetimes are timezone-aware with the local timezone set
+        by default.
 
-        The history files are first copied to a temporary location and then queried, this might
-        lead to some additional overhead and results returned might not be the latest if the
-        browser is in use. This is done because the SQlite files are locked by the browser when
-        in use.
+        The history files are first copied to a temporary location and then
+        queried, this might lead to some additional overhead and results
+        returned might not be the latest if the browser is in use. This is
+        done because the SQlite files are locked by the browser when in use.
 
         :param history_paths: (optional) a list of history files.
         :type history_paths: list(:py:class:`pathlib.Path`)
-        :param sort: (optional) flag to specify if the output should be sorted.
-            Default value set to True.
+        :param sort: (optional) flag to specify if the output should be
+            sorted. Default value set to True.
         :type sort: boolean
-        :param desc: (optional)  flag to speicify asc/desc (Applicable iff sort is True)
-            Default value set to False.
+        :param desc: (optional)  flag to specify asc/desc
+            (Applicable if sort is True) Default value set to False.
         :type asc: boolean
-        :return: Object of class :py:class:`browser_history.generic.Outputs` with the
-            data member histories set to list(tuple(:py:class:`datetime.datetime`, str)).
+        :return: Object of class :py:class:`browser_history.generic.Outputs`
+            with the data member histories set to
+            list(tuple(:py:class:`datetime.datetime`, str)).
             If the browser is not installed, this object will be empty.
         :rtype: :py:class:`browser_history.generic.Outputs`
         """
@@ -191,15 +213,19 @@ class Browser:
         output_object = Outputs(fetch_type="history")
         with tempfile.TemporaryDirectory() as tmpdirname:
             for history_path in history_paths:
-                copied_history_path = shutil.copy2(history_path.absolute(), tmpdirname)
-                conn = sqlite3.connect(f"file:{copied_history_path}?mode=ro", uri=True)
+                copied_history_path = shutil.copy2(
+                    history_path.absolute(), tmpdirname
+                )
+                conn = sqlite3.connect(
+                    f"file:{copied_history_path}?mode=ro", uri=True
+                )
                 cursor = conn.cursor()
                 cursor.execute(self.history_SQL)
                 date_histories = [
                     (
-                        datetime.datetime.strptime(d, "%Y-%m-%d %H:%M:%S").replace(
-                            tzinfo=self._local_tz
-                        ),
+                        datetime.datetime.strptime(
+                            d, "%Y-%m-%d %H:%M:%S"
+                        ).replace(tzinfo=self._local_tz),
                         url,
                     )
                     for d, url in cursor.fetchall()
@@ -211,25 +237,28 @@ class Browser:
         return output_object
 
     def fetch_bookmarks(self, bookmarks_paths=None, sort=True, desc=False):
-        """Returns bookmarks of all available profiles stored in SQL or JSON or plist.
+        """Returns bookmarks of all available profiles stored in SQL or JSON
+        or plist.
 
-        The returned datetimes are timezone-aware with the local timezone set by default.
+        The returned datetimes are timezone-aware with the local timezone set
+        by default.
 
-        The bookmark files are first copied to a temporary location and then queried, this might
-        lead to some additional overhead and results returned might not be the latest if the
-        browser is in use. This is done because the SQlite files are locked by the browser when
-        in use.
+        The bookmark files are first copied to a temporary location and then
+        queried, this might lead to some additional overhead and results
+        returned might not be the latest if the browser is in use. This is
+        done because the SQlite files are locked by the browser when in use.
 
         :param bookmarks_paths: (optional) a list of bookmark files.
         :type bookmarks_paths: list(:py:class:`pathlib.Path`)
-        :param sort: (optional) flag to specify if the output should be sorted.
-            Default value set to True.
+        :param sort: (optional) flag to specify if the output should be
+            sorted. Default value set to True.
         :type sort: boolean
-        :param desc: (optional)  flag to speicify asc/desc (Applicable iff sort is True)
-            Default value set to False.
+        :param desc: (optional)  flag to specify asc/desc
+            (Applicable if sort is True) Default value set to False.
         :type asc: boolean
-        :return: Object of class :py:class:`browser_history.generic.Outputs` with the
-            attribute bookmarks set to a list of (timestamp, url, title, folder) tuples
+        :return: Object of class :py:class:`browser_history.generic.Outputs`
+            with the attribute bookmarks set to a list of
+            (timestamp, url, title, folder) tuples
         :rtype: :py:class:`browser_history.generic.Outputs`
         """
 
@@ -255,17 +284,21 @@ class Outputs:
     A generic class to encapsulate history and bookmark outputs and to
     easily convert them to JSON, CSV or other formats.
 
-    :param fetch_type: string argument to select history output or bookmarks output
+    :param fetch_type: string argument to select history output or
+    bookmarks output
     """
 
-    # type hint for histories and bookmarks have to be manually written for docs
-    # instead of using HistoryVar and BookmarkVar respectively
-    histories: List[Tuple[datetime.datetime, str]]  #: List of tuples of Timestamp & URL
+    # type hint for histories and bookmarks have to be manually written for
+    # docs instead of using HistoryVar and BookmarkVar respectively
+    histories: List[
+        Tuple[datetime.datetime, str]
+    ]  #: List of tuples of Timestamp & URL
     bookmarks: List[Tuple[datetime.datetime, str, str, str]]
     """List of tuples of Timestamp, URL, Title, Folder."""
 
     field_map: Dict[str, Dict[str, Any]]
-    """Dictionary which maps fetch_type to the respective variables and formatting fields."""
+    """Dictionary which maps fetch_type to the respective variables and
+    formatting fields."""
 
     format_map: Dict[str, Callable]
     """Dictionary which maps output formats to their respective functions."""
@@ -304,10 +337,22 @@ class Outputs:
         ... obj.histories = entries
         ... obj.sort_domain()
         defaultdict(<class 'list'>, {
-            'example.com': [[datetime.datetime(2020, 1, 1, 0, 0), 'https://example.com']],
+            'example.com': [
+                [
+                    datetime.datetime(2020, 1, 1, 0, 0),
+                    'https://example.com'
+                ]
+            ],
             'google.com': [
-                 [datetime.datetime(2020, 1, 1, 0, 0), 'https://google.com'],
-                 [datetime.datetime(2020, 1, 1, 0, 0), 'https://google.com/imghp?hl=EN']]
+                 [
+                    datetime.datetime(2020, 1, 1, 0, 0),
+                    'https://google.com'
+                 ],
+                 [
+                    datetime.datetime(2020, 1, 1, 0, 0),
+                    'https://google.com/imghp?hl=EN'
+                ]
+            ]
          })
         """
         domain_histories = defaultdict(list)
@@ -317,15 +362,17 @@ class Outputs:
 
     def formatted(self, output_format: str = "csv") -> str:
         """
-        Returns history or bookmarks as a :py:class:`str` formatted  as ``output_format``
+        Returns history or bookmarks as a :py:class:`str` formatted as
+        ``output_format``
 
         :param output_format: One the formats in `csv`, `json`, `jsonl`
         """
-        # convert to lower case since the formats tuple is enforced in lowercase
+        # convert to lower case since the formats tuple is enforced in
+        # lowercase
         output_format = output_format.lower()
         if self.format_map.get(output_format):
-            # fetch the required formatter and call it. The formatters are instance methods
-            # so no need to pass any arguments
+            # fetch the required formatter and call it. The formatters are
+            # instance methods so no need to pass any arguments
             formatter = self.format_map[output_format]
             return formatter()
         raise ValueError(
@@ -335,8 +382,8 @@ class Outputs:
 
     def to_csv(self) -> str:
         """
-        Return history or bookmarks formatted as a comma separated string with the first row
-        having the fields names
+        Return history or bookmarks formatted as a comma separated string with
+        the first row having the fields names
 
         :return: string with the output in CSV format
 
@@ -356,10 +403,12 @@ class Outputs:
         2020-01-01 00:00:00,https://example.com
 
         """
-        # we will use csv module and let it do all the heavy lifting such as special character
-        # escaping and correct line termination escape sequences
-        # The catch is, we need to return a string but the csv module only works with files so we
-        # will use StringIO to build the csv in memory first
+        # we will use csv module and let it do all the heavy lifting such as
+        # special character escaping and correct line termination escape
+        # sequences
+        # The catch is, we need to return a string but the csv module only
+        # works with files so we will use StringIO to build the csv in
+        # memory first
         with StringIO() as output:
             writer = csv.writer(output)
             writer.writerow(self.field_map[self.fetch_type]["fields"])
@@ -373,7 +422,8 @@ class Outputs:
         names. If ``json_lines`` flag is `True` convert to JSON Lines format,
         otherwise convert it to Plain JSON format.
 
-        :param json_lines: flag to specify if the json_string should be JSON Lines.
+        :param json_lines: flag to specify if the json_string should be JSON
+        Lines.
         :return: string with the output in JSON/JSONL format
 
         Examples:
@@ -417,7 +467,9 @@ class Outputs:
         lines = []
         for entry in self.field_map[self.fetch_type]["var"]:
             json_record = {}
-            for field, value in zip(self.field_map[self.fetch_type]["fields"], entry):
+            for field, value in zip(
+                self.field_map[self.fetch_type]["fields"], entry
+            ):
                 json_record[field] = value
             lines.append(json_record)
 
@@ -434,16 +486,19 @@ class Outputs:
 
     def save(self, filename, output_format="infer"):
         """
-        Saves history or bookmarks to a file. Infers the type from the given filename
-        extension. If the type could not be inferred, it defaults to csv.
+        Saves history or bookmarks to a file. Infers the type from the given
+        filename extension. If the type could not be inferred, it defaults
+        to csv.
 
         :param filename: the name of the file.
-        :param output_format: (optional)One the formats in `csv`, `json`, `jsonl`.
-            If not given, it will automatically be inferd from the file's extension
+        :param output_format: (optional)One the formats in `csv`, `json`,
+            `jsonl`.
+            If not given, it will automatically be inferd from the file's
+            extension
         """
         if output_format == "infer":
             output_format = os.path.splitext(filename)[1][1:]
-            if  not output_format in self.format_map:
+            if output_format not in self.format_map:
                 raise ValueError(
                     f"Invalid extension .{output_format}. Should be one of "
                     f"{', '.join(self.format_map.keys())}"
