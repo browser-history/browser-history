@@ -137,8 +137,7 @@ def test_edge_windows(become_windows, change_homedir):  # noqa: F811
     his_path = e.history_path_profile("Profile 2")
     assert (
         his_path
-        == Path.home()
-        / "AppData/Local/Microsoft/Edge/User Data/Profile 2/History"
+        == Path.home() / "AppData/Local/Microsoft/Edge/User Data/Profile 2/History"
     )
     his = e.history_profiles(["Profile 2"]).histories
     assert len(his) == 1
@@ -179,9 +178,7 @@ def test_safari_mac(become_mac, change_homedir):  # noqa: F811
         ),
         "https://www.apple.com/in/",
     )
-    assert (
-        his[1][1] == "https://www.google.co.in/?client=safari&channel=mac_bm"
-    )
+    assert his[1][1] == "https://www.google.co.in/?client=safari&channel=mac_bm"
     assert his[4] == (
         datetime.datetime(
             2020,

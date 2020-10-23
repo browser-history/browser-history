@@ -19,9 +19,7 @@ def get_history():
             browser_output_object = browser_object.fetch_history()
             output_object.histories.extend(browser_output_object.histories)
         except AssertionError:
-            utils.logger.info(
-                "%s browser is not supported", browser_class.name
-            )
+            utils.logger.info("%s browser is not supported", browser_class.name)
     output_object.histories.sort()
     return output_object
 
