@@ -1,0 +1,3 @@
+[flake8]
+max-line-length = 88
+extend-ignore = A001, E203, P101, P103, W503

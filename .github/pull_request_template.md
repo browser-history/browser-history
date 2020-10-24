@@ -20,4 +20,5 @@ Please delete options that are not relevant.
 - [ ] I have commented my code, particularly in hard-to-understand areas (if applicable)
 - [ ] I have made corresponding changes to the documentation (if applicable)
 - [ ] My changes generate no new warnings 
+- [ ] I have enabled the pre-commit hook and it's not detecting any issue.
 - [ ] Any dependent and pending changes have been merged and published
