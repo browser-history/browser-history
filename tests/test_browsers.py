@@ -22,10 +22,10 @@ from dateutil import tz
 LOCAL_TIMEZONE = tz.gettz()
 
 
-def _detatch_timezone_stamp(hist, is_lone_item=True):
-    """Remove the timezone stamp from a datetime.datetime object.
+def _detatch_timezone_stamp(hist):
+    """Remove the timezone associated with the datetime in a history entry.
 
-    This is so datetimes can be tested for correctness despite timezone
+    This is so the datetimes can be tested for correctness despite timezone
     complications. Without removing the timezone stamp, we are comparing
     objects like the following, where the timezones are equivalent but named
     differently due to the means of extracting them:
@@ -38,13 +38,7 @@ def _detatch_timezone_stamp(hist, is_lone_item=True):
     but the datetime tuple should be, and is tested to be, the same in
     both cases.
     """
-    if is_lone_item:
-        return (hist[0].replace(tzinfo=None), hist[1])
-    else:
-        removed_tz_entries = []
-        for entry in hist:
-            removed_tz_entries.append((entry[0].replace(tzinfo=None), entry[1]))
-        return removed_tz_entries
+    return (hist[0].replace(tzinfo=None), hist[1])
 
 
 # pylint: disable=redefined-outer-name,unused-argument
@@ -219,25 +213,23 @@ def test_firefox_windows(become_windows, change_homedir):  # noqa: F811
     )
     # get history for second profile
     his = f.history_profiles(["Profile 2"]).histories
-    assert _detatch_timezone_stamp(his, is_lone_item=False) == [
-        (
-            datetime.datetime(
-                2020,
-                10,
-                4,
-                14,
-                2,
-                14,
-                tzinfo=datetime.timezone(
-                    datetime.timedelta(seconds=10800),
-                    "E. Africa Standard Time",
-                ),
-            )
-            .astimezone(LOCAL_TIMEZONE)
-            .replace(tzinfo=None),
-            "https://www.reddit.com/",
+    assert _detatch_timezone_stamp(his[0]) == (
+        datetime.datetime(
+            2020,
+            10,
+            4,
+            14,
+            2,
+            14,
+            tzinfo=datetime.timezone(
+                datetime.timedelta(seconds=10800),
+                "E. Africa Standard Time",
+            ),
         )
-    ]
+        .astimezone(LOCAL_TIMEZONE)
+        .replace(tzinfo=None),
+        "https://www.reddit.com/",
+    )
 
 
 def test_edge_windows(become_windows, change_homedir):  # noqa: F811
@@ -247,24 +239,22 @@ def test_edge_windows(become_windows, change_homedir):  # noqa: F811
     his = output.histories
     # test history from all profiles
     assert len(his) == 1
-    assert _detatch_timezone_stamp(his, is_lone_item=False) == [
-        (
-            datetime.datetime(
-                2020,
-                9,
-                23,
-                10,
-                45,
-                3,
-                tzinfo=datetime.timezone(
-                    datetime.timedelta(seconds=19800), "India Standard Time"
-                ),
-            )
-            .astimezone(LOCAL_TIMEZONE)
-            .replace(tzinfo=None),
-            "https://pesos.github.io/",
-        ),
-    ]
+    assert _detatch_timezone_stamp(his[0]) == (
+        datetime.datetime(
+            2020,
+            9,
+            23,
+            10,
+            45,
+            3,
+            tzinfo=datetime.timezone(
+                datetime.timedelta(seconds=19800), "India Standard Time"
+            ),
+        )
+        .astimezone(LOCAL_TIMEZONE)
+        .replace(tzinfo=None),
+        "https://pesos.github.io/",
+    )
 
     # test history from specific profile
     profs = e.profiles(e.history_file)
@@ -276,24 +266,22 @@ def test_edge_windows(become_windows, change_homedir):  # noqa: F811
     )
     his = e.history_profiles(["Profile 2"]).histories
     assert len(his) == 1
-    assert _detatch_timezone_stamp(his, is_lone_item=False) == [
-        (
-            datetime.datetime(
-                2020,
-                9,
-                23,
-                10,
-                45,
-                3,
-                tzinfo=datetime.timezone(
-                    datetime.timedelta(seconds=19800), "India Standard Time"
-                ),
-            )
-            .astimezone(LOCAL_TIMEZONE)
-            .replace(tzinfo=None),
-            "https://pesos.github.io/",
+    assert _detatch_timezone_stamp(his[0]) == (
+        datetime.datetime(
+            2020,
+            9,
+            23,
+            10,
+            45,
+            3,
+            tzinfo=datetime.timezone(
+                datetime.timedelta(seconds=19800), "India Standard Time"
+            ),
         )
-    ]
+        .astimezone(LOCAL_TIMEZONE)
+        .replace(tzinfo=None),
+        "https://pesos.github.io/",
+    )
 
 
 def test_safari_mac(become_mac, change_homedir):  # noqa: F811
@@ -339,38 +327,37 @@ def test_opera_windows(become_windows, change_homedir):  # noqa: F811
     outputs = o.fetch_history()
     his = outputs.histories
     assert len(his) == 2
-    assert _detatch_timezone_stamp(his, is_lone_item=False) == [
-        (
-            datetime.datetime(
-                2020,
-                10,
-                13,
-                12,
-                4,
-                51,
-                tzinfo=datetime.timezone(
-                    datetime.timedelta(seconds=10800), "E. Africa Standard Time"
-                ),
-            )
-            .astimezone(LOCAL_TIMEZONE)
-            .replace(tzinfo=None),
-            "https://www.youtube.com/",
-        ),
-        (
-            datetime.datetime(
-                2020,
-                10,
-                13,
-                12,
-                4,
-                59,
-                tzinfo=datetime.timezone(
-                    datetime.timedelta(seconds=10800), "E. Africa Standard Time"
-                ),
-            )
-            .astimezone(LOCAL_TIMEZONE)
-            .replace(tzinfo=None),
-            "https://github.com/",
-        ),
-    ]
+    assert _detatch_timezone_stamp(his[0]) == (
+        datetime.datetime(
+            2020,
+            10,
+            13,
+            12,
+            4,
+            51,
+            tzinfo=datetime.timezone(
+                datetime.timedelta(seconds=10800), "E. Africa Standard Time"
+            ),
+        )
+        .astimezone(LOCAL_TIMEZONE)
+        .replace(tzinfo=None),
+        "https://www.youtube.com/",
+    )
+    assert len(his) == 2
+    assert _detatch_timezone_stamp(his[1]) == (
+        datetime.datetime(
+            2020,
+            10,
+            13,
+            12,
+            4,
+            59,
+            tzinfo=datetime.timezone(
+                datetime.timedelta(seconds=10800), "E. Africa Standard Time"
+            ),
+        )
+        .astimezone(LOCAL_TIMEZONE)
+        .replace(tzinfo=None),
+        "https://github.com/",
+    )
     assert len(o.profiles(o.history_file)) == 1
