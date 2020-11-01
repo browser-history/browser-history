@@ -41,7 +41,7 @@ def make_parser():
         default="history",
         help=f"""
                 argument to decide whether to retrieve history or bookmarks.
-                Should be one of all, {AVAILABLE_TYPES}.
+                Should be one of {AVAILABLE_TYPES}.
                 Default is history.""",
     )
     parser_.add_argument(
@@ -92,9 +92,11 @@ def main():
         "bookmarks": {"var": b_outputs, "fun": get_bookmarks},
     }
 
-    assert (
-        args.type in fetch_map.keys()
-    ), f"Type should be one of all, {AVAILABLE_TYPES}"
+    if args.type not in fetch_map:
+        utils.logger.error(
+            "Type %s is unavailable." " Check --help for available types", args.type
+        )
+        sys.exit(1)
 
     if args.browser == "all":
         fetch_map[args.type]["var"] = fetch_map[args.type]["fun"]()
@@ -109,19 +111,15 @@ def main():
             browser_class = getattr(browsers, selected_browser)
         except AttributeError:
             utils.logger.error(
-                "Browser %s is unavailable." "Check --help for available browsers",
+                "Browser %s is unavailable." " Check --help for available browsers",
                 args.browser,
             )
             sys.exit(1)
 
-        try:
-            if args.type == "history":
-                fetch_map[args.type]["var"] = browser_class().fetch_history()
-            elif args.type == "bookmarks":
-                fetch_map[args.type]["var"] = browser_class().fetch_bookmarks()
-        except AssertionError as e:
-            utils.logger.error(e)
-            sys.exit(1)
+        if args.type == "history":
+            fetch_map[args.type]["var"] = browser_class().fetch_history()
+        elif args.type == "bookmarks":
+            fetch_map[args.type]["var"] = browser_class().fetch_bookmarks()
 
     try:
         if args.output is None:
