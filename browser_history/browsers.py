@@ -53,9 +53,9 @@ class Chrome(Browser):
         The returned datetimes are timezone-aware with the local timezone set
         by default
 
-        :param bookmark_path : the path of the bookmark file
-        :type bookmark_path : str
-        :return a list of tuples of bookmark information
+        :param bookmark_path: the path of the bookmark file
+        :type bookmark_path: str
+        :return: a list of tuples of bookmark information
         :rtype: list(tuple(:py:class:`datetime.datetime`, str, str, str))
         """
 
@@ -163,9 +163,9 @@ class Firefox(Browser):
         The returned datetimes are timezone-aware with the local timezone set
         by default
 
-        :param bookmark_path : the path of the bookmark file
-        :type bookmark_path : str
-        :return a list of tuples of bookmark information
+        :param bookmark_path: the path of the bookmark file
+        :type bookmark_path: str
+        :return: a list of tuples of bookmark information
         :rtype: list(tuple(:py:class:`datetime.datetime`, str, str, str))
         """
 

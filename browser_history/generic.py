@@ -3,6 +3,7 @@ This module defines the generic base class and the functionality.
 
 All browsers from :py:mod:`browser_history.browsers` inherit this class.
 """
+import abc
 import csv
 import datetime
 import json
@@ -15,7 +16,7 @@ from collections import defaultdict
 from functools import partial
 from io import StringIO
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Tuple, Union
+from typing import Any, Callable, Dict, List, Tuple
 from urllib.parse import urlparse
 
 import browser_history.utils as utils
@@ -24,7 +25,7 @@ HistoryVar = List[Tuple[datetime.datetime, str]]
 BookmarkVar = List[Tuple[datetime.datetime, str, str, str]]
 
 
-class Browser:
+class Browser(abc.ABC):
     """A generic class to support all major browsers with minimal
     configuration.
 
@@ -33,59 +34,88 @@ class Browser:
 
     To create a new browser type, the following class variables must be set.
 
-    * **name**: A name for the browser. Not used anywhere except for logging
-      and errors.
-    * *Paths*: A path string, relative to the home directory, where the
+    * :py:class:`name`
+    * **paths**: A path string, relative to the home directory, where the
       browsers data is saved.
-      This path should be one level above the profile directories if they
-      exist. At least one of the following must be set.
+      At least one of the following must be set:
+      :py:class:`windows_path`, :py:class:`mac_path`, :py:class:`linux_path`
+    * :py:class:`history_file`
+    * :py:class:`history_SQL`
 
-        * **windows_path**: browser path on Windows.
-        * **mac_path**: browser path on Mac OS
-        * **linux_path**: browser path on Linux
+    These following class variable can optionally be set:
 
-    * **profile_support**: (optional) boolean indicating whether
-      the browser supports multiple profiles.
-    * **profile_dir_prefixes**: (optional) list of possible prefixes for the
-      profile directories. Keep empty to check all subdirectories in the
-      browser path.
-    * **history_file**: name of the (SQLite) file which stores the history.
-    * **bookmarks_file**: name of the (SQLite, JSON or PLIST) file which
-      stores the bookmarks
-    * **history_SQL**: SQL query required to extract history from the
-      ``history_file``. The query must return two columns: ``visit_time`` and
-      ``url``. The ``visit_time`` must be processed using the
-      `datetime <https://www.sqlitetutorial.net/sqlite-date-functions/sqlite-datetime-function/>`_  # noqa: E501
-      function with the modifier ``localtime``.
-    * **bookmarks_parser**: a function to parse bookmarks and convert to
-      readable format
-    * **_local_tz**: gets a datetime object of the current time as per the
-      users timezone
+    * :py:class:`bookmarks_file`
+    * :py:class:`bookmarks_parser`
+    * :py:class:`profile_support`
+    * :py:class:`profile_dir_prefixes`
+    * :py:class:`_local_tz`
 
-    :param plat: the current platform. A value of ``None`` means the platform
+    :param plat: the current platform. A value of :py:class:`None` means the platform
        will be inferred from the system.
-    :type plat: :py:class:`browser_history.utils.Platform`
+
+    Examples:
+
+    >>> class CustomBrowser(Browser):
+    ...     name = 'custom browser'
+    ...     history_file = 'history_file'
+    ...     history_SQL = \"\"\"
+    ...         SELECT
+    ...             url
+    ...         FROM
+    ...             history_visits
+    ...     \"\"\"
+    ...     linux_path = 'browser'
+    ...
+    ... vars(CustomBrowser())
+    {'profile_dir_prefixes': [], 'history_dir': PosixPath('/home/username/browser')}
     """
 
-    name = "Generic"
+    windows_path: typing.Optional[str] = None  #: browser path on Windows.
+    mac_path: typing.Optional[str] = None  #: browser path on Mac OS.
+    linux_path: typing.Optional[str] = None  #: browser path on Linux.
 
-    windows_path = None
-    mac_path = None
-    linux_path = None
+    profile_support: bool = False  #: boolean indicating whether
+    """Boolean indicating whether the browser supports multiple profiles."""
 
-    profile_support = False
-    profile_dir_prefixes = []
+    profile_dir_prefixes: typing.Optional[typing.List[typing.Any]] = None
+    """List of possible prefixes for the profile directories.
+    Keep empty to check all subdirectories in the browser path.
+    """
 
-    history_file = None
-    bookmarks_file = None
+    bookmarks_file: typing.Optional[str] = None
+    """Name of the (SQLite, JSON or PLIST) file which stores the bookmarks."""
 
-    history_SQL = None
+    _local_tz: typing.Optional[datetime.tzinfo] = (
+        datetime.datetime.now().astimezone().tzinfo
+    )
+    """Gets a datetime object of the current time as per the users timezone."""
 
-    bookmarks_parser = lambda bookmark_path: None  # noqa: E731
+    history_dir: Path
+    """History directory."""
 
-    _local_tz = datetime.datetime.now().astimezone().tzinfo
+    @property
+    @abc.abstractmethod
+    def name(self) -> str:
+        """A name for the browser. Not used anywhere except for logging and errors."""
 
-    def __init__(self, plat: utils.Platform = None):
+    @property
+    @abc.abstractmethod
+    def history_file(self) -> str:
+        """Name of the (SQLite) file which stores the history."""
+
+    @property
+    @abc.abstractmethod
+    def history_SQL(self) -> str:
+        """SQL query required to extract history from the ``history_file``.
+        The query must return two columns: ``visit_time`` and ``url``.
+        The ``visit_time`` must be processed using the `datetime`_
+        function with the modifier ``localtime``.
+
+            .. _datetime: https://www.sqlitetutorial.net/sqlite-date-functions/sqlite-datetime-function/
+        """  # pylint: disable=line-too-long # noqa: E501
+
+    def __init__(self, plat: typing.Optional[utils.Platform] = None):
+        self.profile_dir_prefixes = []
         if plat is None:
             plat = utils.get_platform()
         homedir = Path.home()
@@ -101,10 +131,15 @@ class Browser:
             assert self.linux_path is not None, error_string.format("Linux")
             self.history_dir = homedir / self.linux_path
         else:
-            self.history_dir = None
+            raise NotImplementedError()
 
         if self.profile_support and not self.profile_dir_prefixes:
             self.profile_dir_prefixes.append("*")
+
+    def bookmarks_parser(
+        self, bookmark_path
+    ):  # pylint: disable=assignment-from-no-return
+        """A function to parse bookmarks and convert to readable format."""
 
     def profiles(self, profile_file) -> typing.List[str]:
         """Returns a list of profile directories. If the browser is supported
@@ -135,7 +170,7 @@ class Browser:
                     profile_dirs.append(path)
         return profile_dirs
 
-    def history_path_profile(self, profile_dir: Path) -> Path:
+    def history_path_profile(self, profile_dir: Path) -> typing.Optional[Path]:
         """Returns path of the history file for the given ``profile_dir``
 
         The ``profile_dir`` should be one of the outputs from
@@ -145,8 +180,9 @@ class Browser:
             relative to ``history_dir``)
         :type profile_dir: :py:class:`pathlib.Path`
         :return: path to history file of the profile
-        :rtype: :py:class:`pathlib.Path`
         """
+        if self.history_file is None:
+            return None
         return self.history_dir / profile_dir / self.history_file
 
     def paths(self, profile_file):
@@ -272,8 +308,7 @@ class Outputs:
     A generic class to encapsulate history and bookmark outputs and to
     easily convert them to JSON, CSV or other formats.
 
-    :param fetch_type: string argument to select history output or
-    bookmarks output
+    :param fetch_type: string argument to select history output or bookmarks output
     """
 
     # type hint for histories and bookmarks have to be manually written for
@@ -306,7 +341,7 @@ class Outputs:
             "jsonl": partial(self.to_json, json_lines=True),
         }
 
-    def sort_domain(self) -> Union[HistoryVar, BookmarkVar]:
+    def sort_domain(self) -> typing.DefaultDict[Any, List[Any]]:
         """
         Returns the history/bookamarks sorted according to the domain-name.
 
@@ -341,7 +376,7 @@ class Outputs:
             ]
          })
         """
-        domain_histories = defaultdict(list)
+        domain_histories: typing.DefaultDict[typing.Any, List[Any]] = defaultdict(list)
         for entry in self.field_map[self.fetch_type]["var"]:
             domain_histories[urlparse(entry[1]).netloc].append(entry)
         return domain_histories
@@ -408,8 +443,8 @@ class Outputs:
         names. If ``json_lines`` flag is `True` convert to JSON Lines format,
         otherwise convert it to Plain JSON format.
 
-        :param json_lines: flag to specify if the json_string should be JSON
-        Lines.
+        :param json_lines: flag to specify if the json_string should be JSON Lines.
+
         :return: string with the output in JSON/JSONL format
 
         Examples:
