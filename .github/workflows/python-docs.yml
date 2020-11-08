@@ -9,7 +9,7 @@ jobs:
     strategy:
       matrix:
         python-version: [3.8]
-        platform: ubuntu-latest
+        platform: [ubuntu-latest]
 
     runs-on: ${{ matrix.platform }}
 
