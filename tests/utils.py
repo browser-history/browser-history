@@ -1,3 +1,4 @@
+from dateutil import tz
 from os import path
 import platform
 from pathlib import Path
@@ -43,3 +44,44 @@ def become_linux(monkeypatch):
     monkeypatch.setattr(platform, "system", lambda: "Linux")
 
     return platform.system()
+
+
+def _detach_timezone_stamp(hist):
+    """Remove the timezone associated with the datetime in a history entry.
+
+    This is so the datetimes can be tested for correctness despite timezone
+    complications. Without removing the timezone stamp, we are comparing
+    objects like the following, where the timezones are equivalent but named
+    differently due to the means of extracting them:
+
+        datetime.datetime(<datetime tuple>, tzinfo=datetime.timezone(
+            datetime.timedelta(seconds=<delta>), 'AEDT'))
+
+        datetime.datetime(<datetime tuple>, tzinfo=tzfile('/etc/localtime')
+
+    but the datetime tuple should be, and is tested to be, the same in
+    both cases.
+    """
+    return (hist[0].replace(tzinfo=None), hist[1])
+
+
+def assert_histories_equal(actual_history, expected_history):
+    """Assert that two histories are equal, accounting for differing timezones.
+
+    Use of any Python standard library timezone-management option, such as:
+
+        datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo
+
+    instead of a dedicated external library, notably here dateutil.tz, would
+    result in failures for certain timezones e.g. 'Europe/London' or
+    'Australia/Melbourne' due to DST effects.
+
+    Note that from Python >= 3.9 it is possible to use a built-in module,
+    zoneinfo (https://docs.python.org/3/library/zoneinfo.html) to achieve
+    timezone awareness. For earlier versions, an external module must be used.
+    """
+    local_timezone = tz.gettz()
+
+    assert _detach_timezone_stamp(actual_history) == _detach_timezone_stamp(
+        (expected_history[0].astimezone(local_timezone), expected_history[1])
+    )
