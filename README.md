@@ -5,19 +5,20 @@
 [![PyPI version](https://badge.fury.io/py/browser-history.svg)](https://badge.fury.io/py/browser-history)
 [![codecov](https://codecov.io/gh/pesos/browser-history/branch/master/graph/badge.svg)](https://codecov.io/gh/pesos/browser-history)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Maintainability](https://api.codeclimate.com/v1/badges/64c86a28b0d7d387ce72/maintainability)](https://codeclimate.com/github/pesos/browser-history/maintainability)
 
-``browser-history`` is a simple, zero-dependencies, developer-friendly python
+`browser-history` is a simple, zero-dependencies, developer-friendly python
 package to retrieve (almost) any browser's history on (almost) any platform.
 
 ## Features
 
- - Supports most **popular browsers**. See [this](https://browser-history.readthedocs.io/en/latest/browsers.html) for a full list.
- - Supports all major platforms - **Windows, Mac and Linux**.
- - A **command-line tool**: simply run `browser-history --help` from your terminal.
- - **History**: browsing history with exact timestamp and URL.
- - **Bookmarks**: browser bookmarks with timestamp, URL, title and folder.
- - Developer friendly: you can add support for new browsers or add a new feature very easily.
- - Fully open source: this project is developed by [PES Open Source](https://github.com/pesos) and will always be open source, with the Apache License.
+- Supports most **popular browsers**. See [this](https://browser-history.readthedocs.io/en/latest/browsers.html) for a full list.
+- Supports all major platforms - **Windows, Mac and Linux**.
+- A **command-line tool**: simply run `browser-history --help` from your terminal.
+- **History**: browsing history with exact timestamp and URL.
+- **Bookmarks**: browser bookmarks with timestamp, URL, title and folder.
+- Developer friendly: you can add support for new browsers or add a new feature very easily.
+- Fully open source: this project is developed by [PES Open Source](https://github.com/pesos) and will always be open source, with the Apache License.
 
 # Quick Start
 
@@ -30,6 +31,7 @@ package to retrieve (almost) any browser's history on (almost) any platform.
 ### History
 
 To get history from all installed browsers:
+
 ```python
 from browser_history import get_history
 
@@ -40,6 +42,7 @@ his = outputs.histories
 ```
 
 If you want history from a specific browser:
+
 ```python
 from browser_history.browsers import Firefox
 
@@ -50,11 +53,12 @@ outputs = f.fetch_history()
 his = outputs.histories
 ```
 
- - `Firefox` in the above snippet can be replaced with any of the [supported browsers](https://browser-history.readthedocs.io/en/latest/browsers.html).
+- `Firefox` in the above snippet can be replaced with any of the [supported browsers](https://browser-history.readthedocs.io/en/latest/browsers.html).
 
 ### Bookmarks
 
 To get bookmarks from all installed browsers:
+
 ```python
 from browser_history import get_bookmarks
 
@@ -65,6 +69,7 @@ bms = outputs.bookmarks
 ```
 
 To get bookmarks from a specific browser:
+
 ```python
 from browser_history.browsers import Firefox
 
