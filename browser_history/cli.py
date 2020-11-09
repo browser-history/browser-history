@@ -9,6 +9,7 @@ from browser_history import (
     generic,
     get_bookmarks,
     get_history,
+    get_cookies,
     utils,
 )
 
@@ -40,7 +41,7 @@ def make_parser():
         "--type",
         default="history",
         help=f"""
-                argument to decide whether to retrieve history or bookmarks.
+                argument to decide whether to retrieve history or bookmarks or cookies.
                 Should be one of {AVAILABLE_TYPES}.
                 Default is history.""",
     )
@@ -49,9 +50,9 @@ def make_parser():
         "--browser",
         default="all",
         help=f"""
-                browser to retrieve history or bookmarks from. Should be one
+                browser to retrieve history or bookmarks or cookies from. Should be one
                 of all, {AVAILABLE_BROWSERS}.
-                Default is all (gets history or bookmarks from all browsers).
+                Default is all (gets history or bookmarks or cookies from all browsers).
                 """,
     )
 
@@ -70,7 +71,8 @@ def make_parser():
         "--output",
         default=None,
         help="""
-                File where history output or bookmark output is to be written.
+                File where history output or bookmark or cookies
+                output is to be written.
                 If not provided, standard output is used.""",
     )
 
@@ -86,10 +88,11 @@ def main():
     It parses arguments from sys.argv and performs the appropriate actions.
     """
     args = parser.parse_args()
-    h_outputs = b_outputs = None
+    h_outputs = b_outputs = c_outputs = None
     fetch_map = {
         "history": {"var": h_outputs, "fun": get_history},
         "bookmarks": {"var": b_outputs, "fun": get_bookmarks},
+        "cookies": {"var": c_outputs, "fun": get_cookies},
     }
 
     if args.type not in fetch_map:
@@ -115,12 +118,12 @@ def main():
                 args.browser,
             )
             sys.exit(1)
-
-        if args.type == "history":
-            fetch_map[args.type]["var"] = browser_class().fetch_history()
-        elif args.type == "bookmarks":
-            fetch_map[args.type]["var"] = browser_class().fetch_bookmarks()
-
+        fetch_map = {
+            "history": {"var": h_outputs, "fun": browser_class().fetch_history},
+            "bookmarks": {"var": b_outputs, "fun": browser_class().fetch_bookmarks},
+            "cookies": {"var": c_outputs, "fun": browser_class().fetch_cookies},
+        }
+        fetch_map[args.type]["var"] = fetch_map[args.type]["fun"]()
     try:
         if args.output is None:
             if args.format == "infer":
