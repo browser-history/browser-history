@@ -3,14 +3,12 @@
 All browsers must inherit from :py:mod:`browser_history.generic.Browser`.
 """
 import datetime
-import json
-import os
 import sqlite3
 
-from browser_history.generic import Browser
+from browser_history.generic import Browser, ChromiumBasedBrowser
 
 
-class Chrome(Browser):
+class Chromium(ChromiumBasedBrowser):
     """Google Chrome Browser
 
     Supported platforms:
@@ -22,77 +20,13 @@ class Chrome(Browser):
     Profile support: Yes
     """
 
-    name = "Chrome"
+    name = "Chromium"
 
-    windows_path = "AppData/Local/Google/Chrome/User Data"
-    mac_path = "Library/Application Support/Google/Chrome/"
-    linux_path = ".config/google-chrome"
-
-    profile_support = True
-    profile_dir_prefixes = ["Default*", "Profile*"]
-
-    history_file = "History"
-    bookmarks_file = "Bookmarks"
-
-    history_SQL = """
-        SELECT
-            datetime(
-                visits.visit_time/1000000-11644473600, 'unixepoch', 'localtime'
-            ) as 'visit_time',
-            urls.url
-        FROM
-            visits INNER JOIN urls ON visits.url = urls.id
-        WHERE
-            visits.visit_duration > 0
-        ORDER BY
-            visit_time DESC
-    """
-
-    def bookmarks_parser(self, bookmark_path):
-        """Returns bookmarks of a single profile for Chrome based browsers
-        The returned datetimes are timezone-aware with the local timezone set
-        by default
-
-        :param bookmark_path: the path of the bookmark file
-        :type bookmark_path: str
-        :return: a list of tuples of bookmark information
-        :rtype: list(tuple(:py:class:`datetime.datetime`, str, str, str))
-        """
-
-        def _deeper(array, folder, bookmarks_list):
-            for node in array:
-                if node["type"] == "url":
-                    d_t = datetime.datetime(1601, 1, 1) + datetime.timedelta(
-                        microseconds=int(node["date_added"])
-                    )
-                    bookmarks_list.append(
-                        (
-                            d_t.replace(microsecond=0, tzinfo=self._local_tz),
-                            node["url"],
-                            node["name"],
-                            folder,
-                        )
-                    )
-                else:
-                    bookmarks_list = _deeper(
-                        node["children"],
-                        folder + os.sep + node["name"],
-                        bookmarks_list,
-                    )
-            return bookmarks_list
-
-        with open(bookmark_path) as b_p:
-            b_m = json.load(b_p)
-            bookmarks_list = []
-            for root in b_m["roots"]:
-                if isinstance(b_m["roots"][root], dict):
-                    bookmarks_list = _deeper(
-                        b_m["roots"][root]["children"], root, bookmarks_list
-                    )
-        return bookmarks_list
+    linux_path = ".config/chromium"
+    windows_path = "AppData/Local/chromium/User Data"
 
 
-class Chromium(Browser):
+class Chrome(ChromiumBasedBrowser):
     """Chromium Browser
 
     Supported platforms (TODO: Mac OS support)
@@ -103,20 +37,11 @@ class Chromium(Browser):
     Profile support: Yes
     """
 
-    name = "Chromium"
+    name = "Chrome"
 
-    linux_path = ".config/chromium"
-    windows_path = "AppData/Local/chromium/User Data"
-
-    profile_support = True
-    profile_dir_prefixes = Chrome.profile_dir_prefixes
-
-    history_file = Chrome.history_file
-    bookmarks_file = Chrome.bookmarks_file
-
-    history_SQL = Chrome.history_SQL
-
-    bookmarks_parser = Chrome.bookmarks_parser
+    windows_path = "AppData/Local/Google/Chrome/User Data"
+    mac_path = "Library/Application Support/Google/Chrome/"
+    linux_path = ".config/google-chrome"
 
 
 class Firefox(Browser):
@@ -236,7 +161,7 @@ class Safari(Browser):
     """
 
 
-class Edge(Browser):
+class Edge(ChromiumBasedBrowser):
     """Microsoft Edge Browser
 
     Supported platforms
@@ -252,18 +177,8 @@ class Edge(Browser):
     windows_path = "AppData/Local/Microsoft/Edge/User Data"
     mac_path = "Library/Application Support/Microsoft Edge"
 
-    profile_support = True
-    profile_dir_prefixes = Chrome.profile_dir_prefixes
 
-    history_file = Chrome.history_file
-    bookmarks_file = Chrome.bookmarks_file
-
-    history_SQL = Chrome.history_SQL
-
-    bookmarks_parser = Chrome.bookmarks_parser
-
-
-class Opera(Browser):
+class Opera(ChromiumBasedBrowser):
     """Opera Browser
 
     Supported platforms
@@ -281,15 +196,8 @@ class Opera(Browser):
 
     profile_support = False
 
-    history_file = Chrome.history_file
-    bookmarks_file = Chrome.bookmarks_file
 
-    history_SQL = Chrome.history_SQL
-
-    bookmarks_parser = Chrome.bookmarks_parser
-
-
-class OperaGX(Browser):
+class OperaGX(ChromiumBasedBrowser):
     """Opera GX Browser
 
     Supported platforms
@@ -305,15 +213,8 @@ class OperaGX(Browser):
 
     profile_support = False
 
-    history_file = Chrome.history_file
-    bookmarks_file = Chrome.bookmarks_file
 
-    history_SQL = Chrome.history_SQL
-
-    bookmarks_parser = Chrome.bookmarks_parser
-
-
-class Brave(Browser):
+class Brave(ChromiumBasedBrowser):
     """Brave Browser
 
     Supported platforms:
@@ -328,13 +229,3 @@ class Brave(Browser):
 
     linux_path = ".config/BraveSoftware/Brave-Browser"
     mac_path = "Library/Application Support/BraveSoftware/Brave-Browser"
-
-    profile_support = True
-    profile_dir_prefixes = Chrome.profile_dir_prefixes
-
-    history_file = Chrome.history_file
-    bookmarks_file = Chrome.bookmarks_file
-
-    history_SQL = Chrome.history_SQL
-
-    bookmarks_parser = Chrome.bookmarks_parser
