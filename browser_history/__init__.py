@@ -1,4 +1,30 @@
+import inspect
 from . import browsers, generic, utils  # noqa: F401
+
+
+def get_browsers():
+    """This method provides a list of all browsers implemented by
+    browser_history.
+
+    :return: A :py:class:`list` containing implemented browser classes
+        all inheriting from the super class
+        :py:class:`browser_history.generic.Browser`
+
+    :rtype: :py:class:`list`
+    """
+
+    # recursively get all concrete subclasses
+    def get_subclasses(browser):
+        # include browser itself in return list if it is concrete
+        sub_classes = []
+        if not inspect.isabstract(browser):
+            sub_classes.append(browser)
+
+        for sub_class in browser.__subclasses__():
+            sub_classes.extend(get_subclasses(sub_class))
+        return sub_classes
+
+    return get_subclasses(generic.Browser)
 
 
 def get_history():
@@ -12,8 +38,8 @@ def get_history():
     :rtype: :py:class:`browser_history.generic.Outputs`
     """
     output_object = generic.Outputs(fetch_type="history")
-    subclasses = generic.Browser.__subclasses__()
-    for browser_class in subclasses:
+    browser_classes = get_browsers()
+    for browser_class in browser_classes:
         try:
             browser_object = browser_class()
             browser_output_object = browser_object.fetch_history()
@@ -35,7 +61,7 @@ def get_bookmarks():
     :rtype: :py:class:`browser_history.generic.Outputs`
     """
     output_object = generic.Outputs(fetch_type="bookmarks")
-    subclasses = generic.Browser.__subclasses__()
+    subclasses = get_browsers()
     for browser_class in subclasses:
         try:
             browser_object = browser_class()

@@ -8,12 +8,13 @@ from browser_history import (
     browsers,
     generic,
     get_bookmarks,
+    get_browsers,
     get_history,
     utils,
 )
 
 # get list of all implemented browser by finding subclasses of generic.Browser
-AVAILABLE_BROWSERS = ", ".join(b.__name__ for b in generic.Browser.__subclasses__())
+AVAILABLE_BROWSERS = ", ".join(b.__name__ for b in get_browsers())
 AVAILABLE_FORMATS = ", ".join(generic.Outputs(fetch_type=None).format_map.keys())
 AVAILABLE_TYPES = ", ".join(generic.Outputs(fetch_type=None).field_map.keys())
 
@@ -104,7 +105,7 @@ def main():
         try:
             # gets browser class by name (string).
             selected_browser = args.browser
-            for browser in generic.Browser.__subclasses__():
+            for browser in get_browsers():
                 if browser.__name__.lower() == args.browser.lower():
                     selected_browser = browser.__name__
                     break
