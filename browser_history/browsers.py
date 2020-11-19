@@ -9,13 +9,12 @@ from browser_history.generic import Browser, ChromiumBasedBrowser
 
 
 class Chromium(ChromiumBasedBrowser):
-    """Google Chrome Browser
+    """Chromium Browser
 
-    Supported platforms:
+    Supported platforms (TODO: Mac OS support)
 
-    * Windows
     * Linux
-    * Mac OS
+    * Windows
 
     Profile support: Yes
     """
@@ -27,12 +26,13 @@ class Chromium(ChromiumBasedBrowser):
 
 
 class Chrome(ChromiumBasedBrowser):
-    """Chromium Browser
+    """Google Chrome Browser
 
-    Supported platforms (TODO: Mac OS support)
+    Supported platforms:
 
-    * Linux
     * Windows
+    * Linux
+    * Mac OS
 
     Profile support: Yes
     """
