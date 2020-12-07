@@ -31,7 +31,6 @@ INVALID_CMD_OPTS = [
 VALID_TYPE_ARGS = [
     "history",
     "bookmarks",
-    # "all",  # Note: this is only commented out because there is a bug!
 ]
 VALID_BROWSER_ARGS = [
     "all",
@@ -128,8 +127,9 @@ def test_format_argument():
     # Sniffer determines format, less intensive than reading in csv.reader
     # and we don't mind the CSV dialect, so just check call doesn't error
     read_csv = csv.Sniffer()
+    # This gives '_csv.Error: Could not determine delimiter' if not a csv file
     read_csv.sniff(csv_output, delimiters=",")
-    read_csv.has_header(csv_output)
+    assert read_csv.has_header(csv_output)
 
     for fmt_opt in VALID_CMD_OPTS[3]:
         for fmt_arg in VALID_FORMAT_ARGS:
@@ -137,8 +137,8 @@ def test_format_argument():
                 "utf-8"
             )
             if fmt_arg in ("csv", "infer"):  # infer gives csv if no file
-                csv.Sniffer().sniff(output, delimiters=",")
-                csv.Sniffer().has_header(output)
+                read_csv.sniff(output, delimiters=",")
+                assert read_csv.has_header(output)
                 assert CSV_HISTORY_HEADER in output
             elif fmt_arg == "json":
                 assert output.startswith(HISTORY_TITLE)
@@ -155,7 +155,7 @@ def test_format_argument():
 def test_output_argument():
     """Test arguments for the output option."""
     for output_opt in VALID_CMD_OPTS[4]:
-        with tempfile.NamedTemporaryFile(suffix=".csv", delete=False) as f:
+        with tempfile.NamedTemporaryFile(suffix=".csv") as f:
             output = subprocess.check_output([CMD_ROOT, output_opt, f.name])
             # Check output was not sent to STDOUT since should go to file
             assert HISTORY_HEADER not in output.decode("utf-8")
@@ -182,9 +182,9 @@ def test_argument_combinations():
         assert not chrome_bookmarks_output.startswith(HISTORY_TITLE)
         read_csv = csv.Sniffer()
         read_csv.sniff(chrome_bookmarks_output, delimiters=",")
-        read_csv.has_header(chrome_bookmarks_output)
+        assert read_csv.has_header(chrome_bookmarks_output)
 
-        with tempfile.NamedTemporaryFile(suffix=".csv", delete=False) as f:
+        with tempfile.NamedTemporaryFile(suffix=".csv") as f:
             # This command should write to the given output file:
             subprocess.check_output(
                 [
