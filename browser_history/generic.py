@@ -530,21 +530,12 @@ class Outputs:
 class ChromiumBasedBrowser(Browser, abc.ABC):
     """A generic class to support the increasing number of Chromium based
     browsers.
-
-    .. note::
-
-        This generic class assumes all chromium based browsers support
-        profiles but that may not be the case. Ensure :py:attr:`profile_support`
-        is overridden correctly if so.
-
     """
 
     profile_dir_prefixes = ["Default*", "Profile*"]
 
     history_file = "History"
     bookmarks_file = "Bookmarks"
-
-    profile_support = True
 
     history_SQL = """
             SELECT
