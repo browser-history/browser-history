@@ -24,6 +24,8 @@ class Chromium(ChromiumBasedBrowser):
     linux_path = ".config/chromium"
     windows_path = "AppData/Local/chromium/User Data"
 
+    profile_support = True
+
 
 class Chrome(ChromiumBasedBrowser):
     """Google Chrome Browser
@@ -42,6 +44,8 @@ class Chrome(ChromiumBasedBrowser):
     windows_path = "AppData/Local/Google/Chrome/User Data"
     mac_path = "Library/Application Support/Google/Chrome/"
     linux_path = ".config/google-chrome"
+
+    profile_support = True
 
 
 class Firefox(Browser):
@@ -177,6 +181,8 @@ class Edge(ChromiumBasedBrowser):
     windows_path = "AppData/Local/Microsoft/Edge/User Data"
     mac_path = "Library/Application Support/Microsoft Edge"
 
+    profile_support = True
+
 
 class Opera(ChromiumBasedBrowser):
     """Opera Browser
@@ -229,3 +235,5 @@ class Brave(ChromiumBasedBrowser):
 
     linux_path = ".config/BraveSoftware/Brave-Browser"
     mac_path = "Library/Application Support/BraveSoftware/Brave-Browser"
+
+    profile_support = True
