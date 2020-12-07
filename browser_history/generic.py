@@ -23,6 +23,16 @@ import browser_history.utils as utils
 
 HistoryVar = List[Tuple[datetime.datetime, str]]
 BookmarkVar = List[Tuple[datetime.datetime, str, str, str]]
+CookiesVar = List[
+    Tuple[
+        str,
+        str,
+        datetime.datetime,
+        str,
+        str,
+        str,
+    ]
+]
 
 
 class Browser(abc.ABC):
@@ -46,6 +56,9 @@ class Browser(abc.ABC):
 
     * :py:class:`bookmarks_file`
     * :py:class:`bookmarks_parser`
+    * :py:class:`cookies_file`
+    * :py:class:`cookies_parser`
+    * :py:class:`cookies_sql`
     * :py:class:`profile_support`
     * :py:class:`profile_dir_prefixes`
     * :py:class:`_local_tz`
@@ -84,6 +97,12 @@ class Browser(abc.ABC):
 
     bookmarks_file: typing.Optional[str] = None
     """Name of the (SQLite, JSON or PLIST) file which stores the bookmarks."""
+
+    cookies_file: typing.Optional[str] = None
+    """Name of the (SQLite) file which stores the cookies"""
+
+    cookies_SQL: typing.Optional[str] = None
+    """ SQL code to parse to get cookie data"""
 
     _local_tz: typing.Optional[datetime.tzinfo] = (
         datetime.datetime.now().astimezone().tzinfo
@@ -140,6 +159,9 @@ class Browser(abc.ABC):
         self, bookmark_path
     ):  # pylint: disable=assignment-from-no-return
         """A function to parse bookmarks and convert to readable format."""
+
+    def cookies_parser(self, cookie):  # pylint: disable=assignment-from-no-return
+        """A function to parse cookies and convert to readable format."""
 
     def profiles(self, profile_file) -> typing.List[str]:
         """Returns a list of profile directories. If the browser is supported
@@ -302,13 +324,74 @@ class Browser(abc.ABC):
                 output_object.bookmarks.sort(reverse=desc)
         return output_object
 
+    def fetch_cookies(self, cookies_paths=None, sort=True, desc=False):
+        """Returns cookies of all available profiles stored in SQL.
+        The returned datetimes are timezone-aware with the local timezone set
+        by default.
+        The cookies files are first copied to a temporary location and then
+        queried, this might lead to some additional overhead and results
+        returned might not be the latest if the browser is in use. This is
+        done because the SQlite files are locked by the browser when in use.
+        :param cookies_paths: (optional) a list of cookie files.
+        :type cookies_paths: list(:py:class:`pathlib.Path`)
+        :param sort: (optional) flag to specify if the output should be
+            sorted. Default value set to True.
+        :type sort: boolean
+        :param desc: (optional)  flag to specify asc/desc
+            (Applicable if sort is True) Default value set to False.
+        :type asc: boolean
+        :return: Object of class :py:class:`browser_history.generic.Outputs`
+            with the data member cookies set to
+            list(tuple(:py:class: str, str, str, `datetime.datetime`, str, str)).
+            If the browser is not installed, this object will be empty.
+        :rtype: :py:class:`browser_history.generic.Outputs`
+        """
+        if cookies_paths is None:
+            cookies_paths = self.paths(profile_file=self.cookies_file)
+        output_object = Outputs(fetch_type="cookies")
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            for cookies_path in cookies_paths:
+                copied_cookies_path = shutil.copy2(cookies_path.absolute(), tmpdirname)
+                conn = sqlite3.connect(f"file:{copied_cookies_path}?mode=ro", uri=True)
+                cursor = conn.cursor()
+                cursor.execute(self.cookies_SQL)
+                cookies = [
+                    {
+                        "name": name,
+                        "url": host + path,
+                        "encrypted_value": e_value,
+                        "value": value,
+                        "expiry": d,
+                        "isSecure": "Secure" if isSecure == 1 else "Not Secure",
+                        "isHTTP": "HTTP" if isHttpsOnly == 1 else "Not HTTP",
+                    }
+                    for (
+                        name,
+                        host,
+                        path,
+                        e_value,
+                        value,
+                        d,
+                        isSecure,
+                        isHttpsOnly,
+                    ) in cursor.fetchall()
+                ]
+                date_cookies = []
+                for cookie in cookies:
+                    date_cookies.append(self.cookies_parser(cookie))
+                output_object.cookies.extend(date_cookies)
+                if sort:
+                    output_object.cookies.sort(reverse=desc)
+                conn.close()
+        return output_object
+
 
 class Outputs:
     """
-    A generic class to encapsulate history and bookmark outputs and to
+    A generic class to encapsulate history, bookmark and cookie outputs and to
     easily convert them to JSON, CSV or other formats.
-
-    :param fetch_type: string argument to select history output or bookmarks output
+    :param fetch_type: string argument to select history,
+    bookmarks or cookies
     """
 
     # type hint for histories and bookmarks have to be manually written for
@@ -316,6 +399,8 @@ class Outputs:
     histories: List[Tuple[datetime.datetime, str]]  #: List of tuples of Timestamp & URL
     bookmarks: List[Tuple[datetime.datetime, str, str, str]]
     """List of tuples of Timestamp, URL, Title, Folder."""
+    cookies: List[Tuple[str, str, str, datetime.datetime, str, str]]
+    """List of tuples of Name, URL, cookie value, expiry_date, isSecure, isHTTPOnly"""
 
     field_map: Dict[str, Dict[str, Any]]
     """Dictionary which maps fetch_type to the respective variables and
@@ -326,13 +411,27 @@ class Outputs:
 
     def __init__(self, fetch_type):
         self.fetch_type = fetch_type
+
         self.histories = []
         self.bookmarks = []
+        self.cookies = []
+
         self.field_map = {
             "history": {"var": self.histories, "fields": ("Timestamp", "URL")},
             "bookmarks": {
                 "var": self.bookmarks,
                 "fields": ("Timestamp", "URL", "Title", "Folder"),
+            },
+            "cookies": {
+                "var": self.cookies,
+                "fields": (
+                    "Name",
+                    "URL",
+                    "Cookie_Value",
+                    "Expiry_date",
+                    "IsSecure",
+                    "IsHTTP",
+                ),
             },
         }
         self.format_map = {

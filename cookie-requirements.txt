@@ -1,0 +1,4 @@
+keyring; sys_platform == "darwin" or sys_platform == "linux" or sys_platform == "linux2"
+pbkdf2; sys_platform == "darwin" or sys_platform == "linux" or sys_platform == "linux2"
+pyaes; sys_platform == "linux" or sys_platform == "linux2"
+pypiwin32; sys_platform == "win32"

@@ -48,3 +48,29 @@ def get_bookmarks():
             utils.logger.info("%s", e)
     output_object.bookmarks.sort()
     return output_object
+
+
+def get_cookies():
+    """This method is used to obtain browser cookies of all available and
+    supported browsers for the system platform.
+
+    :return: Object of class :py:class:`browser_history.generic.Outputs` with
+        the data member cookies set to
+        list(tuple(:py:class: str, str, str, `datetime.datetime`, str, str))
+
+    :rtype: :py:class:`browser_history.generic.Outputs`
+    """
+    output_object = generic.Outputs(fetch_type="cookies")
+    subclasses = generic.Browser.__subclasses__()
+    for browser_class in subclasses:
+        try:
+            browser_object = browser_class()
+            assert (
+                browser_object.bookmarks_file is not None
+            ), f"Cookies are not supported on {browser_class.name}"
+            browser_output_object = browser_object.fetch_cookies()
+            output_object.cookies.extend(browser_output_object.cookies)
+        except AssertionError as e:
+            utils.logger.info("%s", e)
+    output_object.cookies.sort()
+    return output_object

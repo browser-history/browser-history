@@ -6,8 +6,25 @@ import datetime
 import json
 import os
 import sqlite3
-
 from browser_history.generic import Browser
+import browser_history.utils as utils
+
+try:
+    EXC = None
+    if utils.get_platform() == utils.Platform.WINDOWS:
+        import win32crypt
+    else:
+        import keyring
+        from pbkdf2 import PBKDF2
+
+        if utils.get_platform() == utils.Platform.LINUX:
+            import pyaes
+            import gi
+
+            gi.require_version("Secret", "1")
+            from gi.repository import Secret
+except ImportError as i_exc:
+    EXC = i_exc
 
 
 class Chrome(Browser):
@@ -33,6 +50,7 @@ class Chrome(Browser):
 
     history_file = "History"
     bookmarks_file = "Bookmarks"
+    cookies_file = "Cookies"
 
     history_SQL = """
         SELECT
@@ -47,15 +65,25 @@ class Chrome(Browser):
         ORDER BY
             visit_time DESC
     """
+    cookies_SQL = """
+            SELECT
+                name, host_key, path, encrypted_value, value,
+                datetime(
+                    expires_utc/1000000-11644473600, 'unixepoch', 'localtime'
+                ) as 'expiry_date',
+                is_secure, is_httponly
+            FROM
+                cookies
+        """
 
     def bookmarks_parser(self, bookmark_path):
         """Returns bookmarks of a single profile for Chrome based browsers
         The returned datetimes are timezone-aware with the local timezone set
         by default
 
-        :param bookmark_path: the path of the bookmark file
-        :type bookmark_path: str
-        :return: a list of tuples of bookmark information
+        :param bookmark_path : the path of the bookmark file
+        :type bookmark_path : str
+        :return a list of tuples of bookmark information
         :rtype: list(tuple(:py:class:`datetime.datetime`, str, str, str))
         """
 
@@ -91,6 +119,83 @@ class Chrome(Browser):
                     )
         return bookmarks_list
 
+    def cookies_parser(self, cookie):
+
+        """Returns cookies of a single input for Chrome based browsers
+        The returned datetimes are timezone-aware with the local timezone set
+        by default
+
+        :param cookie : dictionary containing cookie details
+        :type cookie : dict
+        :return a tuple of cookie information
+        :rtype: list(tuple(:py:class: str, str, `datetime.datetime`, str, str, str))
+        """
+        platform = utils.get_platform()
+        if EXC is not None:
+            logger_map = {
+                utils.Platform.LINUX: "'keyring', 'pbkdf2', 'pyaes', 'gi'. ",
+                utils.Platform.WINDOWS: "win32crypt. ",
+                utils.Platform.MAC: "'keyring', 'pbkdf2'. ",
+            }
+            utils.logger.info(
+                "%s",
+                "Module Not Found: "
+                + "The following packages are required for retrieving"
+                + " cookies on Chrome-based browsers:"
+                + logger_map[platform],
+            )
+            raise ModuleNotFoundError(EXC)
+        if platform != utils.Platform.WINDOWS:
+            if platform == utils.Platform.LINUX:
+                my_pass = None
+                flags = Secret.ServiceFlags.LOAD_COLLECTIONS
+                service = Secret.Service.get_sync(flags)
+                gnome_keyring = service.get_collections()
+                unlocked_keyrings = service.unlock_sync(gnome_keyring).unlocked
+                keyring_name = "{} Safe Storage".format(self.name.capitalize())
+                for unlocked_keyring in unlocked_keyrings:
+                    for item in unlocked_keyring.get_items():
+                        if item.get_label() == keyring_name:
+                            item.load_secret_sync()
+                            my_pass = item.get_secret().get_text()
+                            break
+                        if my_pass:
+                            break
+                if not my_pass:
+                    my_pass = my_pass = keyring.get_password(
+                        "{} Keys".format(self.name), "{} Safe Storage".format(self.name)
+                    )
+                key = PBKDF2(my_pass, b"saltysalt", iterations=1).read(16)
+
+            elif platform == utils.Platform.MAC:
+                my_pass = keyring.get_password("Chrome Safe Storage", "Chrome").encode(
+                    "utf8"
+                )
+                key = PBKDF2(my_pass, b"saltysalt", iterations=1003).read(16)
+
+            if cookie["value"] or cookie["encrypted_value"][:3] not in [b"v11", b"v10"]:
+                cookie["encrypted_value"] = cookie["value"]
+            else:
+                cookie["encrypted_value"] = cookie["encrypted_value"][3:]
+                cipher = pyaes.Decrypter(pyaes.AESModeOfOperationCBC(key, b" " * 16))
+                decrypted = cipher.feed(
+                    cookie["encrypted_value"][: int(len(cookie["encrypted_value"]) / 2)]
+                )
+                decrypted += cipher.feed(
+                    cookie["encrypted_value"][int(len(cookie["encrypted_value"]) / 2) :]
+                )
+                decrypted += cipher.feed()
+                cookie["encrypted_value"] = decrypted.decode("utf-8")
+        else:
+            cookie["encrypted_value"] = win32crypt.CryptUnprotectData(
+                cookie["encrypted_value"], None, None, None, 0
+            )[1].decode("utf-8")
+        del cookie["value"]
+        cookie["expiry"] = datetime.datetime.strptime(
+            cookie["expiry"], "%Y-%m-%d %H:%M:%S"
+        ).replace(tzinfo=self._local_tz)
+        return tuple(cookie.values())
+
 
 class Chromium(Browser):
     """Chromium Browser
@@ -113,10 +218,13 @@ class Chromium(Browser):
 
     history_file = Chrome.history_file
     bookmarks_file = Chrome.bookmarks_file
+    cookies_file = Chrome.cookies_file
 
     history_SQL = Chrome.history_SQL
+    cookies_SQL = Chrome.cookies_SQL
 
     bookmarks_parser = Chrome.bookmarks_parser
+    cookies_parser = Chrome.cookies_parser
 
 
 class Firefox(Browser):
@@ -141,6 +249,7 @@ class Firefox(Browser):
 
     history_file = "places.sqlite"
     bookmarks_file = "places.sqlite"
+    cookies_file = "cookies.sqlite"
 
     history_SQL = """
         SELECT
@@ -158,14 +267,21 @@ class Firefox(Browser):
             visit_date IS NOT NULL AND url LIKE 'http%' AND title IS NOT NULL
     """
 
+    cookies_SQL = """
+        SELECT
+            name, host, path, value, value, expiry, isSecure, isHttpOnly
+        FROM
+            moz_cookies
+    """
+
     def bookmarks_parser(self, bookmark_path):
         """Returns bookmarks of a single profile for Firefox based browsers
         The returned datetimes are timezone-aware with the local timezone set
         by default
 
-        :param bookmark_path: the path of the bookmark file
-        :type bookmark_path: str
-        :return: a list of tuples of bookmark information
+        :param bookmark_path : the path of the bookmark file
+        :type bookmark_path : str
+        :return a list of tuples of bookmark information
         :rtype: list(tuple(:py:class:`datetime.datetime`, str, str, str))
         """
 
@@ -199,6 +315,25 @@ class Firefox(Browser):
             for d, url, title, folder in cursor.fetchall()
         ]
         return date_bookmarks
+
+    def cookies_parser(self, cookie):
+        """Returns cookies of a single input for Chrome based browsers
+        The returned datetimes are timezone-aware with the local timezone set
+        by default
+
+        :param cookie : dictionary containing cookie details
+        :type cookie : dict
+        :return a tuple of cookie information
+        :rtype: list(tuple(:py:class: str, str, `datetime.datetime`, str, str, str))
+        """
+        cookie["expiry"] = datetime.datetime.utcfromtimestamp(
+            cookie["expiry"]
+        ).strftime("%Y-%m-%d %H:%M:%S")
+        cookie["expiry"] = datetime.datetime.strptime(
+            cookie["expiry"], "%Y-%m-%d %H:%M:%S"
+        ).replace(tzinfo=self._local_tz)
+        del cookie["value"]
+        return tuple(cookie.values())
 
 
 class Safari(Browser):
@@ -257,10 +392,13 @@ class Edge(Browser):
 
     history_file = Chrome.history_file
     bookmarks_file = Chrome.bookmarks_file
+    cookies_file = Chrome.cookies_file
 
     history_SQL = Chrome.history_SQL
+    cookies_SQL = Chrome.cookies_SQL
 
     bookmarks_parser = Chrome.bookmarks_parser
+    cookies_parser = Chrome.cookies_parser
 
 
 class Opera(Browser):
@@ -283,10 +421,13 @@ class Opera(Browser):
 
     history_file = Chrome.history_file
     bookmarks_file = Chrome.bookmarks_file
+    cookies_file = Chrome.cookies_file
 
     history_SQL = Chrome.history_SQL
+    cookies_SQL = Chrome.cookies_SQL
 
     bookmarks_parser = Chrome.bookmarks_parser
+    cookies_parser = Chrome.cookies_parser
 
 
 class OperaGX(Browser):
@@ -309,8 +450,10 @@ class OperaGX(Browser):
     bookmarks_file = Chrome.bookmarks_file
 
     history_SQL = Chrome.history_SQL
+    cookies_SQL = Chrome.cookies_SQL
 
     bookmarks_parser = Chrome.bookmarks_parser
+    cookies_parser = Chrome.cookies_parser
 
 
 class Brave(Browser):
@@ -334,7 +477,10 @@ class Brave(Browser):
 
     history_file = Chrome.history_file
     bookmarks_file = Chrome.bookmarks_file
+    cookies_file = Chrome.cookies_file
 
     history_SQL = Chrome.history_SQL
+    cookies_SQL = Chrome.cookies_SQL
 
     bookmarks_parser = Chrome.bookmarks_parser
+    cookies_parser = Chrome.cookies_parser
