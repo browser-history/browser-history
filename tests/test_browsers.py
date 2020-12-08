@@ -346,3 +346,67 @@ def test_opera_windows(become_windows, change_homedir):  # noqa: F811
         ),
     )
     assert len(o.profiles(o.history_file)) == 1
+
+
+def test_brave_windows(become_windows, change_homedir):  # noqa: F811
+    """Test history is correct on Brave for Windows"""
+    f = browser_history.browsers.Brave()
+    output = f.fetch_history()
+    his = output.histories
+    assert len(his) == 4
+    profs = f.profiles(f.history_file)
+    assert len(profs) == 2
+    # check first and last item to ensure both profiles are searched
+    assert_histories_equal(
+        his[0],
+        (
+            datetime.datetime(
+                2020,
+                12,
+                7,
+                21,
+                58,
+                11,
+                tzinfo=datetime.timezone(
+                    datetime.timedelta(seconds=10800), "E. Africa Standard Time"
+                ),
+            ),
+            "https://github.com/",
+        ),
+    )
+    assert_histories_equal(
+        his[-1],
+        (
+            datetime.datetime(
+                2020,
+                12,
+                7,
+                22,
+                1,
+                29,
+                tzinfo=datetime.timezone(
+                    datetime.timedelta(seconds=10800), "E. Africa Standard Time"
+                ),
+            ),
+            "https://stackoverflow.com/",
+        ),
+    )
+    # get history for second profile
+    his = f.history_profiles(["Profile 2"]).histories
+    assert_histories_equal(
+        his[0],
+        (
+            datetime.datetime(
+                2020,
+                12,
+                7,
+                22,
+                0,
+                40,
+                tzinfo=datetime.timezone(
+                    datetime.timedelta(seconds=10800), "E. Africa Standard Time"
+                ),
+            ),
+            "https://www.reddit.com/",
+        ),
+    )
