@@ -19,8 +19,8 @@ sys.path.insert(0, os.path.abspath(".."))
 # -- Project information -----------------------------------------------------
 
 project = "browser-history"
-copyright = "2020, Samyak S Sarnayak"
-author = "Samyak S Sarnayak"
+copyright = "2020, Samyak Sarnayak"
+author = "Samyak Sarnayak"
 
 # The full version, including alpha/beta/rc tags
 release = "0.2.1"

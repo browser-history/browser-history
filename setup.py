@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 setuptools.setup(
     name="browser-history",  # Replace with your own username
     version="0.2.1",
-    author="Samyak S Sarnayak",
+    author="Samyak Sarnayak",
     author_email="samyak201@gmail.com",
     description="A python module to extract browser history",
     long_description=long_description,
