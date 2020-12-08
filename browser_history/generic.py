@@ -525,3 +525,71 @@ class Outputs:
 
         with open(filename, "w") as out_file:
             out_file.write(self.formatted(output_format))
+
+
+class ChromiumBasedBrowser(Browser, abc.ABC):
+    """A generic class to support the increasing number of Chromium based
+    browsers.
+    """
+
+    profile_dir_prefixes = ["Default*", "Profile*"]
+
+    history_file = "History"
+    bookmarks_file = "Bookmarks"
+
+    history_SQL = """
+            SELECT
+                datetime(
+                    visits.visit_time/1000000-11644473600, 'unixepoch', 'localtime'
+                ) as 'visit_time',
+                urls.url
+            FROM
+                visits INNER JOIN urls ON visits.url = urls.id
+            WHERE
+                visits.visit_duration > 0
+            ORDER BY
+                visit_time DESC
+        """
+
+    def bookmarks_parser(self, bookmark_path):
+        """Returns bookmarks of a single profile for Chrome based browsers
+        The returned datetimes are timezone-aware with the local timezone set
+        by default
+
+        :param bookmark_path: the path of the bookmark file
+        :type bookmark_path: str
+        :return: a list of tuples of bookmark information
+        :rtype: list(tuple(:py:class:`datetime.datetime`, str, str, str))
+        """
+
+        def _deeper(array, folder, bookmarks_list):
+            for node in array:
+                if node["type"] == "url":
+                    d_t = datetime.datetime(1601, 1, 1) + datetime.timedelta(
+                        microseconds=int(node["date_added"])
+                    )
+                    bookmarks_list.append(
+                        (
+                            d_t.replace(microsecond=0, tzinfo=self._local_tz),
+                            node["url"],
+                            node["name"],
+                            folder,
+                        )
+                    )
+                else:
+                    bookmarks_list = _deeper(
+                        node["children"],
+                        folder + os.sep + node["name"],
+                        bookmarks_list,
+                    )
+            return bookmarks_list
+
+        with open(bookmark_path) as b_p:
+            b_m = json.load(b_p)
+            bookmarks_list = []
+            for root in b_m["roots"]:
+                if isinstance(b_m["roots"][root], dict):
+                    bookmarks_list = _deeper(
+                        b_m["roots"][root]["children"], root, bookmarks_list
+                    )
+        return bookmarks_list
