@@ -227,6 +227,7 @@ class Brave(ChromiumBasedBrowser):
 
     * Linux
     * Mac OS
+    * Windows
 
     Profile support: Yes
     """
@@ -235,5 +236,6 @@ class Brave(ChromiumBasedBrowser):
 
     linux_path = ".config/BraveSoftware/Brave-Browser"
     mac_path = "Library/Application Support/BraveSoftware/Brave-Browser"
+    windows_path = "AppData/Local/BraveSoftware/Brave-Browser/User Data"
 
     profile_support = True
