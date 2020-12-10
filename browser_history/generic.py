@@ -562,25 +562,32 @@ class ChromiumBasedBrowser(Browser, abc.ABC):
         :rtype: list(tuple(:py:class:`datetime.datetime`, str, str, str))
         """
 
-        def _deeper(array, folder, bookmarks_list):
-            for node in array:
-                if node["type"] == "url":
-                    d_t = datetime.datetime(1601, 1, 1) + datetime.timedelta(
-                        microseconds=int(node["date_added"])
-                    )
-                    bookmarks_list.append(
-                        (
-                            d_t.replace(microsecond=0, tzinfo=self._local_tz),
-                            node["url"],
-                            node["name"],
-                            folder,
-                        )
-                    )
+        def _deeper(bookmarks_json, folder, bookmarks_list):
+            for node in bookmarks_json:
+                if node == "children":
+                    for child in bookmarks_json[node]:
+                        if child["type"] == "url":
+                            d_t = datetime.datetime(1601, 1, 1) + datetime.timedelta(
+                                microseconds=int(child["date_added"])
+                            )
+                            bookmarks_list.append(
+                                (
+                                    d_t.replace(microsecond=0, tzinfo=self._local_tz),
+                                    child["url"],
+                                    child["name"],
+                                    folder,
+                                )
+                            )
+                        else:
+                            bookmarks_list = _deeper(
+                                child,
+                                folder + os.sep + child["name"],
+                                bookmarks_list,
+                            )
+                    break
                 else:
                     bookmarks_list = _deeper(
-                        node["children"],
-                        folder + os.sep + node["name"],
-                        bookmarks_list,
+                        bookmarks_json[node], folder, bookmarks_list
                     )
             return bookmarks_list
 
@@ -589,7 +596,5 @@ class ChromiumBasedBrowser(Browser, abc.ABC):
             bookmarks_list = []
             for root in b_m["roots"]:
                 if isinstance(b_m["roots"][root], dict):
-                    bookmarks_list = _deeper(
-                        b_m["roots"][root]["children"], root, bookmarks_list
-                    )
+                    bookmarks_list = _deeper(b_m["roots"][root], root, bookmarks_list)
         return bookmarks_list
