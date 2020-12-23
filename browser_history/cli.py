@@ -87,10 +87,10 @@ def main():
     It parses arguments from sys.argv and performs the appropriate actions.
     """
     args = parser.parse_args()
-    h_outputs = b_outputs = None
+    outputs = None
     fetch_map = {
-        "history": {"var": h_outputs, "fun": get_history},
-        "bookmarks": {"var": b_outputs, "fun": get_bookmarks},
+        "history": get_history,
+        "bookmarks": get_bookmarks,
     }
 
     if args.type not in fetch_map:
@@ -100,7 +100,7 @@ def main():
         sys.exit(1)
 
     if args.browser == "all":
-        fetch_map[args.type]["var"] = fetch_map[args.type]["fun"]()
+        outputs = fetch_map[args.type]()
     else:
         try:
             # gets browser class by name (string).
@@ -118,18 +118,18 @@ def main():
             sys.exit(1)
 
         if args.type == "history":
-            fetch_map[args.type]["var"] = browser_class().fetch_history()
+            outputs = browser_class().fetch_history()
         elif args.type == "bookmarks":
-            fetch_map[args.type]["var"] = browser_class().fetch_bookmarks()
+            outputs = browser_class().fetch_bookmarks()
 
     try:
         if args.output is None:
             if args.format == "infer":
                 args.format = "csv"
             print(args.type + ":")
-            print(fetch_map[args.type]["var"].formatted(args.format))
+            print(outputs.formatted(args.format))
         elif args.output is not None:
-            fetch_map[args.type]["var"].save(args.output, args.format)
+            outputs.save(args.output, args.format)
 
     except ValueError as e:
         utils.logger.error(e)
