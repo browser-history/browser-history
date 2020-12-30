@@ -12,7 +12,7 @@ package to retrieve (almost) any browser's history on (almost) any platform.
 
 ## NOTE - The features and quickstart here are for the master branch, which has many breaking changes.
 
-Some of the code in this README might not work if you have just `pip install`ed the project. Latest docs can be found in the `release` branch.
+Some of the code in this README might not work if you have just `pip install`ed the project. The docs for the latest release can be found [here](https://browser-history.readthedocs.io/en/stable/).
 
 
 
