@@ -10,7 +10,7 @@
 ``browser-history`` is a simple, zero-dependencies, developer-friendly python
 package to retrieve (almost) any browser's history on (almost) any platform.
 
-## NOTE - Docs need to be updated for latest release, as it features breaking changes.
+## NOTE - The features and quickstart here are for the master branch, which has many breaking changes.
 
 Some of the code in this README might not work if you have just `pip install`ed the project. Latest docs can be found in the `release` branch.
 
