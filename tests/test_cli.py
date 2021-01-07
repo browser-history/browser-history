@@ -6,6 +6,8 @@ import tempfile
 
 import pytest
 
+from browser_history import get_browsers
+
 
 CMD_ROOT = "browser-history"
 
@@ -68,6 +70,20 @@ CSV_HISTORY_HEADER = HISTORY_TITLE + HISTORY_HEADER
 CSV_BOOKMARKS_HEADER = BOOKMARKS_TITLE + BOOKMARKS_HEADER
 
 
+def _get_browser_available_on_system():
+    """Find a browser that is supported and installed on the test system."""
+    for browser in get_browsers():
+        try:  # filter out unsupported browsers
+            history = browser().fetch_history()
+        except AssertionError:  # anything caught here is unsupported
+            continue
+        # Has non-empty history so must be installed as well as supported
+        if json.loads(history.to_json())["history"]:
+            # Return string name which corresponds to a VALID_BROWSER_ARGS entry
+            return browser.name
+    return  # None indicating no browsers available on system
+
+
 def test_no_argument():
     """Test the root command gives basic output."""
     output = subprocess.check_output([CMD_ROOT])
@@ -81,9 +97,9 @@ def test_type_argument():
             output = subprocess.check_output([CMD_ROOT, type_opt, type_arg]).decode(
                 "utf-8"
             )
-            if type_arg == "history":  # in ('history', 'all')
+            if type_arg == "history":
                 assert output.startswith(HISTORY_TITLE)
-            if type_arg == "bookmarks":  # in ('bookmarks', 'all')
+            if type_arg == "bookmarks":
                 assert output.startswith(BOOKMARKS_TITLE)
 
 
@@ -110,13 +126,13 @@ def test_browser_argument(browser_arg):
             # in question, which makes the command fail, but in a way
             # that is expected and gives a recognised error message.
             pytest.skip(
-                "Unable to test against this browser because it is "
-                "not available locally"
+                "Unable to test against {} browser because it is "
+                "not available locally".format(browser_opt)
             )
         else:  # command fails for another reason i.e. a test failure
             pytest.fail(
-                "The browser is available but the command to fetch "
-                "the history from it has failed."
+                "{} browser is available but the command to fetch "
+                "the history from it has failed.".format(browser_opt)
             )
 
 
@@ -129,7 +145,9 @@ def test_format_argument():
     read_csv = csv.Sniffer()
     # This gives '_csv.Error: Could not determine delimiter' if not a csv file
     read_csv.sniff(csv_output, delimiters=",")
-    assert read_csv.has_header(csv_output)
+    assert read_csv.has_header(
+        csv_output
+    ), "CSV format missing heading with type followed by column names."
 
     for fmt_opt in VALID_CMD_OPTS[3]:
         for fmt_arg in VALID_FORMAT_ARGS:
@@ -167,23 +185,27 @@ def test_argument_combinations():
     """Test that combinations of optional arguments work properly."""
     # Choose some representative combinations. No need to test every one.
     indices = (0, 1)
+    available_browser = _get_browser_available_on_system()
     # To test combos of short or long option variants
     for index_a, index_b in itertools.product(indices, indices):
-        chrome_bookmarks_output = subprocess.check_output(
-            [
-                CMD_ROOT,
-                VALID_CMD_OPTS[1][index_a],  # type
-                VALID_TYPE_ARGS[1],  # ... is bookmarks,
-                VALID_CMD_OPTS[2][index_a],  # browser
-                VALID_BROWSER_ARGS[1],  # ... is Chrome
-            ]
-        ).decode("utf-8")
-        assert chrome_bookmarks_output.startswith(BOOKMARKS_TITLE)
-        assert not chrome_bookmarks_output.startswith(HISTORY_TITLE)
-        read_csv = csv.Sniffer()
-        read_csv.sniff(chrome_bookmarks_output, delimiters=",")
-        assert read_csv.has_header(chrome_bookmarks_output)
-
+        if available_browser:
+            chrome_bookmarks_output = subprocess.check_output(
+                [
+                    CMD_ROOT,
+                    VALID_CMD_OPTS[1][index_a],  # type
+                    VALID_TYPE_ARGS[1],  # ... is bookmarks,
+                    VALID_CMD_OPTS[2][index_a],  # browser
+                    available_browser,  # ... is any usable on system
+                ]
+            ).decode("utf-8")
+            assert chrome_bookmarks_output.startswith(BOOKMARKS_TITLE)
+            assert not chrome_bookmarks_output.startswith(HISTORY_TITLE)
+            read_csv = csv.Sniffer()
+            read_csv.sniff(chrome_bookmarks_output, delimiters=",")
+            assert read_csv.has_header(chrome_bookmarks_output)
+        else:  # unlikely but catch just in case can't use any browser
+            for _ in range(3):  # to cover all three assert tests above
+                pytest.skip("No browsers available to test with")
         with tempfile.NamedTemporaryFile(suffix=".csv") as f:
             # This command should write to the given output file:
             subprocess.check_output(
