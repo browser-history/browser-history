@@ -86,7 +86,7 @@ def _get_browser_available_on_system():
 
 def test_no_argument():
     """Test the root command gives basic output."""
-    output = subprocess.check_output([CMD_ROOT])
+    output = subprocess.check_output(CMD_ROOT, shell=True)
     assert CSV_HISTORY_HEADER in output.decode("utf-8")
 
 
@@ -94,9 +94,9 @@ def test_type_argument():
     """Test arguments for the type option."""
     for type_opt in VALID_CMD_OPTS[1]:
         for type_arg in VALID_TYPE_ARGS:
-            output = subprocess.check_output([CMD_ROOT, type_opt, type_arg]).decode(
-                "utf-8"
-            )
+            output = subprocess.check_output(
+                " ".join([CMD_ROOT, type_opt, type_arg]), shell=True
+            ).decode("utf-8")
             if type_arg == "history":
                 assert output.startswith(HISTORY_TITLE)
             if type_arg == "bookmarks":
@@ -108,9 +108,10 @@ def test_browser_argument(browser_arg):
     """Test arguments for the browser option."""
     for browser_opt in VALID_CMD_OPTS[2]:
         output = subprocess.Popen(
-            [CMD_ROOT, browser_opt, browser_arg],
+            " ".join([CMD_ROOT, browser_opt, browser_arg]),
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
+            shell=True,
         )
         stdout, stderr = output.communicate()
         if output.returncode == 0:
@@ -139,7 +140,7 @@ def test_browser_argument(browser_arg):
 def test_format_argument():
     """Tests arguments for the format option."""
     # First check format of default:
-    csv_output = subprocess.check_output([CMD_ROOT]).decode("utf-8")
+    csv_output = subprocess.check_output(CMD_ROOT, shell=True).decode("utf-8")
     # Sniffer determines format, less intensive than reading in csv.reader
     # and we don't mind the CSV dialect, so just check call doesn't error
     read_csv = csv.Sniffer()
@@ -151,9 +152,9 @@ def test_format_argument():
 
     for fmt_opt in VALID_CMD_OPTS[3]:
         for fmt_arg in VALID_FORMAT_ARGS:
-            output = subprocess.check_output([CMD_ROOT, fmt_opt, fmt_arg]).decode(
-                "utf-8"
-            )
+            output = subprocess.check_output(
+                " ".join([CMD_ROOT, fmt_opt, fmt_arg]), shell=True
+            ).decode("utf-8")
             if fmt_arg in ("csv", "infer"):  # infer gives csv if no file
                 read_csv.sniff(output, delimiters=",")
                 assert read_csv.has_header(output)
@@ -174,7 +175,9 @@ def test_output_argument():
     """Test arguments for the output option."""
     for output_opt in VALID_CMD_OPTS[4]:
         with tempfile.NamedTemporaryFile(suffix=".csv") as f:
-            output = subprocess.check_output([CMD_ROOT, output_opt, f.name])
+            output = subprocess.check_output(
+                " ".join([CMD_ROOT, output_opt, f.name]), shell=True
+            )
             # Check output was not sent to STDOUT since should go to file
             assert HISTORY_HEADER not in output.decode("utf-8")
             with open(f.name, "rb") as f:  # now check the file
@@ -190,13 +193,16 @@ def test_argument_combinations():
     for index_a, index_b in itertools.product(indices, indices):
         if available_browser:
             chrome_bookmarks_output = subprocess.check_output(
-                [
-                    CMD_ROOT,
-                    VALID_CMD_OPTS[1][index_a],  # type
-                    VALID_TYPE_ARGS[1],  # ... is bookmarks,
-                    VALID_CMD_OPTS[2][index_a],  # browser
-                    available_browser,  # ... is any usable on system
-                ]
+                " ".join(
+                    [
+                        CMD_ROOT,
+                        VALID_CMD_OPTS[1][index_a],  # type
+                        VALID_TYPE_ARGS[1],  # ... is bookmarks,
+                        VALID_CMD_OPTS[2][index_a],  # browser
+                        available_browser,  # ... is any usable on system
+                    ]
+                ),
+                shell=True,
             ).decode("utf-8")
             assert chrome_bookmarks_output.startswith(BOOKMARKS_TITLE)
             assert not chrome_bookmarks_output.startswith(HISTORY_TITLE)
@@ -209,13 +215,16 @@ def test_argument_combinations():
         with tempfile.NamedTemporaryFile(suffix=".csv") as f:
             # This command should write to the given output file:
             subprocess.check_output(
-                [
-                    CMD_ROOT,
-                    VALID_CMD_OPTS[3][index_b],  # format
-                    VALID_FORMAT_ARGS[2],  # ... is json,
-                    VALID_CMD_OPTS[4][index_b],  # output
-                    f.name,  # ... is a named file
-                ]
+                " ".join(
+                    [
+                        CMD_ROOT,
+                        VALID_CMD_OPTS[3][index_b],  # format
+                        VALID_FORMAT_ARGS[2],  # ... is json,
+                        VALID_CMD_OPTS[4][index_b],  # output
+                        f.name,  # ... is a named file
+                    ]
+                ),
+                shell=True,
             ).decode("utf-8")
             with open(f.name, "rb") as f:
                 json.loads(f.read().decode("utf-8"))
@@ -224,7 +233,9 @@ def test_argument_combinations():
 def test_help_option():
     """Test the command-line help provided to the user on request."""
     for help_opt in VALID_CMD_OPTS[0]:
-        output = subprocess.check_output([CMD_ROOT, help_opt]).decode("utf-8")
+        output = subprocess.check_output(
+            " ".join([CMD_ROOT, help_opt]), shell=True
+        ).decode("utf-8")
         assert HELP_SIGNATURE in output
 
 
@@ -232,4 +243,6 @@ def test_invalid_options():
     """Test that invalid options error correctly."""
     for bad_opt in INVALID_CMD_OPTS:
         with pytest.raises(subprocess.CalledProcessError):
-            subprocess.check_output([CMD_ROOT, bad_opt]).decode("utf-8")
+            subprocess.check_output(" ".join([CMD_ROOT, bad_opt]), shell=True).decode(
+                "utf-8"
+            )
