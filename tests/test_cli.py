@@ -41,6 +41,7 @@ VALID_TYPE_ARGS = [
     "history",
     "bookmarks",
 ]
+INVALID_TYPE_ARGS = ["cookies", "lol", "histories", "bookmark"]
 VALID_BROWSER_ARGS = [
     "all",
     "Chrome",
@@ -52,12 +53,14 @@ VALID_BROWSER_ARGS = [
     "OperaGX",
     "Brave",
 ]
+INVALID_BROWSER_ARGS = ["vivaldi", "explorer", "ie", "netscape", "none", "brr"]
 VALID_FORMAT_ARGS = [
     "infer",
     "csv",
     "json",
     "jsonl",
 ]
+INVALID_FORMAT_ARGS = ["csvv", "txt", "html", "qwerty"]
 # (VALID_OUTPUT_ARGS is any existent file, so validity depends on the fs)
 GENERAL_INVALID_ARGS = [
     "foo",
@@ -193,12 +196,12 @@ def test_format_argument(capsys, platform):
 def test_output_argument(capsys, platform):
     """Test arguments for the output option."""
     for output_opt in VALID_CMD_OPTS[4]:
-        with tempfile.NamedTemporaryFile(suffix=".csv") as f:
-            cli([output_opt, f.name])
+        with tempfile.TemporaryDirectory() as tmpdir:
+            cli([output_opt, tmpdir + "out.csv"])
             output = capsys.readouterr().out
             # Check output was not sent to STDOUT since should go to file
             assert HISTORY_HEADER not in output
-            with open(f.name, "rt") as f:  # now check the file
+            with open(tmpdir + "out.csv", "rt") as f:  # now check the file
                 assert HISTORY_HEADER in f.read()
 
 
@@ -250,17 +253,17 @@ def test_argument_combinations(capsys, platform, browser):
         else:  # unlikely but catch just in case can't use any browser
             for _ in range(3):  # to cover all three assert tests above
                 pytest.skip("No browsers available to test with")
-        with tempfile.NamedTemporaryFile(suffix=".csv") as f:
+        with tempfile.TemporaryDirectory() as tmpdir:
             # This command should write to the given output file:
             cli(
                 [
                     VALID_CMD_OPTS[3][index_b],  # format
                     VALID_FORMAT_ARGS[2],  # ... is json,
                     VALID_CMD_OPTS[4][index_b],  # output
-                    f.name,  # ... is a named file
+                    tmpdir + "out.json",  # ... is a named file
                 ]
             )
-            with open(f.name, "rb") as f:
+            with open(tmpdir + "out.json", "rb") as f:
                 json.loads(f.read().decode("utf-8"))
 
 
@@ -274,9 +277,33 @@ def test_help_option(capsys):
             assert e.value.code == 0
 
 
-def test_invalid_options(capsys):
+def test_invalid_options(change_homedir):  # noqa: F811
     """Test that invalid options error correctly."""
     for bad_opt in INVALID_CMD_OPTS:
         with pytest.raises(SystemExit) as e:
             cli([bad_opt])
             assert e.value.code == 2
+
+
+def test_invalid_format(change_homedir):  # noqa: F811
+    """Test that invalid formats error correctly."""
+    for bad_format in INVALID_FORMAT_ARGS:
+        with pytest.raises(SystemExit) as e:
+            cli(["-f", bad_format])
+            assert e.value.code == 1
+
+
+def test_invalid_type(change_homedir):  # noqa: F811
+    """Test that invalid types error correctly."""
+    for bad_type in INVALID_TYPE_ARGS:
+        with pytest.raises(SystemExit) as e:
+            cli(["-t", bad_type])
+            assert e.value.code == 1
+
+
+def test_invalid_browser(change_homedir):  # noqa: F811
+    """Test that invalid browsers error correctly."""
+    for bad_browser in INVALID_BROWSER_ARGS:
+        with pytest.raises(SystemExit) as e:
+            cli(["-b", bad_browser])
+            assert e.value.code == 1
