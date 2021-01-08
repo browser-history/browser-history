@@ -23,8 +23,9 @@ Some of the code in this README might not work if you have just `pip install`ed 
  - A **command-line tool**: simply run `browser-history --help` from your terminal.
  - **History**: browsing history with exact timestamp and URL.
  - **Bookmarks**: browser bookmarks with timestamp, URL, title and folder.
+ - Lightweight: the entire package is less than 20kB in size and has no dependencies other than python.
  - Developer friendly: you can add support for new browsers or add a new feature very easily.
- - Fully open source: this project is developed by [PES Open Source](https://github.com/pesos) and will always be open source, with the Apache License.
+ - Fully open source: this project is developed and maintained by [PES Open Source](https://github.com/pesos) and will always be open source (with the Apache 2.0 License).
 
 # Quick Start
 
