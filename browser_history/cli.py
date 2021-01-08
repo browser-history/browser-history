@@ -81,12 +81,12 @@ def make_parser():
 parser = make_parser()
 
 
-def main():
+def cli(args):
     """Entrypoint to the command-line interface (CLI) of browser-history.
 
     It parses arguments from sys.argv and performs the appropriate actions.
     """
-    args = parser.parse_args()
+    args = parser.parse_args(args)
     outputs = None
     fetch_map = {
         "history": get_history,
@@ -126,7 +126,6 @@ def main():
         if args.output is None:
             if args.format == "infer":
                 args.format = "csv"
-            print(args.type + ":")
             print(outputs.formatted(args.format))
         elif args.output is not None:
             outputs.save(args.output, args.format)
@@ -134,3 +133,7 @@ def main():
     except ValueError as e:
         utils.logger.error(e)
         sys.exit(1)
+
+
+def main():
+    cli(sys.argv[1:])
