@@ -11,6 +11,7 @@ from browser_history import (
     get_browsers,
     get_history,
     utils,
+    __version__,
 )
 
 # get list of all implemented browser by finding subclasses of generic.Browser
@@ -73,6 +74,10 @@ def make_parser():
         help="""
                 File where history output or bookmark output is to be written.
                 If not provided, standard output is used.""",
+    )
+
+    parser_.add_argument(
+        "-v", "--version", action="version", version="%(prog)s " + __version__
     )
 
     return parser_

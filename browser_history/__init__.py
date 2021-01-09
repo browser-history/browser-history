@@ -2,6 +2,9 @@ import inspect
 from . import browsers, generic, utils  # noqa: F401
 
 
+__version__ = "0.2.1"
+
+
 def get_browsers():
     """This method provides a list of all browsers implemented by
     browser_history.
