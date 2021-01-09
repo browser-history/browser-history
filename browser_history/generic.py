@@ -286,6 +286,9 @@ class Browser(abc.ABC):
         :rtype: :py:class:`browser_history.generic.Outputs`
         """
 
+        assert (
+            self.bookmarks_file is not None
+        ), "Bookmarks are not supported for {} browser".format(self.name)
         if bookmarks_paths is None:
             bookmarks_paths = self.paths(profile_file=self.bookmarks_file)
         output_object = Outputs(fetch_type="bookmarks")
