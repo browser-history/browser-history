@@ -63,8 +63,8 @@ def make_parser():
         default="infer",
         help=f"""
             Format to be used in output. Should be one of {AVAILABLE_FORMATS}.
-            Default is infer (it tries to infer it from the output file's
-            extension. If no output file is given it defaults to csv)""",
+            Default is infer (format is inferred from the output file's
+            extension. If no output file (-o) is specified, it defaults to csv)""",
     )
 
     parser_.add_argument(

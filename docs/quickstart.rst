@@ -6,9 +6,14 @@ Quick Start
 Installation
 ------------
 
-::
+To install the latest release::
 
     pip install browser-history
+
+To install from the master branch (warning: development version. Things could break)::
+
+    pip install git+https://github.com/pesos/browser-history.git
+
 
 Get started
 -----------
@@ -41,6 +46,10 @@ If you want history from a specific browser:
 
 Bookmarks
 ^^^^^^^^^
+
+.. warning::
+    Experimental feature. Although this has been confirmed to work on multiple (Firefox and Chromium based) browsers
+    on all platforms, it is not covered by tests and has not been used as much as the history feature.
 
 To get bookmarks from all installed browsers:
 ::

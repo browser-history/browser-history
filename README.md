@@ -10,11 +10,6 @@
 ``browser-history`` is a simple, zero-dependencies, developer-friendly python
 package to retrieve (almost) any browser's history on (almost) any platform.
 
-## NOTE - The features and quickstart here are for the master branch, which has many breaking changes.
-
-Some of the code in this README might not work if you have just `pip install`ed the project. The docs for the latest release can be found [here](https://browser-history.readthedocs.io/en/stable/).
-
-
 
 ## Features
 
@@ -23,7 +18,7 @@ Some of the code in this README might not work if you have just `pip install`ed 
  - A **command-line tool**: simply run `browser-history --help` from your terminal.
  - **History**: browsing history with exact timestamp and URL.
  - **Bookmarks**: browser bookmarks with timestamp, URL, title and folder.
- - Lightweight: the entire package is less than 20kB in size and has no dependencies other than python.
+ - Lightweight: the entire package is less than 20kB in size and has no dependencies other than python 3.6+.
  - Developer friendly: you can add support for new browsers or add a new feature very easily.
  - Fully open source: this project is developed and maintained by [PES Open Source](https://github.com/pesos) and will always be open source (with the Apache 2.0 License).
 
@@ -31,7 +26,17 @@ Some of the code in this README might not work if you have just `pip install`ed 
 
 ## Installation
 
-`pip install browser-history`
+To install the latest release:
+
+```
+pip install browser-history
+```
+
+To install from the master branch (warning: development version. Things could break)
+
+```
+pip install git+https://github.com/pesos/browser-history.git
+```
 
 ## Usage
 
@@ -61,6 +66,9 @@ his = outputs.histories
  - `Firefox` in the above snippet can be replaced with any of the [supported browsers](https://browser-history.readthedocs.io/en/latest/browsers.html).
 
 ### Bookmarks
+
+WARNING: Experimental feature. Although this has been confirmed to work on multiple (Firefox and Chromium based) browsers
+on all platforms, it is not covered by tests and has not been used as much as the history feature.
 
 To get bookmarks from all installed browsers:
 ```python
