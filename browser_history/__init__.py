@@ -1,4 +1,6 @@
 import inspect
+import webbrowser
+
 from . import browsers, generic, utils  # noqa: F401
 
 
@@ -77,3 +79,33 @@ def get_bookmarks():
             utils.logger.info("%s", e)
     output_object.bookmarks.sort()
     return output_object
+
+
+# keep everything lower-cased
+browser_aliases = {
+    "google-chrome": "chrome",
+    "chromehtml": "chrome",
+    "chromium-browser": "chromium",
+    "msedgehtm": "edge",
+    "operastable": "opera",
+    "firefoxurl": "firefox",
+}
+
+
+def default_browser():
+    plat = utils.get_platform()
+
+    if plat == utils.Platform.LINUX:
+        default = webbrowser.get().name.lower()
+    else:
+        utils.logger.info("Default browser feature not supported on this OS")
+        return None
+
+    if default in [browser.__name__.lower() for browser in get_browsers()]:
+        # we are lucky and the name is exactly like we want it
+        return default
+    elif default in browser_aliases:
+        # check if it matches any aliases
+        return browser_aliases[default]
+    else:
+        utils.logger.info("Current default browser is not supported")

@@ -6,6 +6,7 @@ import sys
 
 from browser_history import (
     browsers,
+    default_browser,
     generic,
     get_bookmarks,
     get_browsers,
@@ -52,7 +53,7 @@ def make_parser():
         default="all",
         help=f"""
                 browser to retrieve history or bookmarks from. Should be one
-                of all, {AVAILABLE_BROWSERS}.
+                of all, default, {AVAILABLE_BROWSERS}.
                 Default is all (gets history or bookmarks from all browsers).
                 """,
     )
@@ -110,6 +111,10 @@ def cli(args):
         try:
             # gets browser class by name (string).
             selected_browser = args.browser
+            if selected_browser == "default":
+                args.browser = default_browser()
+                if args.browser is None:
+                    sys.exit(1)
             for browser in get_browsers():
                 if browser.__name__.lower() == args.browser.lower():
                     selected_browser = browser.__name__
