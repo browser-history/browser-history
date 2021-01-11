@@ -3,6 +3,9 @@ import webbrowser
 
 from . import browsers, generic, utils  # noqa: F401
 
+if utils.get_platform() == utils.Platform.WINDOWS:
+    from winreg import HKEY_CURRENT_USER, OpenKey, QueryValueEx  # type: ignore
+
 
 __version__ = "0.3.0"
 
@@ -83,29 +86,59 @@ def get_bookmarks():
 
 # keep everything lower-cased
 browser_aliases = {
-    "google-chrome": "chrome",
-    "chromehtml": "chrome",
-    "chromium-browser": "chromium",
-    "msedgehtm": "edge",
-    "operastable": "opera",
-    "firefoxurl": "firefox",
+    "google-chrome": browsers.Chrome,
+    "chromehtml": browsers.Chrome,
+    "chromiumhtm": browsers.Chromium,
+    "chromium-browser": browsers.Chromium,
+    "msedgehtm": browsers.Edge,
+    "operastable": browsers.Opera,
+    "opera-stable": browsers.Opera,
+    "operagxstable": browsers.OperaGX,
+    "firefoxurl": browsers.Firefox,
+    "bravehtml": browsers.Brave,
 }
 
 
 def default_browser():
+    """This method gets the default browser of the current platform
+
+    :return: A :py:class:`browsers.Browser` object representing the default
+        browser in the current platform. If platform is not supported or
+        default browser is unknown or unsupported ``None`` is returned
+
+    :rtype: union[:py:class:`browsers.Browser`, None]
+    """
     plat = utils.get_platform()
+
+    # ---- get default from specific platform ----
 
     if plat == utils.Platform.LINUX:
         default = webbrowser.get().name.lower()
+    elif plat == utils.Platform.WINDOWS:
+        reg_path = (
+            "Software\\Microsoft\\Windows\\Shell\\Associations\\"
+            "UrlAssociations\\https\\UserChoice"
+        )
+        with OpenKey(HKEY_CURRENT_USER, reg_path) as key:
+            default = QueryValueEx(key, "ProgId")[0].lower()
     else:
-        utils.logger.info("Default browser feature not supported on this OS")
+        utils.logger.warning("Default browser feature not supported on this OS")
         return None
 
-    if default in [browser.__name__.lower() for browser in get_browsers()]:
+    # ---- convert obtained default to something we understand ----
+
+    b_map = {browser.__name__.lower(): browser for browser in get_browsers()}
+    if default in b_map:
         # we are lucky and the name is exactly like we want it
-        return default
-    elif default in browser_aliases:
-        # check if it matches any aliases
-        return browser_aliases[default]
-    else:
-        utils.logger.info("Current default browser is not supported")
+        return b_map[default]
+
+    for browser in browser_aliases:
+        # look for alias matches even if the default name has "noise"
+        # for instance firefox on windows returns something like
+        # "firefoxurl-3EEDF34567DDE" but we only need "firefoxurl"
+        if browser in default:
+            return browser_aliases[browser]
+
+    # nothing was found
+    utils.logger.warning("Current default browser is not supported")
+    return None

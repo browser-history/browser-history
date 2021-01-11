@@ -112,13 +112,16 @@ def cli(args):
             # gets browser class by name (string).
             selected_browser = args.browser
             if selected_browser == "default":
-                args.browser = default_browser()
-                if args.browser is None:
+                default = default_browser()
+                if default is None:
                     sys.exit(1)
-            for browser in get_browsers():
-                if browser.__name__.lower() == args.browser.lower():
-                    selected_browser = browser.__name__
-                    break
+                else:
+                    selected_browser = default.__name__
+            else:
+                for browser in get_browsers():
+                    if browser.__name__.lower() == args.browser.lower():
+                        selected_browser = browser.__name__
+                        break
             browser_class = getattr(browsers, selected_browser)
         except AttributeError:
             utils.logger.error(
