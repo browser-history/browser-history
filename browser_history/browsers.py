@@ -20,6 +20,7 @@ class Chromium(ChromiumBasedBrowser):
     """
 
     name = "Chromium"
+    aliases = ("chromiumhtm", "chromium-browser", "chromiumhtml")
 
     linux_path = ".config/chromium"
     windows_path = "AppData/Local/chromium/User Data"
@@ -40,6 +41,7 @@ class Chrome(ChromiumBasedBrowser):
     """
 
     name = "Chrome"
+    aliases = ("chromehtml", "google-chrome", "chromehtm")
 
     linux_path = ".config/google-chrome"
     windows_path = "AppData/Local/Google/Chrome/User Data"
@@ -61,6 +63,7 @@ class Firefox(Browser):
     """
 
     name = "Firefox"
+    aliases = ("firefoxurl", )
 
     linux_path = ".mozilla/firefox"
     windows_path = "AppData/Roaming/Mozilla/Firefox/Profiles"
@@ -177,6 +180,7 @@ class Edge(ChromiumBasedBrowser):
     """
 
     name = "Edge"
+    aliases = ("msedgehtm", "msedge")
 
     windows_path = "AppData/Local/Microsoft/Edge/User Data"
     mac_path = "Library/Application Support/Microsoft Edge"
@@ -195,6 +199,7 @@ class Opera(ChromiumBasedBrowser):
     """
 
     name = "Opera"
+    aliases = ("operastable", "opera-stable")
 
     linux_path = ".config/opera"
     windows_path = "AppData/Roaming/Opera Software/Opera Stable"
@@ -214,6 +219,7 @@ class OperaGX(ChromiumBasedBrowser):
     """
 
     name = "OperaGX"
+    aliases = ("operagxstable", "operagx-stable")
 
     windows_path = "AppData/Roaming/Opera Software/Opera GX Stable"
 
@@ -233,6 +239,7 @@ class Brave(ChromiumBasedBrowser):
     """
 
     name = "Brave"
+    aliases = ("bravehtml", )
 
     linux_path = ".config/BraveSoftware/Brave-Browser"
     mac_path = "Library/Application Support/BraveSoftware/Brave-Browser"
