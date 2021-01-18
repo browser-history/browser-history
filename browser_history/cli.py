@@ -6,17 +6,15 @@ import sys
 
 from browser_history import (
     browsers,
-    default_browser,
     generic,
     get_bookmarks,
-    get_browsers,
     get_history,
     utils,
     __version__,
 )
 
 # get list of all implemented browser by finding subclasses of generic.Browser
-AVAILABLE_BROWSERS = ", ".join(b.__name__ for b in get_browsers())
+AVAILABLE_BROWSERS = ", ".join(b.__name__ for b in utils.get_browsers())
 AVAILABLE_FORMATS = ", ".join(generic.Outputs(fetch_type=None).format_map.keys())
 AVAILABLE_TYPES = ", ".join(generic.Outputs(fetch_type=None).field_map.keys())
 
@@ -112,13 +110,13 @@ def cli(args):
             # gets browser class by name (string).
             selected_browser = args.browser
             if selected_browser == "default":
-                default = default_browser()
+                default = utils.default_browser()
                 if default is None:
                     sys.exit(1)
                 else:
                     selected_browser = default.__name__
             else:
-                for browser in get_browsers():
+                for browser in utils.get_browsers():
                     if browser.__name__.lower() == args.browser.lower():
                         selected_browser = browser.__name__
                         break
