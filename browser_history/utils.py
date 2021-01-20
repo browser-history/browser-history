@@ -54,10 +54,6 @@ def get_platform():
     raise NotImplementedError(f"Platform {system} is not supported yet")
 
 
-if get_platform() == Platform.WINDOWS:
-    from winreg import HKEY_CURRENT_USER, OpenKey, QueryValueEx  # type: ignore
-
-
 def get_browsers():
     """This method provides a list of all browsers implemented by
     browser_history.
@@ -83,6 +79,10 @@ def get_browsers():
     return get_subclasses(generic.Browser)
 
 
+if get_platform() == Platform.WINDOWS:
+    import winreg  # type: ignore
+
+
 def default_browser():
     """This method gets the default browser of the current platform
 
@@ -98,14 +98,22 @@ def default_browser():
 
     # Always try to return a lower-cased value for ease of comparison
     if plat == Platform.LINUX:
-        default = webbrowser.get().name.lower()
+        default = webbrowser.get()
+        if default is None or default.name is None:
+            logger.warning("Could not determine default browser")
+            return None
+        default = default.name.lower()
     elif plat == Platform.WINDOWS:
         reg_path = (
             "Software\\Microsoft\\Windows\\Shell\\Associations\\"
             "UrlAssociations\\https\\UserChoice"
         )
-        with OpenKey(HKEY_CURRENT_USER, reg_path) as key:
-            default = QueryValueEx(key, "ProgId")[0].lower()
+        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, reg_path) as key:
+            default = winreg.QueryValueEx(key, "ProgId")
+            if default is None:
+                logger.warning("Could not determine default browser")
+                return None
+            default = default[0].lower()
     else:
         logger.warning("Default browser feature not supported on this OS")
         return None
