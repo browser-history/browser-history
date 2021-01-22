@@ -6,7 +6,7 @@ import enum
 import inspect
 import logging
 import platform
-import webbrowser
+import subprocess
 
 from . import generic
 
@@ -83,6 +83,32 @@ if get_platform() == Platform.WINDOWS:
     import winreg  # type: ignore
 
 
+def _default_browser_linux():
+    try:
+        cmd = "xdg-settings get default-web-browser".split()
+        raw_result = subprocess.check_output(cmd, stderr=subprocess.DEVNULL)
+        # most have a suffix ".desktop" so just remove it
+        default = raw_result.decode().strip().lower().replace(".desktop", "")
+    except (FileNotFoundError, subprocess.CalledProcessError, PermissionError):
+        logger.warning("Could not determine default browser")
+        default = None
+
+    return default
+
+
+def _default_browser_win():
+    reg_path = (
+        "Software\\Microsoft\\Windows\\Shell\\Associations\\"
+        "UrlAssociations\\https\\UserChoice"
+    )
+    with winreg.OpenKey(winreg.HKEY_CURRENT_USER, reg_path) as key:
+        default = winreg.QueryValueEx(key, "ProgId")
+        if default is None:
+            logger.warning("Could not determine default browser")
+            return None
+        return default[0].lower()
+
+
 def default_browser():
     """This method gets the default browser of the current platform
 
@@ -98,24 +124,16 @@ def default_browser():
 
     # Always try to return a lower-cased value for ease of comparison
     if plat == Platform.LINUX:
-        default = webbrowser.get()
-        if default is None or default.name is None:
-            logger.warning("Could not determine default browser")
-            return None
-        default = default.name.lower()
+        default = _default_browser_linux()
     elif plat == Platform.WINDOWS:
-        reg_path = (
-            "Software\\Microsoft\\Windows\\Shell\\Associations\\"
-            "UrlAssociations\\https\\UserChoice"
-        )
-        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, reg_path) as key:
-            default = winreg.QueryValueEx(key, "ProgId")
-            if default is None:
-                logger.warning("Could not determine default browser")
-                return None
-            default = default[0].lower()
+        default = _default_browser_win()
     else:
         logger.warning("Default browser feature not supported on this OS")
+        return None
+
+    if default is None:
+        # the current platform has completely failed to provide a default
+        logger.warning("No default browser found")
         return None
 
     # ---- convert obtained default to something we understand ----

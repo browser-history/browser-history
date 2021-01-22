@@ -180,7 +180,7 @@ class Edge(ChromiumBasedBrowser):
     """
 
     name = "Edge"
-    aliases = ("msedgehtm", "msedge")
+    aliases = ("msedgehtm", "msedge", "microsoft-edge")
 
     windows_path = "AppData/Local/Microsoft/Edge/User Data"
     mac_path = "Library/Application Support/Microsoft Edge"
