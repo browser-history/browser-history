@@ -53,7 +53,7 @@ VALID_BROWSER_ARGS = [
     "OperaGX",
     "Brave",
 ]
-INVALID_BROWSER_ARGS = ["vivaldi", "explorer", "ie", "netscape", "none", "brr"]
+INVALID_BROWSER_ARGS = ["explorer", "ie", "netscape", "none", "brr"]
 VALID_FORMAT_ARGS = [
     "infer",
     "csv",
