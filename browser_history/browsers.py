@@ -41,9 +41,9 @@ class Chrome(ChromiumBasedBrowser):
 
     name = "Chrome"
 
+    linux_path = ".config/google-chrome"
     windows_path = "AppData/Local/Google/Chrome/User Data"
     mac_path = "Library/Application Support/Google/Chrome/"
-    linux_path = ".config/google-chrome"
 
     profile_support = True
 
@@ -62,8 +62,8 @@ class Firefox(Browser):
 
     name = "Firefox"
 
-    windows_path = "AppData/Roaming/Mozilla/Firefox/Profiles"
     linux_path = ".mozilla/firefox"
+    windows_path = "AppData/Roaming/Mozilla/Firefox/Profiles"
     mac_path = "Library/Application Support/Firefox/Profiles/"
 
     profile_support = True
