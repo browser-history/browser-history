@@ -239,3 +239,22 @@ class Brave(ChromiumBasedBrowser):
     windows_path = "AppData/Local/BraveSoftware/Brave-Browser/User Data"
 
     profile_support = True
+
+
+class Vivaldi(ChromiumBasedBrowser):
+    """Vivaldi Browser
+
+    Supported platforms (TODO: Add Mac OS support)
+
+    * Linux
+    * Windows
+
+    Profile support: Yes
+    """
+
+    name = "Vivaldi"
+
+    linux_path = ".config/vivaldi"
+    windows_path = "AppData/Local/Vivaldi/User Data"
+
+    profile_support = True
