@@ -41,9 +41,9 @@ class Chrome(ChromiumBasedBrowser):
 
     name = "Chrome"
 
+    linux_path = ".config/google-chrome"
     windows_path = "AppData/Local/Google/Chrome/User Data"
     mac_path = "Library/Application Support/Google/Chrome/"
-    linux_path = ".config/google-chrome"
 
     profile_support = True
 
@@ -62,8 +62,8 @@ class Firefox(Browser):
 
     name = "Firefox"
 
-    windows_path = "AppData/Roaming/Mozilla/Firefox/Profiles"
     linux_path = ".mozilla/firefox"
+    windows_path = "AppData/Roaming/Mozilla/Firefox/Profiles"
     mac_path = "Library/Application Support/Firefox/Profiles/"
 
     profile_support = True
@@ -235,7 +235,26 @@ class Brave(ChromiumBasedBrowser):
     name = "Brave"
 
     linux_path = ".config/BraveSoftware/Brave-Browser"
-    mac_path = "Library/Application Support/BraveSoftware/Brave-Browser"
     windows_path = "AppData/Local/BraveSoftware/Brave-Browser/User Data"
+    mac_path = "Library/Application Support/BraveSoftware/Brave-Browser"
+
+    profile_support = True
+
+
+class Vivaldi(ChromiumBasedBrowser):
+    """Vivaldi Browser
+
+    Supported platforms (TODO: Add Mac OS support)
+
+    * Linux
+    * Windows
+
+    Profile support: Yes
+    """
+
+    name = "Vivaldi"
+
+    linux_path = ".config/vivaldi"
+    windows_path = "AppData/Local/Vivaldi/User Data"
 
     profile_support = True
