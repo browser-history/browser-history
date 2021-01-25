@@ -410,3 +410,46 @@ def test_brave_windows(become_windows, change_homedir):  # noqa: F811
             "https://www.reddit.com/",
         ),
     )
+
+
+def test_vivaldi_mac(become_mac, change_homedir):  # noqa: F811
+    """Test history is correct on Vivaldi for MacOS"""
+    f = browser_history.browsers.Vivaldi()
+    output = f.fetch_history()
+    his = output.histories
+    assert len(his) == 2
+    profs = f.profiles(f.history_file)
+    assert len(profs) == 1
+    # check first and last item to ensure both profiles are searched
+    assert_histories_equal(
+        his[0],
+        (
+            datetime.datetime(
+                2021,
+                1,
+                25,
+                14,
+                25,
+                3,
+                tzinfo=datetime.timezone(datetime.timedelta(seconds=19800), "IST"),
+            ),
+            "https://vivaldi.com/whats-new-in-vivaldi-3-5/",
+        ),
+    )
+
+    his = f.history_profiles(["Profile 1"]).histories
+    assert_histories_equal(
+        his[1],
+        (
+            datetime.datetime(
+                2021,
+                1,
+                25,
+                14,
+                25,
+                27,
+                tzinfo=datetime.timezone(datetime.timedelta(seconds=19800), "IST"),
+            ),
+            "https://pesos.github.io/",
+        ),
+    )
