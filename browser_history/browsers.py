@@ -255,6 +255,7 @@ class Vivaldi(ChromiumBasedBrowser):
     name = "Vivaldi"
 
     linux_path = ".config/vivaldi"
+    mac_path = "Library/Application Support/Vivaldi"
     windows_path = "AppData/Local/Vivaldi/User Data"
 
     profile_support = True
