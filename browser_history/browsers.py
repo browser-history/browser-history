@@ -260,6 +260,7 @@ class Vivaldi(ChromiumBasedBrowser):
     """
 
     name = "Vivaldi"
+    aliases = ("vivaldi-stable", "vivaldistable")
 
     linux_path = ".config/vivaldi"
     mac_path = "Library/Application Support/Vivaldi"
