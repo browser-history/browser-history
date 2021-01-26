@@ -5,7 +5,7 @@ import tempfile
 
 import pytest
 
-from browser_history import get_browsers
+from browser_history.utils import get_browsers
 from browser_history.cli import cli, AVAILABLE_BROWSERS
 from .utils import (  # noqa: F401
     become_linux,

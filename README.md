@@ -20,6 +20,7 @@ package to retrieve (almost) any browser's history on (almost) any platform.
  - **Bookmarks**: browser bookmarks with timestamp, URL, title and folder.
  - Lightweight: the entire package is less than 20kB in size and has no dependencies other than python 3.6+.
  - Developer friendly: you can add support for new browsers or add a new feature very easily.
+ - Default browser: can automatically determine the default browser on Windows and Linux (`browser-history -b default`).
  - Fully open source: this project is developed and maintained by [PES Open Source](https://github.com/pesos) and will always be open source (with the Apache 2.0 License).
 
 # Quick Start

@@ -8,14 +8,13 @@ from browser_history import (
     browsers,
     generic,
     get_bookmarks,
-    get_browsers,
     get_history,
     utils,
     __version__,
 )
 
 # get list of all implemented browser by finding subclasses of generic.Browser
-AVAILABLE_BROWSERS = ", ".join(b.__name__ for b in get_browsers())
+AVAILABLE_BROWSERS = ", ".join(b.__name__ for b in utils.get_browsers())
 AVAILABLE_FORMATS = ", ".join(generic.Outputs(fetch_type=None).format_map.keys())
 AVAILABLE_TYPES = ", ".join(generic.Outputs(fetch_type=None).field_map.keys())
 
@@ -52,7 +51,7 @@ def make_parser():
         default="all",
         help=f"""
                 browser to retrieve history or bookmarks from. Should be one
-                of all, {AVAILABLE_BROWSERS}.
+                of all, default, {AVAILABLE_BROWSERS}.
                 Default is all (gets history or bookmarks from all browsers).
                 """,
     )
@@ -110,10 +109,17 @@ def cli(args):
         try:
             # gets browser class by name (string).
             selected_browser = args.browser
-            for browser in get_browsers():
-                if browser.__name__.lower() == args.browser.lower():
-                    selected_browser = browser.__name__
-                    break
+            if selected_browser == "default":
+                default = utils.default_browser()
+                if default is None:
+                    sys.exit(1)
+                else:
+                    selected_browser = default.__name__
+            else:
+                for browser in utils.get_browsers():
+                    if browser.__name__.lower() == args.browser.lower():
+                        selected_browser = browser.__name__
+                        break
             browser_class = getattr(browsers, selected_browser)
         except AttributeError:
             utils.logger.error(

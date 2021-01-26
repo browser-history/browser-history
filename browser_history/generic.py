@@ -49,6 +49,7 @@ class Browser(abc.ABC):
     * :py:class:`profile_support`
     * :py:class:`profile_dir_prefixes`
     * :py:class:`_local_tz`
+    * :py:class:`aliases`: A tuple containing other names for the browser in lowercase
 
     :param plat: the current platform. A value of :py:class:`None` means the platform
        will be inferred from the system.
@@ -57,6 +58,7 @@ class Browser(abc.ABC):
 
     >>> class CustomBrowser(Browser):
     ...     name = 'custom browser'
+    ...     aliases = ('custom-browser', 'customhtm')
     ...     history_file = 'history_file'
     ...     history_SQL = \"\"\"
     ...         SELECT
@@ -92,6 +94,12 @@ class Browser(abc.ABC):
 
     history_dir: Path
     """History directory."""
+
+    aliases: tuple = ()
+    """Gets possible names (lower-cased) used to refer to the browser type.
+    Useful for making the browser detectable as a default browser which may be
+    named in various forms on different platforms. Do not include :py:class:`name`
+    in this list"""
 
     @property
     @abc.abstractmethod

@@ -2,3 +2,4 @@
 good-names=
     i,
     e,
+ignored-modules=winreg
