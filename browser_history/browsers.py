@@ -63,7 +63,7 @@ class Firefox(Browser):
     """
 
     name = "Firefox"
-    aliases = ("firefoxurl", )
+    aliases = ("firefoxurl",)
 
     linux_path = ".mozilla/firefox"
     windows_path = "AppData/Roaming/Mozilla/Firefox/Profiles"
@@ -180,8 +180,9 @@ class Edge(ChromiumBasedBrowser):
     """
 
     name = "Edge"
-    aliases = ("msedgehtm", "msedge", "microsoft-edge")
+    aliases = ("msedgehtm", "msedge", "microsoft-edge", "microsoft-edge-dev")
 
+    linux_path = ".config/microsoft-edge-dev"
     windows_path = "AppData/Local/Microsoft/Edge/User Data"
     mac_path = "Library/Application Support/Microsoft Edge"
 
@@ -239,7 +240,7 @@ class Brave(ChromiumBasedBrowser):
     """
 
     name = "Brave"
-    aliases = ("bravehtml", )
+    aliases = ("bravehtml",)
 
     linux_path = ".config/BraveSoftware/Brave-Browser"
     mac_path = "Library/Application Support/BraveSoftware/Brave-Browser"
