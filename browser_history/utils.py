@@ -112,11 +112,11 @@ def _default_browser_win():
 def default_browser():
     """This method gets the default browser of the current platform
 
-    :return: A :py:class:`browsers.Browser` object representing the default
-        browser in the current platform. If platform is not supported or
+    :return: A :py:class:`browser_history.generic.Browser` object representing the
+        default browser in the current platform. If platform is not supported or
         default browser is unknown or unsupported ``None`` is returned
 
-    :rtype: union[:py:class:`browsers.Browser`, None]
+    :rtype: union[:py:class:`browser_history.generic.Browser`, None]
     """
     plat = get_platform()
 
