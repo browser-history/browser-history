@@ -156,3 +156,33 @@ def default_browser():
     # nothing was found
     logger.warning("Current default browser is not supported")
     return None
+
+
+def get_browser(browser_name):
+    """
+    This method returns the browser class from a browser name.
+
+    :param browser_name: a string representing one of the browsers supported
+        or ``default`` (to fetch the default browser).
+
+    :return: A browser class which is a subclass of
+        :py:class:`browser_history.generic.Browser` or ``None`` of no supported
+        browsers match the browser name given
+
+    :rtype: union[:py:class:`browser_history.generic.Browser`, None]
+    """
+    # gets browser class by name (string).
+    if browser_name == "default":
+        return default_browser()
+    else:
+        browser_class = None
+        for browser in get_browsers():
+            if browser.__name__.lower() == browser_name.lower():
+                browser_class = browser
+                break
+        if browser_class is None:
+            logger.error(
+                "%s browser is unavailable. Check --help for available browsers",
+                browser_name,
+            )
+        return browser_class
