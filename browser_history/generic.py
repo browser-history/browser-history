@@ -193,6 +193,21 @@ class Browser(abc.ABC):
             return None
         return self.history_dir / profile_dir / self.history_file
 
+    def bookmarks_path_profile(self, profile_dir: Path) -> typing.Optional[Path]:
+        """Returns path of the bookmark file for the given ``profile_dir``
+
+        The ``profile_dir`` should be one of the outputs from
+        :py:meth:`profiles`
+
+        :param profile_dir: Profile directory (should be a single name,
+            relative to ``history_dir``)
+        :type profile_dir: :py:class:`pathlib.Path`
+        :return: path to bookmark file of the profile
+        """
+        if self.bookmarks_file is None:
+            return None
+        return self.history_dir / profile_dir / self.bookmarks_file
+
     def paths(self, profile_file):
         """Returns a list of file paths, for all profiles.
 
