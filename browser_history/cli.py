@@ -90,7 +90,7 @@ def make_parser():
         metavar="BROWSER",
         help=f"""
                 List all available profiles for a given browser where browser
-                can be on of all, default, {AVAILABLE_BROWSERS}. The browser
+                can be one of default, {AVAILABLE_BROWSERS}. The browser
                 must always be provided.
         """,
     )
@@ -112,7 +112,15 @@ def cli(args):
     """
     args = parser.parse_args(args)
     if args.show_profiles:
+        if args.show_profiles == "all":
+            utils.logger.error(
+                "'all' cannot be used with --show-profiles"
+                ", please specify a single browser"
+            )
+            sys.exit(1)
         browser_class = utils.get_browser(args.show_profiles)
+        if browser_class is None:
+            sys.exit(1)
         if not browser_class.profile_support:
             utils.logger.error(
                 "%s browser does not support profiles", browser_class.name
@@ -134,14 +142,14 @@ def cli(args):
         )
         sys.exit(1)
 
-    if args.browser == "all":
+    if args.browser == "all" and args.profile is not None:
         # profiles are supported only for one browser at a time
-        if args.profile is not None:
-            utils.logger.error(
-                "Cannot use --profile option without specifying a browser"
-                " or with --browser set to 'all'"
-            )
-            sys.exit(1)
+        parser.error(
+            "Cannot use --profile option without specifying a browser"
+            " or with --browser set to 'all'"
+        )
+
+    if args.browser == "all":
         outputs = fetch_map[args.type]()
     else:
         browser_class = utils.get_browser(args.browser)

@@ -166,7 +166,7 @@ def get_browser(browser_name):
         or ``default`` (to fetch the default browser).
 
     :return: A browser class which is a subclass of
-        :py:class:`browser_history.generic.Browser` or ``None`` of no supported
+        :py:class:`browser_history.generic.Browser` or ``None`` if no supported
         browsers match the browser name given
 
     :rtype: union[:py:class:`browser_history.generic.Browser`, None]
