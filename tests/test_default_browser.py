@@ -1,8 +1,6 @@
 # noqa: F401, F811
 # pylint: disable=redefined-outer-name,unused-argument,unused-import
 
-import webbrowser
-
 import pytest
 
 from browser_history import browsers, utils
@@ -90,17 +88,13 @@ def test_default_safari(become_mac, change_linux_default):  # noqa: F811
 
 
 @pytest.mark.browser_name("chromehtml")
-def test_default_windows_chrome(
-    become_windows, change_win_default  # noqa: F811
-):
+def test_default_windows_chrome(become_windows, change_win_default):  # noqa: F811
     """Test that chrome is identified correctly on Windows"""
     assert utils.default_browser() == browsers.Chrome
 
 
-@pytest.mark.browser_name("firefoxurl")
-def test_default_windows_firefox(
-    become_windows, change_win_default  # noqa: F811
-):
+@pytest.mark.browser_name("firefoxurl-3EEDF34567DDE")
+def test_default_windows_firefox(become_windows, change_win_default):  # noqa: F811
     """Test that firefox is identified correctly on Windows"""
     assert utils.default_browser() == browsers.Firefox
 
