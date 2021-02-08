@@ -10,7 +10,7 @@ import subprocess
 
 from . import generic
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("browser-history")
 handler = logging.StreamHandler()
 formatter = logging.Formatter("%(levelname)s: %(message)s")
 handler.setFormatter(formatter)

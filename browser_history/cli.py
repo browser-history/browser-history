@@ -113,7 +113,7 @@ def cli(args):
     args = parser.parse_args(args)
     if args.show_profiles:
         if args.show_profiles == "all":
-            utils.logger.error(
+            utils.logger.critical(
                 "'all' cannot be used with --show-profiles"
                 ", please specify a single browser"
             )
@@ -122,7 +122,7 @@ def cli(args):
         if browser_class is None:
             sys.exit(1)
         if not browser_class.profile_support:
-            utils.logger.error(
+            utils.logger.critical(
                 "%s browser does not support profiles", browser_class.name
             )
             sys.exit(1)
@@ -137,7 +137,7 @@ def cli(args):
     }
 
     if args.type not in fetch_map:
-        utils.logger.error(
+        utils.logger.critical(
             "Type %s is unavailable." " Check --help for available types", args.type
         )
         sys.exit(1)
@@ -160,7 +160,9 @@ def cli(args):
         profile = args.profile
         if profile is not None:
             if not browser_class.profile_support:
-                utils.logger.error("%s browser does not support profiles", browser.name)
+                utils.logger.critical(
+                    "%s browser does not support profiles", browser.name
+                )
                 sys.exit(1)
 
             # get the actual path from profile name
@@ -172,7 +174,7 @@ def cli(args):
             if not profile.exists():
                 # entire profile might be nonexistent or the specific history
                 # or bookmark file might be missing
-                utils.logger.error(
+                utils.logger.critical(
                     "Profile '%s' not found in %s browser "
                     "or profile does not contain %s",
                     args.profile,
