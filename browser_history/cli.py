@@ -5,7 +5,6 @@ import argparse
 import sys
 
 from browser_history import (
-    browsers,
     generic,
     get_bookmarks,
     get_history,
@@ -76,6 +75,27 @@ def make_parser():
     )
 
     parser_.add_argument(
+        "-p",
+        "--profile",
+        default=None,
+        help="""
+                Specify the profile from which to fetch history or bookmarks. If
+                not provided all profiles are fetched
+        """,
+    )
+
+    parser_.add_argument(
+        "--show-profiles",
+        default=None,
+        metavar="BROWSER",
+        help=f"""
+                List all available profiles for a given browser where browser
+                can be one of default, {AVAILABLE_BROWSERS}. The browser
+                must always be provided.
+        """,
+    )
+
+    parser_.add_argument(
         "-v", "--version", action="version", version="%(prog)s " + __version__
     )
 
@@ -91,6 +111,25 @@ def cli(args):
     It parses arguments from sys.argv and performs the appropriate actions.
     """
     args = parser.parse_args(args)
+    if args.show_profiles:
+        if args.show_profiles == "all":
+            utils.logger.critical(
+                "'all' cannot be used with --show-profiles"
+                ", please specify a single browser"
+            )
+            sys.exit(1)
+        browser_class = utils.get_browser(args.show_profiles)
+        if browser_class is None:
+            sys.exit(1)
+        if not browser_class.profile_support:
+            utils.logger.critical(
+                "%s browser does not support profiles", browser_class.name
+            )
+            sys.exit(1)
+        for profile in browser_class().profiles(browser_class.history_file):
+            print(profile)
+        # ignore all other options and exit
+        sys.exit(0)
     outputs = None
     fetch_map = {
         "history": get_history,
@@ -98,40 +137,59 @@ def cli(args):
     }
 
     if args.type not in fetch_map:
-        utils.logger.error(
+        utils.logger.critical(
             "Type %s is unavailable." " Check --help for available types", args.type
         )
         sys.exit(1)
 
+    if args.browser == "all" and args.profile is not None:
+        # profiles are supported only for one browser at a time
+        parser.error(
+            "Cannot use --profile option without specifying a browser"
+            " or with --browser set to 'all'"
+        )
+
     if args.browser == "all":
         outputs = fetch_map[args.type]()
     else:
-        try:
-            # gets browser class by name (string).
-            selected_browser = args.browser
-            if selected_browser == "default":
-                default = utils.default_browser()
-                if default is None:
-                    sys.exit(1)
-                else:
-                    selected_browser = default.__name__
-            else:
-                for browser in utils.get_browsers():
-                    if browser.__name__.lower() == args.browser.lower():
-                        selected_browser = browser.__name__
-                        break
-            browser_class = getattr(browsers, selected_browser)
-        except AttributeError:
-            utils.logger.error(
-                "Browser %s is unavailable." " Check --help for available browsers",
-                args.browser,
-            )
+        browser_class = utils.get_browser(args.browser)
+        if browser_class is None:
             sys.exit(1)
 
+        browser = browser_class()
+        profile = args.profile
+        if profile is not None:
+            if not browser_class.profile_support:
+                utils.logger.critical(
+                    "%s browser does not support profiles", browser.name
+                )
+                sys.exit(1)
+
+            # get the actual path from profile name
+            if args.type == "history":
+                profile = browser.history_path_profile(profile)
+            elif args.type == "bookmarks":
+                profile = browser.bookmarks_path_profile(profile)
+
+            if not profile.exists():
+                # entire profile might be nonexistent or the specific history
+                # or bookmark file might be missing
+                utils.logger.critical(
+                    "Profile '%s' not found in %s browser "
+                    "or profile does not contain %s",
+                    args.profile,
+                    browser.name,
+                    args.type,
+                )
+                sys.exit(1)
+            else:
+                # fetch_history and fetch_bookmarks require an array
+                profile = [profile]
+
         if args.type == "history":
-            outputs = browser_class().fetch_history()
+            outputs = browser.fetch_history(profile)
         elif args.type == "bookmarks":
-            outputs = browser_class().fetch_bookmarks()
+            outputs = browser.fetch_bookmarks(profile)
 
     try:
         if args.output is None:
