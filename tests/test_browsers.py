@@ -8,6 +8,7 @@ from .utils import (  # noqa: F401; pylint: disable=unused-import
     become_windows,
     change_homedir,
     assert_histories_equal,
+    assert_bookmarks_equal,
 )
 
 
@@ -17,9 +18,12 @@ from .utils import (  # noqa: F401; pylint: disable=unused-import
 def test_firefox_linux(become_linux, change_homedir):  # noqa: F811
     """Test history is correct on Firefox for Linux"""
     f = browser_history.browsers.Firefox()
-    output = f.fetch_history()
-    his = output.histories
+    h_output = f.fetch_history()
+    b_output = f.fetch_bookmarks()
+    his = h_output.histories
+    bmk = b_output.bookmarks
     assert len(his) == 5
+    assert len(bmk) == 30
     assert_histories_equal(
         his[0],
         (
@@ -35,9 +39,29 @@ def test_firefox_linux(become_linux, change_homedir):  # noqa: F811
             "https://www.mozilla.org/en-US/privacy/firefox/",
         ),
     )
+    assert_bookmarks_equal(
+        bmk[0],
+        (
+            datetime.datetime(
+                2005,
+                11,
+                3,
+                3,
+                14,
+                56,
+                tzinfo=datetime.timezone(datetime.timedelta(seconds=19800), "IST"),
+            ),
+            "https://forums.fedoraforum.org/",
+            "Fedora Forum",
+            "User Communities",
+        ),
+    )
     profs = f.profiles(f.history_file)
     his_path = f.history_path_profile(profs[0])
-    assert his_path == Path.home() / ".mozilla/firefox/profile/places.sqlite"
+    bmk_path = f.bookmarks_path_profile(profs[0])
+    assert (
+        his_path == bmk_path == Path.home() / ".mozilla/firefox/profile/places.sqlite"
+    )
     his = f.history_profiles(profs).histories
     assert len(his) == 5
     assert_histories_equal(
@@ -60,9 +84,12 @@ def test_firefox_linux(become_linux, change_homedir):  # noqa: F811
 def test_chrome_linux(become_linux, change_homedir):  # noqa: F811
     """Test history is correct on Chrome for Linux"""
     f = browser_history.browsers.Chrome()
-    output = f.fetch_history()
-    his = output.histories
+    h_output = f.fetch_history()
+    b_output = f.fetch_bookmarks()
+    his = h_output.histories
+    bmk = b_output.bookmarks
     assert len(his) == 2
+    assert len(bmk) == 5
     assert_histories_equal(
         his[0],
         (
@@ -78,10 +105,30 @@ def test_chrome_linux(become_linux, change_homedir):  # noqa: F811
             "www.github.com",
         ),
     )
-    profs = f.profiles(f.history_file)
-    his_path = f.history_path_profile(profs[0])
+    assert_bookmarks_equal(
+        bmk[0],
+        (
+            datetime.datetime(
+                2021,
+                2,
+                9,
+                4,
+                7,
+                32,
+                tzinfo=datetime.timezone(datetime.timedelta(seconds=19800), "IST"),
+            ),
+            "https://github.com/pesos/browser-history",
+            "Browser-history",
+            "bookmark_bar/github",
+        ),
+    )
+    h_profs = f.profiles(f.history_file)
+    b_profs = f.profiles(f.bookmarks_file)
+    his_path = f.history_path_profile(h_profs[0])
+    bmk_path = f.bookmarks_path_profile(b_profs[0])
     assert his_path == Path.home() / ".config/google-chrome/History"
-    his = f.history_profiles(profs).histories
+    assert bmk_path == Path.home() / ".config/google-chrome/Bookmarks"
+    his = f.history_profiles(h_profs).histories
     assert len(his) == 2
     assert_histories_equal(
         his[0],
@@ -103,9 +150,12 @@ def test_chrome_linux(become_linux, change_homedir):  # noqa: F811
 def test_chromium_linux(become_linux, change_homedir):  # noqa: F811
     """Test history is correct on Chromium for Linux"""
     f = browser_history.browsers.Chromium()
-    output = f.fetch_history()
-    his = output.histories
+    h_output = f.fetch_history()
+    b_output = f.fetch_bookmarks()
+    his = h_output.histories
+    bmk = b_output.bookmarks
     assert len(his) == 2
+    assert len(bmk) == 10
     assert_histories_equal(
         his[0],
         (
@@ -121,13 +171,36 @@ def test_chromium_linux(become_linux, change_homedir):  # noqa: F811
             "www.github.com",
         ),
     )
-    profs = f.profiles(f.history_file)
-    his_path = f.history_path_profile(profs[0])
+    assert_bookmarks_equal(
+        bmk[0],
+        (
+            datetime.datetime(
+                2021,
+                2,
+                9,
+                4,
+                7,
+                32,
+                tzinfo=datetime.timezone(datetime.timedelta(seconds=19800), "IST"),
+            ),
+            "https://github.com/pesos/browser-history",
+            "Browser-history",
+            "bookmark_bar/github",
+        ),
+    )
+    h_profs = f.profiles(f.history_file)
+    b_profs = f.profiles(f.bookmarks_file)
+    his_path = f.history_path_profile(h_profs[0])
+    bmk_path = f.bookmarks_path_profile(b_profs[0])
     assert his_path in [
         Path.home() / ".config/chromium/Default/History",
         Path.home() / ".config/chromium/Profile/History",
     ]
-    his = f.history_profiles(profs).histories
+    assert bmk_path in [
+        Path.home() / ".config/chromium/Default/Bookmarks",
+        Path.home() / ".config/chromium/Profile/Bookmarks",
+    ]
+    his = f.history_profiles(h_profs).histories
     assert len(his) == 2
     assert_histories_equal(
         his[0],
@@ -149,9 +222,12 @@ def test_chromium_linux(become_linux, change_homedir):  # noqa: F811
 def test_firefox_windows(become_windows, change_homedir):  # noqa: F811
     """Test history is correct on Firefox for Windows"""
     f = browser_history.browsers.Firefox()
-    output = f.fetch_history()
-    his = output.histories
+    h_output = f.fetch_history()
+    b_output = f.fetch_bookmarks()
+    his = h_output.histories
+    bmk = b_output.bookmarks
     assert len(his) == 8
+    assert len(bmk) == 14
     profs = f.profiles(f.history_file)
     assert len(profs) == 2
     # the history list is long so just check the first and last item
@@ -170,6 +246,23 @@ def test_firefox_windows(become_windows, change_homedir):  # noqa: F811
                 ),
             ),
             "https://www.youtube.com/",
+        ),
+    )
+    assert_bookmarks_equal(
+        bmk[0],
+        (
+            datetime.datetime(
+                2018,
+                12,
+                8,
+                0,
+                33,
+                27,
+                tzinfo=datetime.timezone(datetime.timedelta(seconds=19800), "IST"),
+            ),
+            "http://dl.dlb3d.xyz/S/",
+            "Index of /S/",
+            "unfiled",
         ),
     )
     assert_histories_equal(

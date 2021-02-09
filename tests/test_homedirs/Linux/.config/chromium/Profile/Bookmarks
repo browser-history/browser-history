@@ -1,0 +1,84 @@
+{
+   "checksum": "3a95511d153405d15fd1a026daa3590e",
+   "roots": {
+      "bookmark_bar": {
+         "children": [ {
+            "children": [ {
+               "date_added": "13257317252966677",
+               "guid": "d284a861-0fea-42db-bb8b-268edcc51ef4",
+               "id": "5",
+               "name": "Browser-history",
+               "type": "url",
+               "url": "https://github.com/pesos/browser-history"
+            }, {
+               "date_added": "13257317338517163",
+               "guid": "471d5529-869e-4e99-b280-6f051b31a536",
+               "id": "9",
+               "name": "Trending repositories on GitHub today",
+               "type": "url",
+               "url": "https://github.com/trending"
+            } ],
+            "date_added": "13257317275623560",
+            "date_modified": "13257317361523128",
+            "guid": "2ceff373-5aa4-48f4-a8ca-f81b9324d3ad",
+            "id": "6",
+            "name": "github",
+            "type": "folder"
+         }, {
+            "children": [ {
+               "date_added": "13257317293403687",
+               "guid": "29df9f3c-85cd-4725-bd26-3bc427cf75a8",
+               "id": "7",
+               "name": "Home | Solus",
+               "type": "url",
+               "url": "https://getsol.us/home/"
+            }, {
+               "date_added": "13257317361523128",
+               "guid": "5f56d1f8-4ebb-4034-a62a-57abe5432020",
+               "id": "10",
+               "name": "ArcoLinux | ArcoLinux",
+               "type": "url",
+               "url": "https://arcolinux.com/"
+            } ],
+            "date_added": "13257317319912504",
+            "date_modified": "13257317381472838",
+            "guid": "4d56c7c4-8c1f-44b1-811d-ec9241e63e97",
+            "id": "8",
+            "name": "linux",
+            "type": "folder"
+         }, {
+            "date_added": "13257317381472838",
+            "guid": "a34594d2-04a5-4e5b-b506-80a8115b9212",
+            "id": "11",
+            "name": "YouTube",
+            "type": "url",
+            "url": "https://www.youtube.com/"
+         } ],
+         "date_added": "13257312745570579",
+         "date_modified": "13257317387504032",
+         "guid": "00000000-0000-4000-a000-000000000002",
+         "id": "1",
+         "name": "Bookmarks",
+         "type": "folder"
+      },
+      "other": {
+         "children": [  ],
+         "date_added": "13257312745570582",
+         "date_modified": "0",
+         "guid": "00000000-0000-4000-a000-000000000003",
+         "id": "2",
+         "name": "Other bookmarks",
+         "type": "folder"
+      },
+      "synced": {
+         "children": [  ],
+         "date_added": "13257312745570585",
+         "date_modified": "0",
+         "guid": "00000000-0000-4000-a000-000000000004",
+         "id": "3",
+         "name": "Mobile bookmarks",
+         "type": "folder"
+      }
+   },
+   "version": 1
+}
