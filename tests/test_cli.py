@@ -344,7 +344,9 @@ def test_firefox_windows_profiles(capsys, become_windows, change_homedir):  # no
         captured = capsys.readouterr()
         out = captured.out
 
-    assert out.strip() == "Profile 1\nProfile 2"
+    # use set to make the comparison order-insensitive
+    profiles = set(out.strip().split("\n"))
+    assert profiles == {"Profile 1", "Profile 2"}
 
 
 def test_safari_mac_profiles(caplog, become_mac, change_homedir):  # noqa: F811
