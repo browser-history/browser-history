@@ -400,9 +400,12 @@ def test_safari_mac(become_mac, change_homedir):  # noqa: F811
 
 def test_opera_windows(become_windows, change_homedir):  # noqa: F811
     o = browser_history.browsers.Opera()
-    outputs = o.fetch_history()
-    his = outputs.histories
+    h_output = o.fetch_history()
+    b_output = o.fetch_bookmarks()
+    his = h_output.histories
+    bmk = b_output.bookmarks
     assert len(his) == 2
+    assert len(bmk) == 4
     assert_histories_equal(
         his[0],
         (
@@ -418,6 +421,23 @@ def test_opera_windows(become_windows, change_homedir):  # noqa: F811
                 ),
             ),
             "https://www.youtube.com/",
+        ),
+    )
+    assert_bookmarks_equal(
+        bmk[0],
+        (
+            datetime.datetime(
+                2021,
+                2,
+                17,
+                13,
+                52,
+                41,
+                tzinfo=datetime.timezone(datetime.timedelta(seconds=19800), "IST"),
+            ),
+            "https://www.google.com/",
+            "Google",
+            "bookmark_bar",
         ),
     )
     assert len(his) == 2
@@ -444,9 +464,12 @@ def test_opera_windows(become_windows, change_homedir):  # noqa: F811
 def test_brave_windows(become_windows, change_homedir):  # noqa: F811
     """Test history is correct on Brave for Windows"""
     f = browser_history.browsers.Brave()
-    output = f.fetch_history()
-    his = output.histories
+    h_output = f.fetch_history()
+    b_output = f.fetch_bookmarks()
+    his = h_output.histories
+    bmk = b_output.bookmarks
     assert len(his) == 4
+    assert len(bmk) == 4
     profs = f.profiles(f.history_file)
     assert len(profs) == 2
     # check first and last item to ensure both profiles are searched
@@ -465,6 +488,23 @@ def test_brave_windows(become_windows, change_homedir):  # noqa: F811
                 ),
             ),
             "https://github.com/",
+        ),
+    )
+    assert_bookmarks_equal(
+        bmk[0],
+        (
+            datetime.datetime(
+                2021,
+                2,
+                17,
+                13,
+                52,
+                41,
+                tzinfo=datetime.timezone(datetime.timedelta(seconds=19800), "IST"),
+            ),
+            "https://www.google.com/",
+            "Google",
+            "bookmark_bar",
         ),
     )
     assert_histories_equal(
