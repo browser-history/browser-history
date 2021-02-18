@@ -1,0 +1,69 @@
+{
+   "checksum": "fbae9c350b2fae247bcca1dd617e9a7a",
+   "roots": {
+      "bookmark_bar": {
+         "children": [ {
+            "date_added": "13258023761074324",
+            "guid": "6e5fae15-05d2-4389-afc3-a2f9eea454ec",
+            "id": "5",
+            "name": "Google",
+            "type": "url",
+            "url": "https://www.google.com/"
+         }, {
+            "children": [ {
+               "date_added": "13258023778385483",
+               "guid": "ce09e2d8-0c11-42ec-a838-d1ce137b77bd",
+               "id": "6",
+               "name": "Pop!_OS by System76",
+               "type": "url",
+               "url": "https://pop.system76.com/"
+            }, {
+               "date_added": "13258023921425352",
+               "guid": "3f504a2d-fb59-4ffe-9957-5f9a20908e6f",
+               "id": "9",
+               "name": "Arco",
+               "type": "url",
+               "url": "https://arcolinux.com/"
+            } ],
+            "date_added": "13258023786852702",
+            "date_modified": "13258023940152887",
+            "guid": "3f29a5d3-f286-492a-8c05-b916b9db2abf",
+            "id": "7",
+            "name": "linux",
+            "type": "folder"
+         }, {
+            "date_added": "13258023796525305",
+            "guid": "d03e7e9a-e2a4-4a56-9dc1-1cbf0dea7e9b",
+            "id": "8",
+            "name": "GitHub: Where the world builds software · GitHub",
+            "type": "url",
+            "url": "https://github.com/"
+         } ],
+         "date_added": "13258023738989264",
+         "date_modified": "13258023921425352",
+         "guid": "00000000-0000-4000-a000-000000000002",
+         "id": "1",
+         "name": "Bookmarks",
+         "type": "folder"
+      },
+      "other": {
+         "children": [  ],
+         "date_added": "13258023738989267",
+         "date_modified": "0",
+         "guid": "00000000-0000-4000-a000-000000000003",
+         "id": "2",
+         "name": "Other bookmarks",
+         "type": "folder"
+      },
+      "synced": {
+         "children": [  ],
+         "date_added": "13258023738989271",
+         "date_modified": "0",
+         "guid": "00000000-0000-4000-a000-000000000004",
+         "id": "3",
+         "name": "Mobile bookmarks",
+         "type": "folder"
+      }
+   },
+   "version": 1
+}

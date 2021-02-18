@@ -593,12 +593,16 @@ class ChromiumBasedBrowser(Browser, abc.ABC):
                 if node == "children":
                     for child in bookmarks_json[node]:
                         if child["type"] == "url":
-                            d_t = datetime.datetime(1601, 1, 1) + datetime.timedelta(
+                            d_t = datetime.datetime(
+                                1601, 1, 1, tzinfo=datetime.timezone.utc
+                            ) + datetime.timedelta(
                                 microseconds=int(child["date_added"])
                             )
                             bookmarks_list.append(
                                 (
-                                    d_t.replace(microsecond=0, tzinfo=self._local_tz),
+                                    d_t.replace(microsecond=0).astimezone(
+                                        self._local_tz
+                                    ),
                                     child["url"],
                                     child["name"],
                                     folder,
