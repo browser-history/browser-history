@@ -179,12 +179,7 @@ def get_browser(browser_name):
         browser_class = None
         for browser in get_browsers():
             if browser.__name__.lower() == browser_name.lower():
-                support_check = {
-                    Platform.LINUX: browser.linux_path,
-                    Platform.WINDOWS: browser.windows_path,
-                    Platform.MAC: browser.mac_path
-                }
-                if support_check.get(get_platform()) is not None:
+                if browser.is_supported():
                     browser_class = browser
                 break
         if browser_class is None:

@@ -328,6 +328,20 @@ class Browser(abc.ABC):
                 output_object.bookmarks.sort(reverse=desc)
         return output_object
 
+    @classmethod
+    def is_supported(cls):
+        """Checks whether the browser is supported on current platform
+
+        :return: True if browser is supported on current platform else False
+        :rtype: boolean
+        """
+        support_check = {
+            utils.Platform.LINUX: cls.linux_path,
+            utils.Platform.WINDOWS: cls.windows_path,
+            utils.Platform.MAC: cls.mac_path
+        }
+        return support_check.get(utils.get_platform()) is not None
+
 
 class Outputs:
     """
