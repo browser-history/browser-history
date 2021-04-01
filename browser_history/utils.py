@@ -166,8 +166,9 @@ def get_browser(browser_name):
         or ``default`` (to fetch the default browser).
 
     :return: A browser class which is a subclass of
-        :py:class:`browser_history.generic.Browser` or ``None`` if no supported
-        browsers match the browser name given
+        :py:class:`browser_history.generic.Browser` otherwise ``None`` if no
+        supported browsers match the browser name given or the given browser
+        is not supported on the current platform
 
     :rtype: union[:py:class:`browser_history.generic.Browser`, None]
     """
@@ -178,7 +179,13 @@ def get_browser(browser_name):
         browser_class = None
         for browser in get_browsers():
             if browser.__name__.lower() == browser_name.lower():
-                browser_class = browser
+                support_check = {
+                    Platform.LINUX: browser.linux_path,
+                    Platform.WINDOWS: browser.windows_path,
+                    Platform.MAC: browser.mac_path
+                }
+                if support_check.get(get_platform()) is not None:
+                    browser_class = browser
                 break
         if browser_class is None:
             logger.error(
