@@ -6,7 +6,7 @@ import re
 
 import pytest
 
-from browser_history.utils import get_browsers
+from browser_history.utils import get_browsers, get_browser
 from browser_history.cli import cli, AVAILABLE_BROWSERS
 from .utils import (  # noqa: F401
     become_linux,
@@ -136,6 +136,11 @@ def test_browser_argument(browser_arg, capsys, platform):
     """Test arguments for the browser option."""
     for browser_opt in VALID_CMD_OPTS[2]:
         try:
+            if get_browser(browser_arg) is None:
+                # if browser is in VALID_BROWSER_ARG but not supported on
+                # current platform it will throw a SystemExit so lets raise
+                # an AssertionError and handle it like the rest
+                raise AssertionError("browser is unavailable")
             cli([browser_opt, browser_arg])
             captured = capsys.readouterr()
             assert CSV_HISTORY_HEADER in captured.out
@@ -145,6 +150,7 @@ def test_browser_argument(browser_arg, capsys, platform):
                 for browser_unavailable_err in (
                     "browser is not supported",
                     "browser is not installed",
+                    "browser is unavailable"
                 )
             ):
                 # In case the tester does not have access to the browser
@@ -217,6 +223,11 @@ def test_argument_combinations(capsys, platform, browser):
     for index_a, index_b in itertools.product(indices, indices):
         if available_browser:
             try:
+                if get_browser(browser) is None:
+                    # if browser is in AVAILABLE_BROWSERS but not supported on
+                    # current platform it will throw a SystemExit so lets raise
+                    # an AssertionError and handle it like the rest
+                    raise AssertionError("browser is unavailable")
                 cli(
                     [
                         VALID_CMD_OPTS[1][index_a],  # type
@@ -232,6 +243,7 @@ def test_argument_combinations(capsys, platform, browser):
                         "browser is not supported",
                         "browser is not installed",
                         "Bookmarks are not supported",
+                        "browser is unavailable"
                     )
                 ):
                     # In case the tester does not have access to the browser
