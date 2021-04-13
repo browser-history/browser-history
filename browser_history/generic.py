@@ -265,7 +265,9 @@ class Browser(abc.ABC):
         with tempfile.TemporaryDirectory() as tmpdirname:
             for history_path in history_paths:
                 copied_history_path = shutil.copy2(history_path.absolute(), tmpdirname)
-                conn = sqlite3.connect(f"file:{copied_history_path}?mode=ro", uri=True)
+                conn = sqlite3.connect(
+                    f"file:{copied_history_path}?mode=ro&immutable=1&nolock=1", uri=True
+                )
                 cursor = conn.cursor()
                 cursor.execute(self.history_SQL)
                 date_histories = [
@@ -338,7 +340,7 @@ class Browser(abc.ABC):
         support_check = {
             utils.Platform.LINUX: cls.linux_path,
             utils.Platform.WINDOWS: cls.windows_path,
-            utils.Platform.MAC: cls.mac_path
+            utils.Platform.MAC: cls.mac_path,
         }
         return support_check.get(utils.get_platform()) is not None
 
