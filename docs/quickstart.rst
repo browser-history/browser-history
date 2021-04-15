@@ -49,7 +49,7 @@ Bookmarks
 
 .. warning::
     Experimental feature. Although this has been confirmed to work on multiple (Firefox and Chromium based) browsers
-    on all platforms, it is not covered by tests and has not been used as much as the history feature.
+    on all platforms, it has not been tested as much as the history feature.
 
 To get bookmarks from all installed browsers:
 ::
