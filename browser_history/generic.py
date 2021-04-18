@@ -129,7 +129,7 @@ class Browser(abc.ABC):
         homedir = Path.home()
 
         error_string = (
-            self.name + f" browser is not supported on {utils.get_platform_name(plat)}"
+            f"{self.name} browser is not supported on {utils.get_platform_name(plat)}"
         )
         if plat == utils.Platform.WINDOWS:
             assert self.windows_path is not None, error_string
