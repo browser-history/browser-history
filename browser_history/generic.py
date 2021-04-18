@@ -128,15 +128,17 @@ class Browser(abc.ABC):
             plat = utils.get_platform()
         homedir = Path.home()
 
-        error_string = self.name + " browser is not supported on {}"
+        error_string = (
+            f"{self.name} browser is not supported on {utils.get_platform_name(plat)}"
+        )
         if plat == utils.Platform.WINDOWS:
-            assert self.windows_path is not None, error_string.format("windows")
+            assert self.windows_path is not None, error_string
             self.history_dir = homedir / self.windows_path
         elif plat == utils.Platform.MAC:
-            assert self.mac_path is not None, error_string.format("Mac OS")
+            assert self.mac_path is not None, error_string
             self.history_dir = homedir / self.mac_path
         elif plat == utils.Platform.LINUX:
-            assert self.linux_path is not None, error_string.format("Linux")
+            assert self.linux_path is not None, error_string
             self.history_dir = homedir / self.linux_path
         else:
             raise NotImplementedError()

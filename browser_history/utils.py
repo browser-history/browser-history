@@ -7,6 +7,7 @@ import inspect
 import logging
 import platform
 import subprocess
+from typing import Optional
 
 from . import generic
 
@@ -52,6 +53,20 @@ def get_platform():
     if system == "Windows":
         return Platform.WINDOWS
     raise NotImplementedError(f"Platform {system} is not supported yet")
+
+
+def get_platform_name(plat: Optional[Platform] = None) -> str:
+    """Returns human readable name of the current platform"""
+    if plat is None:
+        plat = get_platform()
+
+    if plat == Platform.LINUX:
+        return "Linux"
+    if plat == Platform.WINDOWS:
+        return "Windows"
+    if plat == Platform.MAC:
+        return "MacOS"
+    return "Unknown"
 
 
 def get_browsers():
@@ -181,10 +196,19 @@ def get_browser(browser_name):
             if browser.__name__.lower() == browser_name.lower():
                 if browser.is_supported():
                     browser_class = browser
-                break
+                    break
+                else:
+                    logger.error(
+                        "%s browser is not supported on %s",
+                        browser_name,
+                        get_platform_name(),
+                    )
+                    return
+
         if browser_class is None:
             logger.error(
                 "%s browser is unavailable. Check --help for available browsers",
                 browser_name,
             )
+
         return browser_class
