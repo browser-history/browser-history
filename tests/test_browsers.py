@@ -586,3 +586,47 @@ def test_vivaldi_mac(become_mac, change_homedir):  # noqa: F811
             "https://pesos.github.io/",
         ),
     )
+
+def test_librewolf_linux(become_linux, change_homedir):  # noqa: F811
+    """Test history is correct on LibreWolf for Linux"""
+    f = browser_history.browsers.LibreWolf()
+    h_output = f.fetch_history()
+    b_output = f.fetch_bookmarks()
+    his = h_output.histories
+    bmk = b_output.bookmarks
+    assert len(his) == 12
+    assert len(bmk) == 1
+    
+    assert_histories_equal(
+        his[0],
+        (
+            datetime.datetime(
+                2021,
+                9,
+                20,
+                17,
+                48,
+                21,
+                tzinfo=datetime.timezone(datetime.timedelta(seconds=19800), "IST"),
+            ),
+            "https://duckduckgo.com/?t=ffab&q=fhgi",
+        ),
+    )
+
+    assert_bookmarks_equal(
+        bmk[0],
+        (
+            datetime.datetime(
+                2021,
+                9,
+                20,
+                18,
+                17,
+                30,
+                tzinfo=datetime.timezone(datetime.timedelta(seconds=19800), "IST"),
+            ),
+            "https://github.com/",
+            "GitHub: Where the world builds software · GitHub",
+            "menu",
+        ),
+    )
