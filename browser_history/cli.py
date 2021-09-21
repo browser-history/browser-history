@@ -3,7 +3,7 @@ command line interface of browser-history."""
 
 import argparse
 import sys
-from argparse import RawTextHelpFormatter
+from argparse import RawDescriptionHelpFormatter
 
 from browser_history import (
     generic,
@@ -42,7 +42,7 @@ def make_parser():
                 Checkout the GitHub repo
                 https://github.com/pesos/browser-history
                 if you have any issues or want to help contribute""",
-        formatter_class=RawTextHelpFormatter,
+        formatter_class=RawDescriptionHelpFormatter,
     )
 
     parser_.add_argument(
