@@ -133,6 +133,22 @@ class Firefox(Browser):
         return date_bookmarks
 
 
+class LibreWolf(Firefox):
+    """LibreWolf Browser
+
+    Supported platforms:
+
+    * Linux
+
+
+    Profile support: Yes
+    """
+    name = "LibreWolf"
+    aliases = ("librewolfurl",)
+
+    linux_path = ".librewolf"
+
+
 class Safari(Browser):
     """Apple Safari browser
 
