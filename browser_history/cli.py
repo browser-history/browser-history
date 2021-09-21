@@ -3,6 +3,7 @@ command line interface of browser-history."""
 
 import argparse
 import sys
+from argparse import RawDescriptionHelpFormatter
 
 from browser_history import (
     generic,
@@ -28,11 +29,20 @@ def make_parser():
     parser_ = argparse.ArgumentParser(
         description="""
                     A tool to retrieve history from
-                    (almost) any browser on (almost) any platform""",
+                    (almost) any browser on (almost) any platform
+
+██████╗ ██████╗  ██████╗ ██╗    ██╗███████╗███████╗██████╗       ██╗  ██╗██╗███████╗████████╗ ██████╗ ██████╗ ██╗   ██╗
+██╔══██╗██╔══██╗██╔═══██╗██║    ██║██╔════╝██╔════╝██╔══██╗      ██║  ██║██║██╔════╝╚══██╔══╝██╔═══██╗██╔══██╗╚██╗ ██╔╝
+██████╔╝██████╔╝██║   ██║██║ █╗ ██║███████╗█████╗  ██████╔╝█████╗███████║██║███████╗   ██║   ██║   ██║██████╔╝ ╚████╔╝
+██╔══██╗██╔══██╗██║   ██║██║███╗██║╚════██║██╔══╝  ██╔══██╗╚════╝██╔══██║██║╚════██║   ██║   ██║   ██║██╔══██╗  ╚██╔╝
+██████╔╝██║  ██║╚██████╔╝╚███╔███╔╝███████║███████╗██║  ██║      ██║  ██║██║███████║   ██║   ╚██████╔╝██║  ██║   ██║
+╚═════╝ ╚═╝  ╚═╝ ╚═════╝  ╚══╝╚══╝ ╚══════╝╚══════╝╚═╝  ╚═╝      ╚═╝  ╚═╝╚═╝╚══════╝   ╚═╝    ╚═════╝ ╚═╝  ╚═╝   ╚═╝
+                    """,  # noqa: E501
         epilog="""
                 Checkout the GitHub repo
                 https://github.com/pesos/browser-history
                 if you have any issues or want to help contribute""",
+        formatter_class=RawDescriptionHelpFormatter,
     )
 
     parser_.add_argument(
