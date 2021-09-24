@@ -1,25 +1,32 @@
-import setuptools
+"""
+browser-history's setup.
 
-with open("README.md", "r") as fh:
-    long_description = fh.read()
+browser-history is a simple, zero-dependencies, developer-friendly
+python package to retrieve (almost) any browser's history on (almost)
+any platform.
 
-setuptools.setup(
-    name="browser-history",  # Replace with your own username
-    version="0.3.1",
-    author="Samyak Sarnayak",
-    author_email="samyak201@gmail.com",
-    description="A python module to extract browser history",
-    long_description=long_description,
-    long_description_content_type="text/markdown",
-    url="https://github.com/pesos/browser-history",
-    packages=setuptools.find_packages(exclude=["tests"]),
-    classifiers=[
-        "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: Apache Software License",
-        "Operating System :: OS Independent",
-    ],
-    python_requires=">=3.6",
-    entry_points={
-        "console_scripts": ["browser-history=browser_history.cli:main"],
-    },
-)
+See https://browser-history.readthedocs.io/en/latest/browsers.html for
+more help.
+"""
+
+try:
+    import setuptools
+except ImportError:
+    raise RuntimeError(
+        "Could not install browser-history in the environment as setuptools "
+        "is missing. Please create a new virtual environment before proceeding"
+    )
+
+import platform
+
+MIN_PYTHON_VERSION = ("3", "6")
+
+if platform.python_version_tuple() < MIN_PYTHON_VERSION:
+    raise SystemExit(
+        "Could not install browser-history in the environment. The"
+        " browser-history package requires python version 3.6+, you are using "
+        f"{platform.python_version()}"
+    )
+
+if __name__ == "__main__":
+    setuptools.setup()
