@@ -5,8 +5,7 @@ browser-history is a simple, zero-dependencies, developer-friendly
 python package to retrieve (almost) any browser's history on (almost)
 any platform.
 
-See https://browser-history.readthedocs.io/en/latest/browsers.html for
-more help.
+See https://browser-history.readthedocs.io/en/stable/ for more help.
 """
 
 try:
