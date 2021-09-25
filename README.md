@@ -1,4 +1,8 @@
-# browser-history
+<p align="center" width="100%">
+    <img width="33%" src="./logo.png">
+</p>
+
+<h1 align="center"> browser-history</h1>
 
 ![tests](https://github.com/pesos/browser-history/workflows/tests/badge.svg)
 [![Documentation Status](https://readthedocs.org/projects/browser-history/badge/?version=latest)](https://browser-history.readthedocs.io/en/latest/?badge=latest)
@@ -97,6 +101,10 @@ Check out the [documentation](https://browser-history.readthedocs.io/en/latest/)
 # Supported Browsers
 
 Read the [documentation](https://browser-history.readthedocs.io/en/latest/browsers.html)
+
+# Credits
+
+Logo designed with :heart: by [XA](https://github.com/XAMES3).
 
 # License
 
