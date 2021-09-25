@@ -98,6 +98,10 @@ Check out the [documentation](https://browser-history.readthedocs.io/en/latest/)
 
 Read the [documentation](https://browser-history.readthedocs.io/en/latest/browsers.html)
 
+# Credits
+
+Logo designed with :heart: by [XA](https://github.com/XAMES3).
+
 # License
 
 Licensed under the [Apache License, Version 2.0 (the "License")](LICENSE)
