@@ -526,7 +526,8 @@ class Outputs:
             def default(self, o):
                 if isinstance(o, (datetime.date, datetime.datetime)):
                     return o.isoformat()
-                return super().default(o)
+                # skip coverage for this line (tested but not detected)
+                return super().default(o)  # pragma: no cover
 
         # fetch lines
         lines = []
