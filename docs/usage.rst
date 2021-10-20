@@ -135,7 +135,7 @@ To plot the the graph ``matplotlib`` is used. So, to install matplotlib enter ``
                     site = por[idx]
                     break
                     
-            if site in frequency:
+            if site not in frequency:
                 frequency[site] += 1
             else:
                 frequency[site] = 1
