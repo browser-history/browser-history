@@ -121,7 +121,7 @@ To plot the the graph ``matplotlib`` is used. So, to install matplotlib enter ``
 
 ::
 
-    from browser_history.browsers import Edge
+    from browser_history.browsers import get_history
     import matplotlib.pyplot as plt
 
     def getMostVisitedSites(history):
@@ -134,10 +134,8 @@ To plot the the graph ``matplotlib`` is used. So, to install matplotlib enter ``
                 if len(por[idx])>1:
                     site = por[idx]
                     break
-            else:
-                site = "NaN"
-
-            if frequency.get(site) != None:
+                    
+            if site in frequency:
                 frequency[site] += 1
             else:
                 frequency[site] = 1
@@ -155,9 +153,7 @@ To plot the the graph ``matplotlib`` is used. So, to install matplotlib enter ``
         plt.title('Site visit stats')
         plt.show()
 
-    b = Edge()
-
-    output = b.fetch_history()
+    output = get_history()
     his = output.histories
 
     rec = getMostVisitedSites(his)
