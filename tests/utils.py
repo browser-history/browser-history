@@ -45,6 +45,14 @@ def become_linux(monkeypatch):
     return platform.system()
 
 
+@pytest.fixture()
+def become_unknown(monkeypatch):
+    """Changes platform.system to return unknown"""
+    monkeypatch.setattr(platform, "system", lambda: "unknown")
+
+    return platform.system()
+
+
 def _detach_timezone_stamp(hist):
     """Remove the timezone associated with the datetime in a history entry.
 
