@@ -38,7 +38,7 @@ History from the default browser
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. warning::
-    Experimental feature. This only works on Linux and Windows, but not for every browser. (see `this PR <https://github.com/pesos/browser-history/pull/123>`_ to check browser and platform support)
+    Experimental feature. This only works on Linux and Windows, but not for every browser. (see `this PR <https://github.com/browser-history/browser-history/pull/123>`_ to check browser and platform support)
 
 Let ``browser-history`` automatically detect the default browser set in the system:
 ::
@@ -137,6 +137,6 @@ Using the CLI
 
 ``browser-history`` provides a command-line interface that can be accessed by typing ``browser-history`` in a terminal (in Windows, this will be the CMD command prompt or powershell).
 
-The CLI provides all of the functionality of ``browser-history`` (please `open an issue <https://github.com/pesos/browser-history/issues>`_ if any feature is missing from the CLI).
+The CLI provides all of the functionality of ``browser-history`` (please `open an issue <https://github.com/browser-history/browser-history/issues>`_ if any feature is missing from the CLI).
 
 More information about the CLI here: :ref:`cli`.

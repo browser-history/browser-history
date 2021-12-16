@@ -40,7 +40,7 @@ def make_parser():
                     """,  # noqa: E501
         epilog="""
                 Checkout the GitHub repo
-                https://github.com/pesos/browser-history
+                https://github.com/browser-history/browser-history
                 if you have any issues or want to help contribute""",
         formatter_class=RawDescriptionHelpFormatter,
     )

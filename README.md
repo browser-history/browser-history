@@ -4,12 +4,12 @@
 
 <h1 align="center"> browser-history</h1>
 
-![tests](https://github.com/pesos/browser-history/workflows/tests/badge.svg)
+![tests](https://github.com/browser-history/browser-history/workflows/tests/badge.svg)
 [![Documentation Status](https://readthedocs.org/projects/browser-history/badge/?version=latest)](https://browser-history.readthedocs.io/en/latest/?badge=latest)
 [![PyPI version](https://badge.fury.io/py/browser-history.svg)](https://badge.fury.io/py/browser-history)
-[![codecov](https://codecov.io/gh/pesos/browser-history/branch/master/graph/badge.svg)](https://codecov.io/gh/pesos/browser-history)
+[![codecov](https://codecov.io/gh/browser-history/browser-history/branch/master/graph/badge.svg)](https://codecov.io/gh/browser-history/browser-history)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![Maintainability](https://api.codeclimate.com/v1/badges/64c86a28b0d7d387ce72/maintainability)](https://codeclimate.com/github/pesos/browser-history/maintainability)
+[![Maintainability](https://api.codeclimate.com/v1/badges/64c86a28b0d7d387ce72/maintainability)](https://codeclimate.com/github/browser-history/browser-history/maintainability)
 
 ``browser-history`` is a simple, zero-dependencies, developer-friendly python
 package to retrieve (almost) any browser's history on (almost) any platform.
@@ -25,7 +25,7 @@ package to retrieve (almost) any browser's history on (almost) any platform.
  - Lightweight: the entire package is less than 20kB in size and has no dependencies other than python 3.6+.
  - Developer friendly: you can add support for new browsers or add a new feature very easily.
  - Default browser: can automatically determine the default browser on Windows and Linux (`browser-history -b default`).
- - Fully open source: this project is developed and maintained by [PES Open Source](https://github.com/pesos) and will always be open source (with the Apache 2.0 License).
+ - Fully open source: this project is developed and maintained by the [`browser-history` organization](https://github.com/browser-history) (previously maintained by [PESOS](https://github.com/pesos)) and will always be open source (with the Apache 2.0 License).
 
 # Quick Start
 
@@ -40,7 +40,7 @@ pip install browser-history
 To install from the master branch (warning: development version. Things could break)
 
 ```
-pip install git+https://github.com/pesos/browser-history.git
+pip install git+https://github.com/browser-history/browser-history.git
 ```
 
 ## Usage

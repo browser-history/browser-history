@@ -12,7 +12,7 @@ To install the latest release::
 
 To install from the master branch (warning: development version. Things could break)::
 
-    pip install git+https://github.com/pesos/browser-history.git
+    pip install git+https://github.com/browser-history/browser-history.git
 
 
 Get started
