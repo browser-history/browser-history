@@ -94,10 +94,6 @@ def get_browsers():
     return get_subclasses(generic.Browser)
 
 
-if get_platform() == Platform.WINDOWS:
-    import winreg  # type: ignore
-
-
 def _default_browser_linux():
     try:
         cmd = "xdg-settings get default-web-browser".split()
@@ -112,6 +108,11 @@ def _default_browser_linux():
 
 
 def _default_browser_win():
+    if get_platform() == Platform.WINDOWS:
+        try:
+            import winreg
+        except ModuleNotFoundError:
+            winreg = None
     reg_path = (
         "Software\\Microsoft\\Windows\\Shell\\Associations\\"
         "UrlAssociations\\https\\UserChoice"
