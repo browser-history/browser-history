@@ -58,3 +58,9 @@ html_theme = "sphinx_rtd_theme"
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 #  html_static_path = ['_static']
+
+# -- LaTeX options -----------------------------------------------------------
+
+# for better unicode support (CLI ASCII art uses unicode symbols)
+# see: latex_engine = 'xelatex'
+latex_engine = "xelatex"
