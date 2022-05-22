@@ -67,11 +67,11 @@ def make_parser() -> argparse.ArgumentParser:
     parser_.add_argument(
         "-f",
         "--format",
-        default="infer",
+        default=None,
         help=f"""
             Format to be used in output. Should be one of {AVAILABLE_FORMATS}.
-            Default is infer (format is inferred from the output file's
-            extension. If no output file (-o) is specified, it defaults to csv).""",
+            If not specified, format is inferred from the output file's
+            extension. If no output file (-o) is specified, it defaults to csv.""",
     )
 
     parser_.add_argument(
@@ -199,7 +199,7 @@ def cli(raw_args: List[str]):
 
     try:
         if args.output is None:
-            if args.format == "infer":
+            if args.format is None:
                 args.format = "csv"
             print(outputs.formatted(args.format))
         elif args.output is not None:

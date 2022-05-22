@@ -15,7 +15,7 @@ from collections import defaultdict
 from functools import partial
 from io import StringIO
 from pathlib import Path
-from typing import Any, Callable, DefaultDict, Dict, List, Optional, Sequence, Tuple
+from typing import Any, Callable, DefaultDict, Dict, List, Optional, Sequence, Tuple, Type
 from urllib.parse import urlparse
 
 import browser_history.utils as utils
@@ -141,11 +141,13 @@ class Browser(abc.ABC):
             self.profile_dir_prefixes = ["*"]
 
     # TODO: fix the return type
-    @abc.abstractmethod
     def bookmarks_parser(
         self, bookmark_path
     ) -> Any:
         """Parse bookmarks and convert to a readable format."""
+        raise NotImplementedError(
+            f"Bookmarks not implemented for this browser: {self.name}"
+        )
 
     def profiles(self, profile_file) -> List[str]:
         """Return a list of profile directories.
@@ -342,6 +344,15 @@ class Browser(abc.ABC):
             utils.Platform.MAC: cls.mac_path,
         }
         return support_check.get(utils.get_platform()) is not None
+
+    _implemented_browsers: List[Type["Browser"]] = []
+    """A list of Browser subclasses which have been implemented."""
+
+    def __init_subclass__(cls, is_abstract: bool = False, *args, **kwargs):
+        """Register list of implemented browsers."""
+        super().__init_subclass__(*args, **kwargs)
+        if not is_abstract:
+            cls._implemented_browsers.append(cls)
 
 
 class Outputs:
@@ -558,7 +569,7 @@ class Outputs:
             out_file.write(self.formatted(output_format))
 
 
-class ChromiumBasedBrowser(Browser, abc.ABC):
+class ChromiumBasedBrowser(Browser, is_abstract=True):
     """A base class to support Chromium based browsers."""
 
     profile_dir_prefixes = ["Default*", "Profile*"]

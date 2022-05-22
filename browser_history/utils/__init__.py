@@ -1,5 +1,4 @@
 """Assorted helper functions."""
-import inspect
 import logging
 import subprocess
 from typing import List, Optional, Type
@@ -24,18 +23,7 @@ def get_browsers() -> List["Type[generic.Browser]"]:
         all inheriting from the super class
         :py:class:`browser_history.generic.Browser`.
     """
-    # recursively get all concrete subclasses
-    def get_subclasses(browser: "Type[generic.Browser]"):
-        # include browser itself in return list if it is concrete
-        sub_classes: List["Type[generic.Browser]"] = []
-        if not inspect.isabstract(browser):
-            sub_classes.append(browser)
-
-        for sub_class in browser.__subclasses__():
-            sub_classes.extend(get_subclasses(sub_class))
-        return sub_classes
-
-    return get_subclasses(generic.Browser)
+    return generic.Browser._implemented_browsers
 
 
 def _default_browser_linux() -> Optional[str]:

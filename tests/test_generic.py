@@ -106,13 +106,6 @@ def test_browser_profiles_remove_trailing_separator():
     assert trimmed_path == f"{browser.history_file}{profile_filename}"[:-1]
 
 
-def test_browser_history_path_profile_is_none():
-    browser = _CustomBrowser(utils.Platform.LINUX)
-    browser.history_file = None
-    path = browser.history_path_profile(pathlib.Path())
-    assert path is None
-
-
 def test_browser_bookmarks_path_profile_is_none():
     browser = _CustomBrowser(utils.Platform.LINUX)
     path = browser.bookmarks_path_profile(pathlib.Path())
