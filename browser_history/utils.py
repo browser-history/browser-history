@@ -1,13 +1,11 @@
-"""
-Module defines Platform class enumerates the popular Operating Systems.
+"""Assorted helper functions."""
 
-"""
 import enum
 import inspect
 import logging
 import platform
 import subprocess
-from typing import Optional
+from typing import List, Optional, Type
 
 from . import generic
 
@@ -19,8 +17,9 @@ logger.addHandler(handler)
 logger.setLevel(logging.INFO)
 
 
+# TODO: perhaps separate this into a `platform` module.
 class Platform(enum.Enum):
-    """An enum used to indicate the system's platform
+    """An enum used to indicate the system's platform.
 
     A value of 0 is reserved for unknown platforms.
 
@@ -40,8 +39,8 @@ class Platform(enum.Enum):
     WINDOWS = 3
 
 
-def get_platform():
-    """Returns the current platform
+def get_platform() -> Platform:
+    """Infer the system's platform.
 
     :rtype: :py:class:`Platform`
     """
@@ -52,11 +51,12 @@ def get_platform():
         return Platform.MAC
     if system == "Windows":
         return Platform.WINDOWS
+    # TODO: check if this is the right error?
     raise NotImplementedError(f"Platform {system} is not supported yet")
 
 
 def get_platform_name(plat: Optional[Platform] = None) -> str:
-    """Returns human readable name of the current platform"""
+    """Human readable name of the current platform."""
     if plat is None:
         plat = get_platform()
 
@@ -69,9 +69,8 @@ def get_platform_name(plat: Optional[Platform] = None) -> str:
     return "Unknown"
 
 
-def get_browsers():
-    """This method provides a list of all browsers implemented by
-    browser_history.
+def get_browsers() -> List["Type[generic.Browser]"]:
+    """Retrieve a list of all browsers implemented by browser_history.
 
     :return: A :py:class:`list` containing implemented browser classes
         all inheriting from the super class
@@ -79,11 +78,10 @@ def get_browsers():
 
     :rtype: :py:class:`list`
     """
-
     # recursively get all concrete subclasses
-    def get_subclasses(browser):
+    def get_subclasses(browser: "Type[generic.Browser]"):
         # include browser itself in return list if it is concrete
-        sub_classes = []
+        sub_classes: List["Type[generic.Browser]"] = []
         if not inspect.isabstract(browser):
             sub_classes.append(browser)
 
@@ -94,7 +92,7 @@ def get_browsers():
     return get_subclasses(generic.Browser)
 
 
-def _default_browser_linux():
+def _default_browser_linux() -> Optional[str]:
     try:
         cmd = "xdg-settings get default-web-browser".split()
         raw_result = subprocess.check_output(cmd, stderr=subprocess.DEVNULL)
@@ -107,16 +105,18 @@ def _default_browser_linux():
     return default
 
 
-def _default_browser_win():
+def _default_browser_win() -> Optional[str]:
     if get_platform() == Platform.WINDOWS:
         try:
             import winreg
         except ModuleNotFoundError:
+            # TODO: why?
             winreg = None
     reg_path = (
         "Software\\Microsoft\\Windows\\Shell\\Associations\\"
         "UrlAssociations\\https\\UserChoice"
     )
+    # TODO: ignore these errors on non-windows platforms?
     with winreg.OpenKey(winreg.HKEY_CURRENT_USER, reg_path) as key:
         default = winreg.QueryValueEx(key, "ProgId")
         if default is None:
@@ -125,8 +125,8 @@ def _default_browser_win():
         return default[0].lower()
 
 
-def default_browser():
-    """This method gets the default browser of the current platform
+def default_browser() -> Optional["Type[generic.Browser]"]:
+    """Get the default browser of the current platform.
 
     :return: A :py:class:`browser_history.generic.Browser` object representing the
         default browser in the current platform. If platform is not supported or
@@ -157,6 +157,7 @@ def default_browser():
 
     # first quick pass for direct matches
     for browser in all_browsers:
+        # TODO: fix type errors here
         if default == browser.name.lower() or default in browser.aliases:
             return browser
 
@@ -170,13 +171,14 @@ def default_browser():
                 return browser
 
     # nothing was found
+    # TODO: maybe print the detected default browser here?
+    #       and ask to specify the browser explicitly?
     logger.warning("Current default browser is not supported")
     return None
 
 
-def get_browser(browser_name):
-    """
-    This method returns the browser class from a browser name.
+def get_browser(browser_name: str) -> Optional["Type[generic.Browser]"]:
+    """Get the browser class from its name.
 
     :param browser_name: a string representing one of the browsers supported
         or ``default`` (to fetch the default browser).

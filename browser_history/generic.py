@@ -1,8 +1,8 @@
-"""
-This module defines the generic base class and the functionality.
+"""This module defines the base Browser class and related things.
 
 All browsers from :py:mod:`browser_history.browsers` inherit this class.
 """
+
 import abc
 import csv
 import datetime
@@ -16,7 +16,7 @@ from collections import defaultdict
 from functools import partial
 from io import StringIO
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
 from urllib.parse import urlparse
 
 import browser_history.utils as utils
@@ -26,8 +26,8 @@ BookmarkVar = List[Tuple[datetime.datetime, str, str, str]]
 
 
 class Browser(abc.ABC):
-    """A generic class to support all major browsers with minimal
-    configuration.
+    # TODO: the :param plat: doc should go into the constructor
+    """A base class to support all major browsers with minimal configuration.
 
     Currently, only browsers which save the history in SQLite files are
     supported.
@@ -72,31 +72,38 @@ class Browser(abc.ABC):
     {'profile_dir_prefixes': [], 'history_dir': PosixPath('/home/username/browser')}
     """
 
-    windows_path: typing.Optional[str] = None  #: browser path on Windows.
-    mac_path: typing.Optional[str] = None  #: browser path on Mac OS.
-    linux_path: typing.Optional[str] = None  #: browser path on Linux.
+    windows_path: Optional[str] = None
+    """Path to directory where the browser data is stored on Windows."""
+    mac_path: Optional[str] = None
+    """Path to directory where the browser data is stored on Mac OS."""
+    linux_path: Optional[str] = None
+    """Path to directory where the browser data is stored on Linux."""
 
-    profile_support: bool = False  #: boolean indicating whether
-    """Boolean indicating whether the browser supports multiple profiles."""
+    profile_support: bool = False
+    """Whether the browser supports multiple profiles."""
 
-    profile_dir_prefixes: typing.Optional[typing.List[typing.Any]] = None
+    profile_dir_prefixes: Optional[List[str]] = None
     """List of possible prefixes for the profile directories.
+
     Keep empty to check all subdirectories in the browser path.
     """
 
-    bookmarks_file: typing.Optional[str] = None
+    bookmarks_file: Optional[str] = None
     """Name of the (SQLite, JSON or PLIST) file which stores the bookmarks."""
 
-    _local_tz: typing.Optional[datetime.tzinfo] = (
+    _local_tz: Optional[datetime.tzinfo] = (
         datetime.datetime.now().astimezone().tzinfo
     )
-    """Gets a datetime object of the current time as per the users timezone."""
+    """A datetime object of the current time as per the users timezone."""
+    # TODO: why is this initialized only once if it's the current time?
 
     history_dir: Path
-    """History directory."""
+    """Actual path to directory where browser history is stored."""
+    # TODO: does this need to be a class property?
 
     aliases: tuple = ()
-    """Gets possible names (lower-cased) used to refer to the browser type.
+    """Possible names (lower-cased) used to refer to the browser type.
+
     Useful for making the browser detectable as a default browser which may be
     named in various forms on different platforms. Do not include :py:class:`name`
     in this list"""
@@ -105,6 +112,8 @@ class Browser(abc.ABC):
     @abc.abstractmethod
     def name(self) -> str:
         """A name for the browser. Not used anywhere except for logging and errors."""
+        # TODO: not true, this is used for matching default browser name too
+        # TODO: why is this a method?
 
     @property
     @abc.abstractmethod
@@ -114,7 +123,8 @@ class Browser(abc.ABC):
     @property
     @abc.abstractmethod
     def history_SQL(self) -> str:
-        """SQL query required to extract history from the ``history_file``.
+        """Return the SQL query required to extract history from the ``history_file``.
+
         The query must return two columns: ``visit_time`` and ``url``.
         The ``visit_time`` must be processed using the `datetime`_
         function with the modifier ``localtime``.
@@ -149,12 +159,13 @@ class Browser(abc.ABC):
     def bookmarks_parser(
         self, bookmark_path
     ):  # pylint: disable=assignment-from-no-return
-        """A function to parse bookmarks and convert to readable format."""
+        """Parse bookmarks and convert to readable format."""
 
     def profiles(self, profile_file) -> typing.List[str]:
-        """Returns a list of profile directories. If the browser is supported
-        on the current
-        platform but is not installed an empty list will be returned
+        """Return a list of profile directories.
+
+        If the browser is supported on the current platform but is not
+        installed an empty list will be returned
 
         :param profile_file: file to search for in the profile directories.
             This should be either ``history_file`` or ``bookmarks_file``.
@@ -162,7 +173,6 @@ class Browser(abc.ABC):
         :rtype: list(str)
 
         """
-
         if not os.path.exists(self.history_dir):
             utils.logger.info("%s browser is not installed", self.name)
             return []
@@ -181,7 +191,7 @@ class Browser(abc.ABC):
         return profile_dirs
 
     def history_path_profile(self, profile_dir: Path) -> typing.Optional[Path]:
-        """Returns path of the history file for the given ``profile_dir``
+        """Return path of the history file for the given ``profile_dir``.
 
         The ``profile_dir`` should be one of the outputs from
         :py:meth:`profiles`
@@ -196,7 +206,7 @@ class Browser(abc.ABC):
         return self.history_dir / profile_dir / self.history_file
 
     def bookmarks_path_profile(self, profile_dir: Path) -> typing.Optional[Path]:
-        """Returns path of the bookmark file for the given ``profile_dir``
+        """Return path of the bookmark file for the given ``profile_dir``.
 
         The ``profile_dir`` should be one of the outputs from
         :py:meth:`profiles`
@@ -211,7 +221,7 @@ class Browser(abc.ABC):
         return self.history_dir / profile_dir / self.bookmarks_file
 
     def paths(self, profile_file):
-        """Returns a list of file paths, for all profiles.
+        """Return a list of file paths, for all profiles.
 
         :rtype: list(:py:class:`pathlib.Path`)
         """
@@ -221,7 +231,7 @@ class Browser(abc.ABC):
         ]
 
     def history_profiles(self, profile_dirs):
-        """Returns history of profiles given by `profile_dirs`.
+        """Return history of profiles given by `profile_dirs`.
 
         :param profile_dirs: List or iterable of profile directories. Can be
             obtained from :py:meth:`profiles`
@@ -237,7 +247,7 @@ class Browser(abc.ABC):
         return self.fetch_history(history_paths)
 
     def fetch_history(self, history_paths=None, sort=True, desc=False):
-        """Returns history of all available profiles stored in SQL.
+        """Return history of all available profiles stored in SQL.
 
         The returned datetimes are timezone-aware with the local timezone set
         by default.
@@ -288,8 +298,7 @@ class Browser(abc.ABC):
         return output_object
 
     def fetch_bookmarks(self, bookmarks_paths=None, sort=True, desc=False):
-        """Returns bookmarks of all available profiles stored in SQL or JSON
-        or plist.
+        """Return bookmarks of all available profiles stored in SQL, JSON or plist.
 
         The returned datetimes are timezone-aware with the local timezone set
         by default.
@@ -312,7 +321,6 @@ class Browser(abc.ABC):
             (timestamp, url, title, folder) tuples
         :rtype: :py:class:`browser_history.generic.Outputs`
         """
-
         assert (
             self.bookmarks_file is not None
         ), "Bookmarks are not supported for {} browser".format(self.name)
@@ -334,7 +342,7 @@ class Browser(abc.ABC):
 
     @classmethod
     def is_supported(cls):
-        """Checks whether the browser is supported on current platform
+        """Check whether the browser is supported on current platform.
 
         :return: True if browser is supported on current platform else False
         :rtype: boolean
@@ -348,25 +356,23 @@ class Browser(abc.ABC):
 
 
 class Outputs:
-    """
-    A generic class to encapsulate history and bookmark outputs and to
-    easily convert them to JSON, CSV or other formats.
+    """Encapsulates history and bookmark outputs with methods for conversion.
 
     :param fetch_type: string argument to select history output or bookmarks output
     """
 
     # type hint for histories and bookmarks have to be manually written for
     # docs instead of using HistoryVar and BookmarkVar respectively
-    histories: List[Tuple[datetime.datetime, str]]  #: List of tuples of Timestamp & URL
+    histories: List[Tuple[datetime.datetime, str]]
+    """List of tuples of Timestamp and URL."""
     bookmarks: List[Tuple[datetime.datetime, str, str, str]]
     """List of tuples of Timestamp, URL, Title, Folder."""
 
     field_map: Dict[str, Dict[str, Any]]
-    """Dictionary which maps fetch_type to the respective variables and
-    formatting fields."""
+    """Maps fetch_type to the respective variables and formatting fields."""
 
     format_map: Dict[str, Callable]
-    """Dictionary which maps output formats to their respective functions."""
+    """Maps output formats to their respective functions."""
 
     def __init__(self, fetch_type):
         self.fetch_type = fetch_type
@@ -386,8 +392,7 @@ class Outputs:
         }
 
     def sort_domain(self) -> typing.DefaultDict[Any, List[Any]]:
-        """
-        Returns the history/bookamarks sorted according to the domain-name.
+        """Return the history/bookamarks sorted according to the domain-name.
 
         Examples:
 
@@ -426,9 +431,7 @@ class Outputs:
         return domain_histories
 
     def formatted(self, output_format: str = "csv") -> str:
-        """
-        Returns history or bookmarks as a :py:class:`str` formatted as
-        ``output_format``
+        """Return history or bookmarks formatted as ``output_format``.
 
         :param output_format: One the formats in `csv`, `json`, `jsonl`
         """
@@ -446,9 +449,9 @@ class Outputs:
         )
 
     def to_csv(self) -> str:
-        """
-        Return history or bookmarks formatted as a comma separated string with
-        the first row having the fields names
+        """Return history or bookmarks formatted as a comma separated string.
+
+        The first row has the fields names.
 
         :return: string with the output in CSV format
 
@@ -482,9 +485,9 @@ class Outputs:
             return output.getvalue()
 
     def to_json(self, json_lines: bool = False) -> str:
-        """
-        Return history or bookmarks formatted as a JSON or JSON Lines format
-        names. If ``json_lines`` flag is `True` convert to JSON Lines format,
+        """Return history or bookmarks formatted as a JSON or JSON Lines.
+
+        If ``json_lines`` flag is `True` convert to JSON Lines format,
         otherwise convert it to Plain JSON format.
 
         :param json_lines: flag to specify if the json_string should be JSON Lines.
@@ -520,7 +523,7 @@ class Outputs:
         """
         # custom json encoder for datetime objects
         class DateTimeEncoder(json.JSONEncoder):
-            """Custom JSON encoder to encode datetime objects"""
+            """Custom JSON encoder to encode datetime objects."""
 
             # Override the default method
             def default(self, o):
@@ -549,15 +552,15 @@ class Outputs:
         return json_string
 
     def save(self, filename, output_format="infer"):
-        """
-        Saves history or bookmarks to a file. Infers the type from the given
-        filename extension. If the type could not be inferred, it defaults
-        to csv.
+        """Save history or bookmarks to a file.
+
+        Infers the type from the given filename extension.
+        If the type could not be inferred, it defaults to csv.
 
         :param filename: the name of the file.
-        :param output_format: (optional)One the formats in `csv`, `json`,
+        :param output_format: (optional) One the formats in `csv`, `json`,
             `jsonl`.
-            If not given, it will automatically be inferd from the file's
+            If not given, it will automatically be inferred from the file's
             extension
         """
         if output_format == "infer":
@@ -573,9 +576,7 @@ class Outputs:
 
 
 class ChromiumBasedBrowser(Browser, abc.ABC):
-    """A generic class to support the increasing number of Chromium based
-    browsers.
-    """
+    """A base class to support Chromium based browsers."""
 
     profile_dir_prefixes = ["Default*", "Profile*"]
 
@@ -597,9 +598,10 @@ class ChromiumBasedBrowser(Browser, abc.ABC):
         """
 
     def bookmarks_parser(self, bookmark_path):
-        """Returns bookmarks of a single profile for Chrome based browsers
+        """Return bookmarks of a single profile for Chromium based browsers.
+
         The returned datetimes are timezone-aware with the local timezone set
-        by default
+        by default.
 
         :param bookmark_path: the path of the bookmark file
         :type bookmark_path: str

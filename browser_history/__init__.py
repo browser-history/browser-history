@@ -1,12 +1,15 @@
-from . import browsers, generic, utils  # noqa: F401
+"""A module to retrieve web browser history."""
+from . import generic, utils
+
+# needed to ensure that implemented browsers are recognized
+from . import browsers  # noqa: F401
 
 
 __version__ = "0.3.2"
 
 
-def get_history():
-    """This method is used to obtain browser histories of all available and
-    supported browsers for the system platform.
+def get_history() -> generic.Outputs:
+    """Obtain browser history of all available and supported browsers.
 
     :return: Object of class :py:class:`browser_history.generic.Outputs` with
         the data member histories set to
@@ -27,9 +30,8 @@ def get_history():
     return output_object
 
 
-def get_bookmarks():
-    """This method is used to obtain browser bookmarks of all available and
-    supported browsers for the system platform.
+def get_bookmarks() -> generic.Outputs:
+    """Obtain browser bookmarks of all available and supported browsers.
 
     :return: Object of class :py:class:`browser_history.generic.Outputs` with
         the data member bookmarks set to
@@ -47,6 +49,8 @@ def get_bookmarks():
             ), f"Bookmarks are not supported on {browser_class.name}"
             browser_output_object = browser_object.fetch_bookmarks()
             output_object.bookmarks.extend(browser_output_object.bookmarks)
+        # TODO: use a more specific error
+        # or is an exception even needed here?
         except AssertionError as e:
             utils.logger.info("%s", e)
     output_object.bookmarks.sort()

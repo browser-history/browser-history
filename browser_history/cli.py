@@ -1,9 +1,9 @@
-"""This module defines functions and globals required for the
-command line interface of browser-history."""
+"""Command line interface of browser-history."""
 
 import argparse
 import sys
 from argparse import RawDescriptionHelpFormatter
+from typing import List
 
 from browser_history import (
     generic,
@@ -20,7 +20,7 @@ AVAILABLE_TYPES = ", ".join(generic.Outputs(fetch_type=None).field_map.keys())
 
 
 def make_parser():
-    """Creates an ArgumentParser, configures and returns it.
+    """Create an :py:class:`argparse.ArgumentParser`, configures and returns it.
 
     This was made into a separate function to be used with sphinx-argparse
 
@@ -38,10 +38,11 @@ def make_parser():
 ██████╔╝██║  ██║╚██████╔╝╚███╔███╔╝███████║███████╗██║  ██║      ██║  ██║██║███████║   ██║   ╚██████╔╝██║  ██║   ██║
 ╚═════╝ ╚═╝  ╚═╝ ╚═════╝  ╚══╝╚══╝ ╚══════╝╚══════╝╚═╝  ╚═╝      ╚═╝  ╚═╝╚═╝╚══════╝   ╚═╝    ╚═════╝ ╚═╝  ╚═╝   ╚═╝
                     """,  # noqa: E501
+        # TODO: fix indentation for all of these using inspect.cleandoc
         epilog="""
                 Checkout the GitHub repo
                 https://github.com/browser-history/browser-history
-                if you have any issues or want to help contribute""",
+                if you have any issues or want to help contribute.""",
         formatter_class=RawDescriptionHelpFormatter,
     )
 
@@ -72,7 +73,7 @@ def make_parser():
         help=f"""
             Format to be used in output. Should be one of {AVAILABLE_FORMATS}.
             Default is infer (format is inferred from the output file's
-            extension. If no output file (-o) is specified, it defaults to csv)""",
+            extension. If no output file (-o) is specified, it defaults to csv).""",
     )
 
     parser_.add_argument(
@@ -90,7 +91,7 @@ def make_parser():
         default=None,
         help="""
                 Specify the profile from which to fetch history or bookmarks. If
-                not provided all profiles are fetched
+                not provided all profiles are fetched.
         """,
     )
 
@@ -115,12 +116,9 @@ def make_parser():
 parser = make_parser()
 
 
-def cli(args):
-    """Entrypoint to the command-line interface (CLI) of browser-history.
-
-    It parses arguments from sys.argv and performs the appropriate actions.
-    """
-    args = parser.parse_args(args)
+def cli(raw_args: List[str]):
+    """Entrypoint to the command-line interface (CLI) of browser-history."""
+    args = parser.parse_args(raw_args)
     if args.show_profiles:
         if args.show_profiles == "all":
             utils.logger.critical(

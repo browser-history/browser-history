@@ -9,7 +9,7 @@ from browser_history.generic import Browser, ChromiumBasedBrowser
 
 
 class Chromium(ChromiumBasedBrowser):
-    """Chromium Browser
+    """Chromium Browser.
 
     Supported platforms (TODO: Mac OS support)
 
@@ -29,7 +29,7 @@ class Chromium(ChromiumBasedBrowser):
 
 
 class Chrome(ChromiumBasedBrowser):
-    """Google Chrome Browser
+    """Google Chrome Browser.
 
     Supported platforms:
 
@@ -51,7 +51,7 @@ class Chrome(ChromiumBasedBrowser):
 
 
 class Firefox(Browser):
-    """Mozilla Firefox Browser
+    """Mozilla Firefox Browser.
 
     Supported platforms:
 
@@ -91,16 +91,16 @@ class Firefox(Browser):
     """
 
     def bookmarks_parser(self, bookmark_path):
-        """Returns bookmarks of a single profile for Firefox based browsers
+        """Return bookmarks of a single profile for Firefox based browsers.
+
         The returned datetimes are timezone-aware with the local timezone set
-        by default
+        by default.
 
         :param bookmark_path: the path of the bookmark file
         :type bookmark_path: str
         :return: a list of tuples of bookmark information
         :rtype: list(tuple(:py:class:`datetime.datetime`, str, str, str))
         """
-
         bookmarks_sql = """
             SELECT
                 datetime(
@@ -134,15 +134,15 @@ class Firefox(Browser):
 
 
 class LibreWolf(Firefox):
-    """LibreWolf Browser
+    """LibreWolf Browser.
 
     Supported platforms:
 
     * Linux
 
-
     Profile support: Yes
     """
+
     name = "LibreWolf"
     aliases = ("librewolfurl",)
 
@@ -150,7 +150,7 @@ class LibreWolf(Firefox):
 
 
 class Safari(Browser):
-    """Apple Safari browser
+    """Apple Safari browser.
 
     Supported platforms:
 
@@ -185,7 +185,7 @@ class Safari(Browser):
 
 
 class Edge(ChromiumBasedBrowser):
-    """Microsoft Edge Browser
+    """Microsoft Edge Browser.
 
     Supported platforms
 
@@ -206,7 +206,7 @@ class Edge(ChromiumBasedBrowser):
 
 
 class Opera(ChromiumBasedBrowser):
-    """Opera Browser
+    """Opera Browser.
 
     Supported platforms
 
@@ -226,7 +226,7 @@ class Opera(ChromiumBasedBrowser):
 
 
 class OperaGX(ChromiumBasedBrowser):
-    """Opera GX Browser
+    """Opera GX Browser.
 
     Supported platforms
 
@@ -244,7 +244,7 @@ class OperaGX(ChromiumBasedBrowser):
 
 
 class Brave(ChromiumBasedBrowser):
-    """Brave Browser
+    """Brave Browser.
 
     Supported platforms:
 
@@ -266,7 +266,7 @@ class Brave(ChromiumBasedBrowser):
 
 
 class Vivaldi(ChromiumBasedBrowser):
-    """Vivaldi Browser
+    """Vivaldi Browser.
 
     Supported platforms (TODO: Add Mac OS support)
 
