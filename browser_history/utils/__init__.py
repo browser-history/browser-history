@@ -7,7 +7,7 @@ import platform
 import subprocess
 from typing import List, Optional, Type
 
-from . import generic
+from .. import generic
 
 logger = logging.getLogger("browser-history")
 handler = logging.StreamHandler()
@@ -23,14 +23,14 @@ class Platform(enum.Enum):
 
     A value of 0 is reserved for unknown platforms.
 
-    **Usage**:
-    To be used without instantiating like so::
-
-        linux = Platform.LINUX
-        mac = Platform.MAC
-        windows = Platform.WINDOWS
-
     See :py:func:`get_platform` to infer the platform from the system.
+
+    Tip:
+        To be used without instantiating like so::
+
+            linux = Platform.LINUX
+            mac = Platform.MAC
+            windows = Platform.WINDOWS
     """
 
     OTHER = 0
@@ -40,10 +40,7 @@ class Platform(enum.Enum):
 
 
 def get_platform() -> Platform:
-    """Infer the system's platform.
-
-    :rtype: :py:class:`Platform`
-    """
+    """Infer the system's platform."""
     system = platform.system()
     if system == "Linux":
         return Platform.LINUX
@@ -72,11 +69,10 @@ def get_platform_name(plat: Optional[Platform] = None) -> str:
 def get_browsers() -> List["Type[generic.Browser]"]:
     """Retrieve a list of all browsers implemented by browser_history.
 
-    :return: A :py:class:`list` containing implemented browser classes
+    Returns:
+        A :py:class:`list` containing implemented browser classes
         all inheriting from the super class
-        :py:class:`browser_history.generic.Browser`
-
-    :rtype: :py:class:`list`
+        :py:class:`browser_history.generic.Browser`.
     """
     # recursively get all concrete subclasses
     def get_subclasses(browser: "Type[generic.Browser]"):
@@ -128,11 +124,10 @@ def _default_browser_win() -> Optional[str]:
 def default_browser() -> Optional["Type[generic.Browser]"]:
     """Get the default browser of the current platform.
 
-    :return: A :py:class:`browser_history.generic.Browser` object representing the
+    Returns:
+        A :py:class:`browser_history.generic.Browser` subclass representing the
         default browser in the current platform. If platform is not supported or
-        default browser is unknown or unsupported ``None`` is returned
-
-    :rtype: union[:py:class:`browser_history.generic.Browser`, None]
+        default browser is unknown or unsupported ``None`` is returned.
     """
     plat = get_platform()
 
@@ -180,15 +175,15 @@ def default_browser() -> Optional["Type[generic.Browser]"]:
 def get_browser(browser_name: str) -> Optional["Type[generic.Browser]"]:
     """Get the browser class from its name.
 
-    :param browser_name: a string representing one of the browsers supported
-        or ``default`` (to fetch the default browser).
+    Args:
+        browser_name: a string representing one of the browsers supported
+            or ``default`` (to fetch the default browser).
 
-    :return: A browser class which is a subclass of
-        :py:class:`browser_history.generic.Browser` otherwise ``None`` if no
-        supported browsers match the browser name given or the given browser
-        is not supported on the current platform
-
-    :rtype: union[:py:class:`browser_history.generic.Browser`, None]
+    Returns:
+        A browser class which is a subclass of
+        :py:class:`browser_history.generic.Browser`. ``None`` if no supported browsers
+        match the browser name given or the given browser is not supported on the
+        current platform
     """
     # gets browser class by name (string).
     if browser_name == "default":

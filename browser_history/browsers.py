@@ -6,6 +6,7 @@ import datetime
 import sqlite3
 
 from browser_history.generic import Browser, ChromiumBasedBrowser
+from browser_history.utils.timezone import local_tz
 
 
 class Chromium(ChromiumBasedBrowser):
@@ -122,7 +123,7 @@ class Firefox(Browser):
         date_bookmarks = [
             (
                 datetime.datetime.strptime(d, "%Y-%m-%d %H:%M:%S").replace(
-                    tzinfo=self._local_tz
+                    tzinfo=local_tz()
                 ),
                 url,
                 title,

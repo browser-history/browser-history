@@ -19,12 +19,10 @@ AVAILABLE_FORMATS = ", ".join(generic.Outputs(fetch_type=None).format_map.keys()
 AVAILABLE_TYPES = ", ".join(generic.Outputs(fetch_type=None).field_map.keys())
 
 
-def make_parser():
+def make_parser() -> argparse.ArgumentParser:
     """Create an :py:class:`argparse.ArgumentParser`, configures and returns it.
 
-    This was made into a separate function to be used with sphinx-argparse
-
-    :rtype: :py:class:`argparse.ArgumentParser`
+    This was made into a separate function to be used with sphinx-argparse.
     """
     parser_ = argparse.ArgumentParser(
         description="""

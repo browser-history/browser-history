@@ -11,11 +11,10 @@ __version__ = "0.3.2"
 def get_history() -> generic.Outputs:
     """Obtain browser history of all available and supported browsers.
 
-    :return: Object of class :py:class:`browser_history.generic.Outputs` with
+    Returns:
+        Object of class :py:class:`browser_history.generic.Outputs` with
         the data member histories set to
-        list(tuple(:py:class:`datetime.datetime`, str))
-
-    :rtype: :py:class:`browser_history.generic.Outputs`
+        list(tuple(:py:class:`datetime.datetime`, str)).
     """
     output_object = generic.Outputs(fetch_type="history")
     browser_classes = utils.get_browsers()
@@ -33,11 +32,10 @@ def get_history() -> generic.Outputs:
 def get_bookmarks() -> generic.Outputs:
     """Obtain browser bookmarks of all available and supported browsers.
 
-    :return: Object of class :py:class:`browser_history.generic.Outputs` with
+    Returns:
+        Object of class :py:class:`browser_history.generic.Outputs` with
         the data member bookmarks set to
-        list(tuple(:py:class:`datetime.datetime`, str, str, str))
-
-    :rtype: :py:class:`browser_history.generic.Outputs`
+        list(tuple(:py:class:`datetime.datetime`, str, str, str)).
     """
     output_object = generic.Outputs(fetch_type="bookmarks")
     subclasses = utils.get_browsers()
