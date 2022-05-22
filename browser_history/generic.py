@@ -15,7 +15,17 @@ from collections import defaultdict
 from functools import partial
 from io import StringIO
 from pathlib import Path
-from typing import Any, Callable, DefaultDict, Dict, List, Optional, Sequence, Tuple, Type
+from typing import (
+    Any,
+    Callable,
+    DefaultDict,
+    Dict,
+    List,
+    Optional,
+    Sequence,
+    Tuple,
+    Type,
+)
 from urllib.parse import urlparse
 
 import browser_history.utils as utils
@@ -141,9 +151,7 @@ class Browser(abc.ABC):
             self.profile_dir_prefixes = ["*"]
 
     # TODO: fix the return type
-    def bookmarks_parser(
-        self, bookmark_path
-    ) -> Any:
+    def bookmarks_parser(self, bookmark_path) -> Any:
         """Parse bookmarks and convert to a readable format."""
         raise NotImplementedError(
             f"Bookmarks not implemented for this browser: {self.name}"
@@ -592,8 +600,7 @@ class ChromiumBasedBrowser(Browser, is_abstract=True):
     """
 
     def bookmarks_parser(
-        self,
-        bookmark_path: str
+        self, bookmark_path: str
     ) -> List[Tuple[datetime.datetime, str, str, str]]:
         """Return bookmarks of a single profile for Chromium based browsers.
 
@@ -616,9 +623,7 @@ class ChromiumBasedBrowser(Browser, is_abstract=True):
                             )
                             bookmarks_list.append(
                                 (
-                                    d_t.replace(microsecond=0).astimezone(
-                                        local_tz()
-                                    ),
+                                    d_t.replace(microsecond=0).astimezone(local_tz()),
                                     child["url"],
                                     child["name"],
                                     folder,
