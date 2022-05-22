@@ -9,6 +9,7 @@ from unittest.mock import patch, Mock
 
 import pytest
 from browser_history import generic, utils
+from browser_history.exceptions import BookmarksNotSupportedError
 from browser_history.generic import Outputs, ChromiumBasedBrowser
 
 
@@ -80,9 +81,9 @@ def test_output_sort_domain(entries, exp_res):
 
 class _CustomBrowser(generic.Browser):
     name = "Custom browser"
-    history_file = ""
-    history_SQL = ""
-    linux_path = "random_path"
+    _history_file = ""
+    _history_SQL = ""
+    _linux_path = "random_path"
     profile_support = True
 
 
@@ -93,7 +94,7 @@ def test_browser_unknown_platform():
 
 def test_browser_profiles_remove_trailing_separator():
     browser = _CustomBrowser(utils.Platform.LINUX)
-    browser.history_file = "history/"
+    browser._history_file = "history/"
     profile_filename = f"profile.file{os.sep}"
     mocked_os = Mock()
     mocked_os.walk.return_value = [
@@ -102,19 +103,19 @@ def test_browser_profiles_remove_trailing_separator():
     mocked_os.path.split.return_value = [profile_filename]
     mocked_os.sep = os.sep
     with patch("browser_history.generic.os", mocked_os):
-        trimmed_path = browser.profiles(profile_filename)[0]
-    assert trimmed_path == f"{browser.history_file}{profile_filename}"[:-1]
+        trimmed_path = browser._profiles(profile_filename)[0]
+    assert trimmed_path == f"{browser._history_file}{profile_filename}"[:-1]
 
 
-def test_browser_bookmarks_path_profile_is_none():
+def test_browser_bookmarks_paths_throws_error():
     browser = _CustomBrowser(utils.Platform.LINUX)
-    path = browser.bookmarks_path_profile(pathlib.Path())
-    assert path is None
+    with pytest.raises(BookmarksNotSupportedError):
+        browser._bookmark_paths()
 
 
 def test_browser_fetch_bookmarks_path_doesnt_exist():
     browser = _CustomBrowser(utils.Platform.LINUX)
-    browser.bookmarks_file = "bookmarks.file"
+    browser._bookmarks_file = "bookmarks.file"
     output = browser.fetch_bookmarks(["path/to/bookmarks"])
     assert output.bookmarks == []
 
@@ -140,7 +141,7 @@ def test_outputs_save_invalid_output_format():
 def test_chromium_based_browser_bookmark_parser_deep_hierarchy():
     class CustomChromiumBrowser(ChromiumBasedBrowser):
         name = "Test"
-        linux_path = "random_path"
+        _linux_path = "random_path"
 
     browser = CustomChromiumBrowser(utils.Platform.LINUX)
     nodes = {
@@ -161,5 +162,5 @@ def test_chromium_based_browser_bookmark_parser_deep_hierarchy():
     }
     with patch("browser_history.generic.open"):
         with patch("browser_history.generic.json.load", Mock(return_value=nodes)):
-            bookmark_list = browser.bookmarks_parser("/")
+            bookmark_list = browser._bookmarks_parser("/")
     assert len(bookmark_list) == 1

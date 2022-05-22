@@ -132,7 +132,7 @@ def cli(raw_args: List[str]):
                 "%s browser does not support profiles", browser_class.name
             )
             sys.exit(1)
-        for profile in browser_class().profiles(browser_class.history_file):
+        for profile in browser_class()._profiles(browser_class._history_file):
             print(profile)
         # ignore all other options and exit
         sys.exit(0)
@@ -173,9 +173,9 @@ def cli(raw_args: List[str]):
 
             # get the actual path from profile name
             if args.type == "history":
-                profile = browser.history_path_profile(profile)
+                profile = browser._history_paths(profile)
             elif args.type == "bookmarks":
-                profile = browser.bookmarks_path_profile(profile)
+                profile = browser._bookmark_paths(profile)
 
             if not profile.exists():
                 # entire profile might be nonexistent or the specific history

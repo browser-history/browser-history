@@ -43,7 +43,7 @@ def get_bookmarks() -> generic.Outputs:
         try:
             browser_object = browser_class()
             assert (
-                browser_object.bookmarks_file is not None
+                browser_object._bookmarks_file is not None
             ), f"Bookmarks are not supported on {browser_class.name}"
             browser_output_object = browser_object.fetch_bookmarks()
             output_object.bookmarks.extend(browser_output_object.bookmarks)

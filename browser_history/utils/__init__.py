@@ -91,7 +91,7 @@ def default_browser() -> Optional["Type[generic.Browser]"]:
     # first quick pass for direct matches
     for browser in all_browsers:
         # TODO: fix type errors here
-        if default == browser.name.lower() or default in browser.aliases:
+        if default == browser.name.lower() or default in browser._aliases:
             return browser
 
     # separate pass for deeper matches
@@ -99,7 +99,7 @@ def default_browser() -> Optional["Type[generic.Browser]"]:
         # look for alias matches even if the default name has "noise"
         # for instance firefox on windows returns something like
         # "firefoxurl-3EEDF34567DDE" but we only need "firefoxurl"
-        for alias in browser.aliases:
+        for alias in browser._aliases:
             if alias in default:
                 return browser
 

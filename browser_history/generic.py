@@ -25,14 +25,14 @@ from typing import (
     Sequence,
     Tuple,
     Type,
+    Union,
+    overload
 )
 from urllib.parse import urlparse
 
 import browser_history.utils as utils
+from browser_history.exceptions import BookmarksNotSupportedError
 from browser_history.utils.timezone import local_tz
-
-HistoryVar = List[Tuple[datetime.datetime, str]]
-BookmarkVar = List[Tuple[datetime.datetime, str, str, str]]
 
 
 class Browser(abc.ABC):
@@ -47,56 +47,56 @@ class Browser(abc.ABC):
     * **paths**: A path string, relative to the home directory, where the
       browsers data is saved.
       At least one of the following must be set:
-      :py:class:`windows_path`, :py:class:`mac_path`, :py:class:`linux_path`
-    * :py:class:`history_file`
-    * :py:class:`history_SQL`
+      :py:class:`_windows_path`, :py:class:`_mac_path`, :py:class:`_linux_path`
+    * :py:class:`_history_file`
+    * :py:class:`_history_SQL`
 
     These following class variable can optionally be set:
 
-    * :py:class:`bookmarks_file`
-    * :py:class:`bookmarks_parser`
+    * :py:class:`_bookmarks_file`
+    * :py:class:`_bookmarks_parser`
     * :py:class:`profile_support`
-    * :py:class:`profile_dir_prefixes`
+    * :py:class:`_profile_dir_prefixes`
     * :py:class:`_local_tz`
-    * :py:class:`aliases`: A tuple containing other names for the browser in lowercase
+    * :py:class:`_aliases`: A tuple containing other names for the browser in lowercase
 
     Example:
         >>> class CustomBrowser(Browser):
         ...     name = 'custom browser'
-        ...     aliases = ('custom-browser', 'customhtm')
-        ...     history_file = 'history_file'
-        ...     history_SQL = \"\"\"
+        ...     _aliases = ('custom-browser', 'customhtm')
+        ...     _history_file = 'history_file'
+        ...     _history_SQL = \"\"\"
         ...         SELECT
         ...             url
         ...         FROM
         ...             history_visits
         ...     \"\"\"
-        ...     linux_path = 'browser'
+        ...     _linux_path = 'browser'
         ...
         ... vars(CustomBrowser())
-        {'profile_dir_prefixes': [], 'history_dir': PosixPath('/home/username/browser')}
+        {'_history_dir': PosixPath('/home/username/browser')}
     """
 
-    windows_path: Optional[str] = None
+    _windows_path: Optional[str] = None
     """Path to directory where the browser data is stored on Windows."""
-    mac_path: Optional[str] = None
+    _mac_path: Optional[str] = None
     """Path to directory where the browser data is stored on Mac OS."""
-    linux_path: Optional[str] = None
+    _linux_path: Optional[str] = None
     """Path to directory where the browser data is stored on Linux."""
 
     profile_support: bool = False
     """Whether the browser supports multiple profiles."""
 
-    profile_dir_prefixes: Optional[List[str]] = None
+    _profile_dir_prefixes: Optional[List[str]] = None
     """List of possible prefixes for the profile directories.
 
     Keep empty to check all subdirectories in the browser path.
     """
 
-    bookmarks_file: Optional[str] = None
+    _bookmarks_file: Optional[str] = None
     """Name of the (SQLite, JSON or PLIST) file which stores the bookmarks."""
 
-    aliases: tuple = ()
+    _aliases: tuple = ()
     """Possible names (lower-cased) used to refer to the browser type.
 
     Useful for making the browser detectable as a default browser which may be
@@ -106,11 +106,11 @@ class Browser(abc.ABC):
     name: str
     """Name of the browser."""
 
-    history_file: str
+    _history_file: str
     """Name of the (SQLite) file which stores the history."""
 
-    history_SQL: str
-    """The SQL query required to extract history from the ``history_file``.
+    _history_SQL: str
+    """The SQL query required to extract history from the ``_history_file``.
 
     The query must return two columns: ``visit_time`` and ``url``.
     The ``visit_time`` must be processed using the `datetime`_
@@ -132,25 +132,28 @@ class Browser(abc.ABC):
             plat = utils.get_platform()
         homedir = Path.home()
 
+        self._history_dir: Path
+        """:py:class:`Path` to the directory where this browser's history is stored."""
+
         error_string = (
             f"{self.name} browser is not supported on {utils.get_platform_name(plat)}"
         )
         if plat == utils.Platform.WINDOWS:
-            assert self.windows_path is not None, error_string
-            self.history_dir = homedir / self.windows_path
+            assert self._windows_path is not None, error_string
+            self._history_dir = homedir / self._windows_path
         elif plat == utils.Platform.MAC:
-            assert self.mac_path is not None, error_string
-            self.history_dir = homedir / self.mac_path
+            assert self._mac_path is not None, error_string
+            self._history_dir = homedir / self._mac_path
         elif plat == utils.Platform.LINUX:
-            assert self.linux_path is not None, error_string
-            self.history_dir = homedir / self.linux_path
+            assert self._linux_path is not None, error_string
+            self._history_dir = homedir / self._linux_path
         else:
             raise NotImplementedError()
 
-        if self.profile_support and not self.profile_dir_prefixes:
-            self.profile_dir_prefixes = ["*"]
+        if self.profile_support and not self._profile_dir_prefixes:
+            self._profile_dir_prefixes = ["*"]
 
-    def bookmarks_parser(
+    def _bookmarks_parser(
         self, bookmark_path: str
     ) -> List[Tuple[datetime.datetime, str, str, str]]:
         """Parse bookmarks and convert to a readable format.
@@ -163,7 +166,7 @@ class Browser(abc.ABC):
             f"Got bookmark path: {bookmark_path}"
         )
 
-    def profiles(self, profile_file) -> List[str]:
+    def _profiles(self, profile_file: str) -> List[str]:
         """Return a list of profile directories.
 
         If the browser is supported on the current platform but is not
@@ -171,20 +174,20 @@ class Browser(abc.ABC):
 
         Args:
             profile_file: file to search for in the profile directories.
-                This should be either ``history_file`` or ``bookmarks_file``.
+                This should be either ``_history_file`` or ``_bookmarks_file``.
         """
-        if not os.path.exists(self.history_dir):
+        if not os.path.exists(self._history_dir):
             utils.logger.info("%s browser is not installed", self.name)
             return []
         if not self.profile_support:
             return ["."]
         profile_dirs = []
-        for dirpath, _, filenames in os.walk(str(self.history_dir)):
+        for dirpath, _, filenames in os.walk(str(self._history_dir)):
             for item in filenames:
                 # TODO: why join and then split??
                 if os.path.split(os.path.join(dirpath, item))[-1] == profile_file:
                     # TODO: why is str(dirpath) needed?
-                    path = str(dirpath).split(str(self.history_dir), maxsplit=1)[-1]
+                    path = str(dirpath).split(str(self._history_dir), maxsplit=1)[-1]
                     if path.startswith(os.sep):
                         path = path[1:]
                     if path.endswith(os.sep):
@@ -192,59 +195,98 @@ class Browser(abc.ABC):
                     profile_dirs.append(path)
         return profile_dirs
 
-    def history_path_profile(self, profile_dir: str) -> Path:
-        """Return path of the history file for the given ``profile_dir``.
+    def profiles_with_history(self) -> List[str]:
+        """All profile names which have browser history."""
+        return self._profiles(self._history_file)
 
-        The ``profile_dir`` should be one of the outputs from
-        :py:meth:`profiles`.
+    def profiles_with_bookmarks(self) -> List[str]:
+        """All profile names which have browser bookmarks."""
+        if self._bookmarks_file is None:
+            raise BookmarksNotSupportedError(self.name)
+        return self._profiles(self._bookmarks_file)
+
+    @overload
+    def _history_paths(
+        self, profile_dir: None = None
+    ) -> List[Path]:
+        ...
+
+    @overload
+    def _history_paths(
+        self, profile_dir: str
+    ) -> Path:
+        ...
+
+    def _history_paths(
+        self, profile_dir: Optional[str] = None
+    ) -> Union[Path, List[Path]]:
+        """Return paths of the history files.
 
         Args:
-            profile_dir: Profile directory (should be a single name,
-                relative to ``history_dir``)
-        """
-        return self.history_dir / profile_dir / self.history_file
-
-    def bookmarks_path_profile(self, profile_dir: Path) -> Optional[Path]:
-        """Return path of the bookmark file for the given ``profile_dir``.
-
-        The ``profile_dir`` should be one of the outputs from :py:meth:`profiles`.
-
-        Args:
-            profile_dir: Profile directory (should be a single name, relative to
-                ``history_dir``)
+            profile_dir: the profile directory. If provided, this should be one of the
+                outputs from :py:meth:`profiles_with_history`.
 
         Returns:
-            :py:class:`Path` to the bookmark file. ``None`` if this browser does not
-            support bookmarks.
+            a single path to the history file if ``profile_dir`` is provided, otherwise
+            paths to history files of all profiles.
         """
-        if self.bookmarks_file is None:
-            return None
-        return self.history_dir / profile_dir / self.bookmarks_file
+        if profile_dir is not None:
+            return self._history_dir / profile_dir / self._history_file
+        else:
+            return [
+                self._history_dir / profile_dir / self._history_file
+                for profile_dir in self._profiles(profile_file=self._history_file)
+            ]
 
-    def paths(self, profile_file: str) -> List[Path]:
-        """Return a list of file paths, for all profiles.
+    @overload
+    def _bookmark_paths(
+        self, profile_dir: None = None
+    ) -> List[Path]:
+        ...
+
+    @overload
+    def _bookmark_paths(
+        self, profile_dir: str
+    ) -> Path:
+        ...
+
+    def _bookmark_paths(
+        self, profile_dir: Optional[str] = None
+    ) -> Union[Path, List[Path]]:
+        """Return paths of the bookmarks files.
 
         Args:
-            profile_file: the name of the file for which paths must be returned. Must be
-                one of :py:class:`history_file` or :py:class:`bookmarks_file`.
+            profile_dir: the profile directory. If provided, this should be one of the
+                outputs from :py:meth:`profiles_with_bookmarks`.
+
+        Returns:
+            a single path to the bookmarks file if ``profile_dir`` is provided,
+            otherwise paths to bookmarks files of all profiles.
         """
-        return [
-            self.history_dir / profile_dir / profile_file
-            for profile_dir in self.profiles(profile_file=profile_file)
-        ]
+        if self._bookmarks_file is None:
+            raise BookmarksNotSupportedError(self.name)
+
+        if profile_dir is not None:
+            return self._history_dir / profile_dir / self._bookmarks_file
+        else:
+            return [
+                self._history_dir / profile_dir / self._bookmarks_file
+                for profile_dir in self._profiles(profile_file=self._bookmarks_file)
+            ]
 
     def history_profiles(self, profile_dirs: Sequence[str]) -> "Outputs":
         """Return history of profiles given by `profile_dirs`.
 
         Args:
-            profile_dirs: Profile directories. Can be obtained from :py:meth:`profiles`.
+            profile_dirs: Profile directories. Can be obtained from
+                :py:meth:`_profiles`.
 
         Returns:
             Object of class :py:class:`browser_history.generic.Outputs` with the data
             member histories set to list(tuple(:py:class:`datetime.datetime`, str)).
         """
         history_paths = [
-            self.history_path_profile(profile_dir) for profile_dir in profile_dirs
+            self._history_paths(profile_dir) for profile_dir in profile_dirs
         ]
         return self.fetch_history(history_paths)
 
@@ -277,7 +319,7 @@ class Browser(abc.ABC):
             done because the SQlite files are locked by the browser when in use.
         """
         if history_paths is None:
-            history_paths = self.paths(profile_file=self.history_file)
+            history_paths = self._history_paths()
         output_object = Outputs(fetch_type="history")
         with tempfile.TemporaryDirectory() as tmpdirname:
             for history_path in history_paths:
@@ -286,7 +328,7 @@ class Browser(abc.ABC):
                     f"file:{copied_history_path}?mode=ro&immutable=1&nolock=1", uri=True
                 )
                 cursor = conn.cursor()
-                cursor.execute(self.history_SQL)
+                cursor.execute(self._history_SQL)
                 date_histories = [
                     (
                         datetime.datetime.strptime(d, "%Y-%m-%d %H:%M:%S").replace(
@@ -331,10 +373,10 @@ class Browser(abc.ABC):
             done because the SQlite files are locked by the browser when in use.
         """
         assert (
-            self.bookmarks_file is not None
+            self._bookmarks_file is not None
         ), "Bookmarks are not supported for {} browser".format(self.name)
         if bookmarks_paths is None:
-            bookmarks_paths = self.paths(profile_file=self.bookmarks_file)
+            bookmarks_paths = self._bookmark_paths()
         output_object = Outputs(fetch_type="bookmarks")
         with tempfile.TemporaryDirectory() as tmpdirname:
             for bookmarks_path in bookmarks_paths:
@@ -343,7 +385,7 @@ class Browser(abc.ABC):
                 copied_bookmark_path = shutil.copy2(
                     bookmarks_path.absolute(), tmpdirname
                 )
-                date_bookmarks = self.bookmarks_parser(copied_bookmark_path)
+                date_bookmarks = self._bookmarks_parser(copied_bookmark_path)
                 output_object.bookmarks.extend(date_bookmarks)
             if sort:
                 output_object.bookmarks.sort(reverse=desc)
@@ -353,9 +395,9 @@ class Browser(abc.ABC):
     def is_supported(cls):
         """Check whether the browser is supported on current platform."""
         support_check = {
-            utils.Platform.LINUX: cls.linux_path,
-            utils.Platform.WINDOWS: cls.windows_path,
-            utils.Platform.MAC: cls.mac_path,
+            utils.Platform.LINUX: cls._linux_path,
+            utils.Platform.WINDOWS: cls._windows_path,
+            utils.Platform.MAC: cls._mac_path,
         }
         return support_check.get(utils.get_platform()) is not None
 
@@ -586,12 +628,12 @@ class Outputs:
 class ChromiumBasedBrowser(Browser, is_abstract=True):
     """A base class to support Chromium based browsers."""
 
-    profile_dir_prefixes = ["Default*", "Profile*"]
+    _profile_dir_prefixes = ["Default*", "Profile*"]
 
-    history_file = "History"
-    bookmarks_file = "Bookmarks"
+    _history_file = "History"
+    _bookmarks_file = "Bookmarks"
 
-    history_SQL = """
+    _history_SQL = """
         SELECT
             datetime(
                 visits.visit_time/1000000-11644473600, 'unixepoch', 'localtime'
@@ -605,7 +647,7 @@ class ChromiumBasedBrowser(Browser, is_abstract=True):
             visit_time DESC
     """
 
-    def bookmarks_parser(
+    def _bookmarks_parser(
         self, bookmark_path: str
     ) -> List[Tuple[datetime.datetime, str, str, str]]:
         """Return bookmarks of a single profile for Chromium based browsers.
