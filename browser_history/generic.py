@@ -150,11 +150,17 @@ class Browser(abc.ABC):
         if self.profile_support and not self.profile_dir_prefixes:
             self.profile_dir_prefixes = ["*"]
 
-    # TODO: fix the return type
-    def bookmarks_parser(self, bookmark_path) -> Any:
-        """Parse bookmarks and convert to a readable format."""
+    def bookmarks_parser(
+        self, bookmark_path: str
+    ) -> List[Tuple[datetime.datetime, str, str, str]]:
+        """Parse bookmarks and convert to a readable format.
+
+        Args:
+            bookmark_path: the path of the bookmark file.
+        """
         raise NotImplementedError(
-            f"Bookmarks not implemented for this browser: {self.name}"
+            f"Bookmarks not implemented for this browser: {self.name}. "
+            f"Got bookmark path: {bookmark_path}"
         )
 
     def profiles(self, profile_file) -> List[str]:

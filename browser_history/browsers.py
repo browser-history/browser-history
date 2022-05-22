@@ -4,6 +4,7 @@ All browsers must inherit from :py:mod:`browser_history.generic.Browser`.
 """
 import datetime
 import sqlite3
+from typing import List, Tuple
 
 from browser_history.generic import Browser, ChromiumBasedBrowser
 from browser_history.utils.timezone import local_tz
@@ -91,16 +92,16 @@ class Firefox(Browser):
             visit_date IS NOT NULL AND url LIKE 'http%' AND title IS NOT NULL
     """
 
-    def bookmarks_parser(self, bookmark_path):
+    def bookmarks_parser(
+        self, bookmark_path: str
+    ) -> List[Tuple[datetime.datetime, str, str, str]]:
         """Return bookmarks of a single profile for Firefox based browsers.
 
         The returned datetimes are timezone-aware with the local timezone set
         by default.
 
-        :param bookmark_path: the path of the bookmark file
-        :type bookmark_path: str
-        :return: a list of tuples of bookmark information
-        :rtype: list(tuple(:py:class:`datetime.datetime`, str, str, str))
+        Args:
+            bookmark_path: the path of the bookmark file.
         """
         bookmarks_sql = """
             SELECT
