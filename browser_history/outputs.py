@@ -258,6 +258,11 @@ class HistoryOutputs(Outputs[Tuple[datetime.datetime, str]]):
     def _fetch_type() -> str:
         return "history"
 
+    @property
+    def histories(self):
+        """List of history data."""
+        return self.data
+
 
 class BookmarksOutputs(Outputs[Tuple[datetime.datetime, str, str, str]]):
     """Encapsulates bookmarks output with methods for conversion and extraction."""
@@ -269,3 +274,8 @@ class BookmarksOutputs(Outputs[Tuple[datetime.datetime, str, str, str]]):
     @staticmethod
     def _fetch_type() -> str:
         return "bookmarks"
+
+    @property
+    def bookmarks(self):
+        """List of bookmarks data."""
+        return self.data

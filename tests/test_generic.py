@@ -10,15 +10,15 @@ from unittest.mock import patch, Mock
 import pytest
 from browser_history import generic, utils
 from browser_history.exceptions import BookmarksNotSupportedError
-from browser_history.generic import Outputs, ChromiumBasedBrowser
+from browser_history.generic import ChromiumBasedBrowser
+from browser_history.outputs import HistoryOutputs, BookmarksOutputs
 
 
 def test_outputs_init():
     """test Outputs init"""
-    obj = generic.Outputs("history")
+    obj = generic.HistoryOutputs()
     assert not obj.histories
-    assert obj.format_map
-    assert obj.field_map
+    assert obj._format_map
 
 
 @pytest.mark.parametrize(
@@ -38,8 +38,8 @@ def test_outputs_init():
 )
 def test_output_to_csv(entries, exp_res):
     """test Outputs.to_csv"""
-    obj = generic.Outputs("history")
-    obj.histories.extend(entries)
+    obj = generic.HistoryOutputs()
+    obj.data.extend(entries)
     assert obj.to_csv() == exp_res
 
 
@@ -74,9 +74,9 @@ def test_output_to_csv(entries, exp_res):
 )
 def test_output_sort_domain(entries, exp_res):
     """test Outputs.sort_domain"""
-    obj = generic.Outputs("history")
-    obj.histories.extend(entries)
-    assert list(obj.sort_domain().items()) == exp_res
+    obj = generic.HistoryOutputs()
+    obj.data.extend(entries)
+    assert list(obj.group_by_domain().items()) == exp_res
 
 
 class _CustomBrowser(generic.Browser):
@@ -123,8 +123,8 @@ def test_browser_fetch_bookmarks_path_doesnt_exist():
 def test_date_time_encoder_default_isoformat_only_date_type():
     initial_string = "date as string"
     entries = [(initial_string, "https://example.com")]
-    outputs = Outputs("history")
-    outputs.histories.extend(entries)
+    outputs = HistoryOutputs()
+    outputs.data.extend(entries)
     output_str = outputs.to_json(True)
     assert (
         output_str
@@ -133,7 +133,7 @@ def test_date_time_encoder_default_isoformat_only_date_type():
 
 
 def test_outputs_save_invalid_output_format():
-    outputs = Outputs("history")
+    outputs = HistoryOutputs()
     with pytest.raises(ValueError):
         outputs.save("file.name")
 
