@@ -1,30 +1,24 @@
-"""This module defines functions and globals required for the
-command line interface of browser-history."""
+"""Command line interface of browser-history."""
 
 import argparse
 import sys
 from argparse import RawDescriptionHelpFormatter
+from typing import List, Optional
 
-from browser_history import (
-    generic,
-    get_bookmarks,
-    get_history,
-    utils,
-    __version__,
-)
+from browser_history import __version__, get_bookmarks, get_history, outputs, utils
 
 # get list of all implemented browser by finding subclasses of generic.Browser
 AVAILABLE_BROWSERS = ", ".join(b.__name__ for b in utils.get_browsers())
-AVAILABLE_FORMATS = ", ".join(generic.Outputs(fetch_type=None).format_map.keys())
-AVAILABLE_TYPES = ", ".join(generic.Outputs(fetch_type=None).field_map.keys())
+AVAILABLE_FORMATS = ", ".join(outputs.Outputs._format_map.keys())
+AVAILABLE_TYPES = ", ".join(
+    sub._fetch_type() for sub in outputs.Outputs.__subclasses__()
+)
 
 
-def make_parser():
-    """Creates an ArgumentParser, configures and returns it.
+def make_parser() -> argparse.ArgumentParser:
+    """Create an :py:class:`argparse.ArgumentParser`, configures and returns it.
 
-    This was made into a separate function to be used with sphinx-argparse
-
-    :rtype: :py:class:`argparse.ArgumentParser`
+    This was made into a separate function to be used with sphinx-argparse.
     """
     parser_ = argparse.ArgumentParser(
         description="""
@@ -38,10 +32,11 @@ def make_parser():
 ██████╔╝██║  ██║╚██████╔╝╚███╔███╔╝███████║███████╗██║  ██║      ██║  ██║██║███████║   ██║   ╚██████╔╝██║  ██║   ██║
 ╚═════╝ ╚═╝  ╚═╝ ╚═════╝  ╚══╝╚══╝ ╚══════╝╚══════╝╚═╝  ╚═╝      ╚═╝  ╚═╝╚═╝╚══════╝   ╚═╝    ╚═════╝ ╚═╝  ╚═╝   ╚═╝
                     """,  # noqa: E501
+        # TODO: fix indentation for all of these using inspect.cleandoc
         epilog="""
                 Checkout the GitHub repo
                 https://github.com/browser-history/browser-history
-                if you have any issues or want to help contribute""",
+                if you have any issues or want to help contribute.""",
         formatter_class=RawDescriptionHelpFormatter,
     )
 
@@ -68,11 +63,11 @@ def make_parser():
     parser_.add_argument(
         "-f",
         "--format",
-        default="infer",
+        default=None,
         help=f"""
             Format to be used in output. Should be one of {AVAILABLE_FORMATS}.
-            Default is infer (format is inferred from the output file's
-            extension. If no output file (-o) is specified, it defaults to csv)""",
+            If not specified, format is inferred from the output file's
+            extension. If no output file (-o) is specified, it defaults to csv.""",
     )
 
     parser_.add_argument(
@@ -90,7 +85,7 @@ def make_parser():
         default=None,
         help="""
                 Specify the profile from which to fetch history or bookmarks. If
-                not provided all profiles are fetched
+                not provided all profiles are fetched.
         """,
     )
 
@@ -115,12 +110,9 @@ def make_parser():
 parser = make_parser()
 
 
-def cli(args):
-    """Entrypoint to the command-line interface (CLI) of browser-history.
-
-    It parses arguments from sys.argv and performs the appropriate actions.
-    """
-    args = parser.parse_args(args)
+def cli(raw_args: List[str]):
+    """Entrypoint to the command-line interface (CLI) of browser-history."""
+    args = parser.parse_args(raw_args)
     if args.show_profiles:
         if args.show_profiles == "all":
             utils.logger.critical(
@@ -136,7 +128,7 @@ def cli(args):
                 "%s browser does not support profiles", browser_class.name
             )
             sys.exit(1)
-        for profile in browser_class().profiles(browser_class.history_file):
+        for profile in browser_class()._profiles(browser_class._history_file):
             print(profile)
         # ignore all other options and exit
         sys.exit(0)
@@ -167,7 +159,8 @@ def cli(args):
             sys.exit(1)
 
         browser = browser_class()
-        profile = args.profile
+        profile: Optional[str] = args.profile
+        profiles = []
         if profile is not None:
             if not browser_class.profile_support:
                 utils.logger.critical(
@@ -177,11 +170,14 @@ def cli(args):
 
             # get the actual path from profile name
             if args.type == "history":
-                profile = browser.history_path_profile(profile)
+                profile_path = browser._history_paths(profile)
             elif args.type == "bookmarks":
-                profile = browser.bookmarks_path_profile(profile)
+                profile_path = browser._bookmark_paths(profile)
+            else:
+                # TODO: can this ever occur?
+                raise Exception(f"Unrecognized type: {args.type}")
 
-            if not profile.exists():
+            if not profile_path.exists():
                 # entire profile might be nonexistent or the specific history
                 # or bookmark file might be missing
                 utils.logger.critical(
@@ -194,16 +190,19 @@ def cli(args):
                 sys.exit(1)
             else:
                 # fetch_history and fetch_bookmarks require an array
-                profile = [profile]
+                profiles = [profile_path]
 
         if args.type == "history":
-            outputs = browser.fetch_history(profile)
+            outputs = browser.fetch_history(profiles)
         elif args.type == "bookmarks":
-            outputs = browser.fetch_bookmarks(profile)
+            outputs = browser.fetch_bookmarks(profiles)
+        else:
+            # TODO: can this ever occur?
+            raise Exception(f"Unrecognized type: {args.type}")
 
     try:
         if args.output is None:
-            if args.format == "infer":
+            if args.format is None:
                 args.format = "csv"
             print(outputs.formatted(args.format))
         elif args.output is not None:
@@ -215,4 +214,8 @@ def cli(args):
 
 
 def main():
+    """Entrypoint to the command-line interface (CLI) of browser-history.
+
+    Takes parameters from `sys.argv`.
+    """
     cli(sys.argv[1:])

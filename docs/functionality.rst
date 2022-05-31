@@ -8,4 +8,5 @@ Currently, all :ref:`supported_browsers` use the same generic class :py:class:`b
 .. autoclass:: browser_history.generic.Browser
    :members:
    :private-members:
+   :special-members: __init__
 

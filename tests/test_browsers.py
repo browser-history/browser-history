@@ -56,9 +56,9 @@ def test_firefox_linux(become_linux, change_homedir):  # noqa: F811
             "User Communities",
         ),
     )
-    profs = f.profiles(f.history_file)
-    his_path = f.history_path_profile(profs[0])
-    bmk_path = f.bookmarks_path_profile(profs[0])
+    profs = f._profiles(f._history_file)
+    his_path = f._history_paths(profs[0])
+    bmk_path = f._bookmark_paths(profs[0])
     assert (
         his_path == bmk_path == Path.home() / ".mozilla/firefox/profile/places.sqlite"
     )
@@ -122,10 +122,10 @@ def test_chrome_linux(become_linux, change_homedir):  # noqa: F811
             "bookmark_bar/github",
         ),
     )
-    h_profs = f.profiles(f.history_file)
-    b_profs = f.profiles(f.bookmarks_file)
-    his_path = f.history_path_profile(h_profs[0])
-    bmk_path = f.bookmarks_path_profile(b_profs[0])
+    h_profs = f._profiles(f._history_file)
+    b_profs = f._profiles(f._bookmarks_file)
+    his_path = f._history_paths(h_profs[0])
+    bmk_path = f._bookmark_paths(b_profs[0])
     assert his_path == Path.home() / ".config/google-chrome/History"
     assert bmk_path == Path.home() / ".config/google-chrome/Bookmarks"
     his = f.history_profiles(h_profs).histories
@@ -188,10 +188,10 @@ def test_chromium_linux(become_linux, change_homedir):  # noqa: F811
             "bookmark_bar/github",
         ),
     )
-    h_profs = f.profiles(f.history_file)
-    b_profs = f.profiles(f.bookmarks_file)
-    his_path = f.history_path_profile(h_profs[0])
-    bmk_path = f.bookmarks_path_profile(b_profs[0])
+    h_profs = f._profiles(f._history_file)
+    b_profs = f._profiles(f._bookmarks_file)
+    his_path = f._history_paths(h_profs[0])
+    bmk_path = f._bookmark_paths(b_profs[0])
     assert his_path in [
         Path.home() / ".config/chromium/Default/History",
         Path.home() / ".config/chromium/Profile/History",
@@ -228,7 +228,7 @@ def test_firefox_windows(become_windows, change_homedir):  # noqa: F811
     bmk = b_output.bookmarks
     assert len(his) == 8
     assert len(bmk) == 14
-    profs = f.profiles(f.history_file)
+    profs = f._profiles(f._history_file)
     assert len(profs) == 2
     # the history list is long so just check the first and last item
     assert_histories_equal(
@@ -330,9 +330,9 @@ def test_edge_windows(become_windows, change_homedir):  # noqa: F811
     )
 
     # test history from specific profile
-    profs = e.profiles(e.history_file)
+    profs = e._profiles(e._history_file)
     assert len(profs) == 2
-    his_path = e.history_path_profile("Profile 2")
+    his_path = e._history_paths("Profile 2")
     assert (
         his_path
         == Path.home() / "AppData/Local/Microsoft/Edge/User Data/Profile 2/History"
@@ -458,7 +458,7 @@ def test_opera_windows(become_windows, change_homedir):  # noqa: F811
             "https://github.com/",
         ),
     )
-    assert len(o.profiles(o.history_file)) == 1
+    assert len(o._profiles(o._history_file)) == 1
 
 
 def test_brave_windows(become_windows, change_homedir):  # noqa: F811
@@ -470,7 +470,7 @@ def test_brave_windows(become_windows, change_homedir):  # noqa: F811
     bmk = b_output.bookmarks
     assert len(his) == 4
     assert len(bmk) == 4
-    profs = f.profiles(f.history_file)
+    profs = f._profiles(f._history_file)
     assert len(profs) == 2
     # check first and last item to ensure both profiles are searched
     assert_histories_equal(
@@ -551,7 +551,7 @@ def test_vivaldi_mac(become_mac, change_homedir):  # noqa: F811
     output = f.fetch_history()
     his = output.histories
     assert len(his) == 2
-    profs = f.profiles(f.history_file)
+    profs = f._profiles(f._history_file)
     assert len(profs) == 1
     # check first and last item to ensure both profiles are searched
     assert_histories_equal(

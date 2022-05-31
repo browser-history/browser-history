@@ -56,7 +56,6 @@ VALID_BROWSER_ARGS = [
 ]
 INVALID_BROWSER_ARGS = ["explorer", "ie", "netscape", "none", "brr"]
 VALID_FORMAT_ARGS = [
-    "infer",
     "csv",
     "json",
     "jsonl",
@@ -187,7 +186,7 @@ def test_format_argument(capsys, platform):
         for fmt_arg in VALID_FORMAT_ARGS:
             cli([fmt_opt, fmt_arg])
             output = capsys.readouterr().out
-            if fmt_arg in ("csv", "infer"):  # infer gives csv if no file
+            if fmt_arg in ("csv",):
                 read_csv.sniff(output, delimiters=",")
                 assert read_csv.has_header(output)
                 assert CSV_HISTORY_HEADER in output
@@ -271,7 +270,7 @@ def test_argument_combinations(capsys, platform, browser):
             cli(
                 [
                     VALID_CMD_OPTS[3][index_b],  # format
-                    VALID_FORMAT_ARGS[2],  # ... is json,
+                    VALID_FORMAT_ARGS[1],  # ... is json,
                     VALID_CMD_OPTS[4][index_b],  # output
                     tmpdir + "out.json",  # ... is a named file
                 ]

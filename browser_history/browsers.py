@@ -4,12 +4,14 @@ All browsers must inherit from :py:mod:`browser_history.generic.Browser`.
 """
 import datetime
 import sqlite3
+from typing import List, Tuple
 
 from browser_history.generic import Browser, ChromiumBasedBrowser
+from browser_history.utils.timezone import local_tz
 
 
 class Chromium(ChromiumBasedBrowser):
-    """Chromium Browser
+    """Chromium Browser.
 
     Supported platforms (TODO: Mac OS support)
 
@@ -20,16 +22,16 @@ class Chromium(ChromiumBasedBrowser):
     """
 
     name = "Chromium"
-    aliases = ("chromiumhtm", "chromium-browser", "chromiumhtml")
+    _aliases = ("chromiumhtm", "chromium-browser", "chromiumhtml")
 
-    linux_path = ".config/chromium"
-    windows_path = "AppData/Local/chromium/User Data"
+    _linux_path = ".config/chromium"
+    _windows_path = "AppData/Local/chromium/User Data"
 
     profile_support = True
 
 
 class Chrome(ChromiumBasedBrowser):
-    """Google Chrome Browser
+    """Google Chrome Browser.
 
     Supported platforms:
 
@@ -41,17 +43,17 @@ class Chrome(ChromiumBasedBrowser):
     """
 
     name = "Chrome"
-    aliases = ("chromehtml", "google-chrome", "chromehtm")
+    _aliases = ("chromehtml", "google-chrome", "chromehtm")
 
-    linux_path = ".config/google-chrome"
-    windows_path = "AppData/Local/Google/Chrome/User Data"
-    mac_path = "Library/Application Support/Google/Chrome/"
+    _linux_path = ".config/google-chrome"
+    _windows_path = "AppData/Local/Google/Chrome/User Data"
+    _mac_path = "Library/Application Support/Google/Chrome/"
 
     profile_support = True
 
 
 class Firefox(Browser):
-    """Mozilla Firefox Browser
+    """Mozilla Firefox Browser.
 
     Supported platforms:
 
@@ -63,18 +65,18 @@ class Firefox(Browser):
     """
 
     name = "Firefox"
-    aliases = ("firefoxurl",)
+    _aliases = ("firefoxurl",)
 
-    linux_path = ".mozilla/firefox"
-    windows_path = "AppData/Roaming/Mozilla/Firefox/Profiles"
-    mac_path = "Library/Application Support/Firefox/Profiles/"
+    _linux_path = ".mozilla/firefox"
+    _windows_path = "AppData/Roaming/Mozilla/Firefox/Profiles"
+    _mac_path = "Library/Application Support/Firefox/Profiles/"
 
     profile_support = True
 
-    history_file = "places.sqlite"
-    bookmarks_file = "places.sqlite"
+    _history_file = "places.sqlite"
+    _bookmarks_file = "places.sqlite"
 
-    history_SQL = """
+    _history_SQL = """
         SELECT
             datetime(
                 visit_date/1000000, 'unixepoch', 'localtime'
@@ -90,17 +92,17 @@ class Firefox(Browser):
             visit_date IS NOT NULL AND url LIKE 'http%' AND title IS NOT NULL
     """
 
-    def bookmarks_parser(self, bookmark_path):
-        """Returns bookmarks of a single profile for Firefox based browsers
+    def _bookmarks_parser(
+        self, bookmark_path: str
+    ) -> List[Tuple[datetime.datetime, str, str, str]]:
+        """Return bookmarks of a single profile for Firefox based browsers.
+
         The returned datetimes are timezone-aware with the local timezone set
-        by default
+        by default.
 
-        :param bookmark_path: the path of the bookmark file
-        :type bookmark_path: str
-        :return: a list of tuples of bookmark information
-        :rtype: list(tuple(:py:class:`datetime.datetime`, str, str, str))
+        Args:
+            bookmark_path: the path of the bookmark file.
         """
-
         bookmarks_sql = """
             SELECT
                 datetime(
@@ -122,7 +124,7 @@ class Firefox(Browser):
         date_bookmarks = [
             (
                 datetime.datetime.strptime(d, "%Y-%m-%d %H:%M:%S").replace(
-                    tzinfo=self._local_tz
+                    tzinfo=local_tz()
                 ),
                 url,
                 title,
@@ -134,23 +136,23 @@ class Firefox(Browser):
 
 
 class LibreWolf(Firefox):
-    """LibreWolf Browser
+    """LibreWolf Browser.
 
     Supported platforms:
 
     * Linux
 
-
     Profile support: Yes
     """
-    name = "LibreWolf"
-    aliases = ("librewolfurl",)
 
-    linux_path = ".librewolf"
+    name = "LibreWolf"
+    _aliases = ("librewolfurl",)
+
+    _linux_path = ".librewolf"
 
 
 class Safari(Browser):
-    """Apple Safari browser
+    """Apple Safari browser.
 
     Supported platforms:
 
@@ -161,13 +163,13 @@ class Safari(Browser):
 
     name = "Safari"
 
-    mac_path = "Library/Safari"
+    _mac_path = "Library/Safari"
 
     profile_support = False
 
-    history_file = "History.db"
+    _history_file = "History.db"
 
-    history_SQL = """
+    _history_SQL = """
         SELECT
             datetime(
                 visit_time + 978307200, 'unixepoch', 'localtime'
@@ -185,7 +187,7 @@ class Safari(Browser):
 
 
 class Edge(ChromiumBasedBrowser):
-    """Microsoft Edge Browser
+    """Microsoft Edge Browser.
 
     Supported platforms
 
@@ -196,17 +198,17 @@ class Edge(ChromiumBasedBrowser):
     """
 
     name = "Edge"
-    aliases = ("msedgehtm", "msedge", "microsoft-edge", "microsoft-edge-dev")
+    _aliases = ("msedgehtm", "msedge", "microsoft-edge", "microsoft-edge-dev")
 
-    linux_path = ".config/microsoft-edge-dev"
-    windows_path = "AppData/Local/Microsoft/Edge/User Data"
-    mac_path = "Library/Application Support/Microsoft Edge"
+    _linux_path = ".config/microsoft-edge-dev"
+    _windows_path = "AppData/Local/Microsoft/Edge/User Data"
+    _mac_path = "Library/Application Support/Microsoft Edge"
 
     profile_support = True
 
 
 class Opera(ChromiumBasedBrowser):
-    """Opera Browser
+    """Opera Browser.
 
     Supported platforms
 
@@ -216,17 +218,17 @@ class Opera(ChromiumBasedBrowser):
     """
 
     name = "Opera"
-    aliases = ("operastable", "opera-stable")
+    _aliases = ("operastable", "opera-stable")
 
-    linux_path = ".config/opera"
-    windows_path = "AppData/Roaming/Opera Software/Opera Stable"
-    mac_path = "Library/Application Support/com.operasoftware.Opera"
+    _linux_path = ".config/opera"
+    _windows_path = "AppData/Roaming/Opera Software/Opera Stable"
+    _mac_path = "Library/Application Support/com.operasoftware.Opera"
 
     profile_support = False
 
 
 class OperaGX(ChromiumBasedBrowser):
-    """Opera GX Browser
+    """Opera GX Browser.
 
     Supported platforms
 
@@ -236,15 +238,15 @@ class OperaGX(ChromiumBasedBrowser):
     """
 
     name = "OperaGX"
-    aliases = ("operagxstable", "operagx-stable")
+    _aliases = ("operagxstable", "operagx-stable")
 
-    windows_path = "AppData/Roaming/Opera Software/Opera GX Stable"
+    _windows_path = "AppData/Roaming/Opera Software/Opera GX Stable"
 
     profile_support = False
 
 
 class Brave(ChromiumBasedBrowser):
-    """Brave Browser
+    """Brave Browser.
 
     Supported platforms:
 
@@ -256,17 +258,17 @@ class Brave(ChromiumBasedBrowser):
     """
 
     name = "Brave"
-    aliases = ("bravehtml",)
+    _aliases = ("bravehtml",)
 
-    linux_path = ".config/BraveSoftware/Brave-Browser"
-    mac_path = "Library/Application Support/BraveSoftware/Brave-Browser"
-    windows_path = "AppData/Local/BraveSoftware/Brave-Browser/User Data"
+    _linux_path = ".config/BraveSoftware/Brave-Browser"
+    _mac_path = "Library/Application Support/BraveSoftware/Brave-Browser"
+    _windows_path = "AppData/Local/BraveSoftware/Brave-Browser/User Data"
 
     profile_support = True
 
 
 class Vivaldi(ChromiumBasedBrowser):
-    """Vivaldi Browser
+    """Vivaldi Browser.
 
     Supported platforms (TODO: Add Mac OS support)
 
@@ -277,10 +279,10 @@ class Vivaldi(ChromiumBasedBrowser):
     """
 
     name = "Vivaldi"
-    aliases = ("vivaldi-stable", "vivaldistable")
+    _aliases = ("vivaldi-stable", "vivaldistable")
 
-    linux_path = ".config/vivaldi"
-    mac_path = "Library/Application Support/Vivaldi"
-    windows_path = "AppData/Local/Vivaldi/User Data"
+    _linux_path = ".config/vivaldi"
+    _mac_path = "Library/Application Support/Vivaldi"
+    _windows_path = "AppData/Local/Vivaldi/User Data"
 
     profile_support = True
