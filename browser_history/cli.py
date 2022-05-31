@@ -3,20 +3,16 @@
 import argparse
 import sys
 from argparse import RawDescriptionHelpFormatter
-from typing import List
+from typing import List, Optional
 
-from browser_history import (
-    generic,
-    get_bookmarks,
-    get_history,
-    utils,
-    __version__,
-)
+from browser_history import __version__, get_bookmarks, get_history, outputs, utils
 
 # get list of all implemented browser by finding subclasses of generic.Browser
 AVAILABLE_BROWSERS = ", ".join(b.__name__ for b in utils.get_browsers())
-AVAILABLE_FORMATS = ", ".join(generic.Outputs(fetch_type=None).format_map.keys())
-AVAILABLE_TYPES = ", ".join(generic.Outputs(fetch_type=None).field_map.keys())
+AVAILABLE_FORMATS = ", ".join(outputs.Outputs._format_map.keys())
+AVAILABLE_TYPES = ", ".join(
+    sub._fetch_type() for sub in outputs.Outputs.__subclasses__()
+)
 
 
 def make_parser() -> argparse.ArgumentParser:
@@ -163,7 +159,8 @@ def cli(raw_args: List[str]):
             sys.exit(1)
 
         browser = browser_class()
-        profile = args.profile
+        profile: Optional[str] = args.profile
+        profiles = []
         if profile is not None:
             if not browser_class.profile_support:
                 utils.logger.critical(
@@ -173,11 +170,14 @@ def cli(raw_args: List[str]):
 
             # get the actual path from profile name
             if args.type == "history":
-                profile = browser._history_paths(profile)
+                profile_path = browser._history_paths(profile)
             elif args.type == "bookmarks":
-                profile = browser._bookmark_paths(profile)
+                profile_path = browser._bookmark_paths(profile)
+            else:
+                # TODO: can this ever occur?
+                raise Exception(f"Unrecognized type: {args.type}")
 
-            if not profile.exists():
+            if not profile_path.exists():
                 # entire profile might be nonexistent or the specific history
                 # or bookmark file might be missing
                 utils.logger.critical(
@@ -190,12 +190,15 @@ def cli(raw_args: List[str]):
                 sys.exit(1)
             else:
                 # fetch_history and fetch_bookmarks require an array
-                profile = [profile]
+                profiles = [profile_path]
 
         if args.type == "history":
-            outputs = browser.fetch_history(profile)
+            outputs = browser.fetch_history(profiles)
         elif args.type == "bookmarks":
-            outputs = browser.fetch_bookmarks(profile)
+            outputs = browser.fetch_bookmarks(profiles)
+        else:
+            # TODO: can this ever occur?
+            raise Exception(f"Unrecognized type: {args.type}")
 
     try:
         if args.output is None:
@@ -211,4 +214,8 @@ def cli(raw_args: List[str]):
 
 
 def main():
+    """Entrypoint to the command-line interface (CLI) of browser-history.
+
+    Takes parameters from `sys.argv`.
+    """
     cli(sys.argv[1:])

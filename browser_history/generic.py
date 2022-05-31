@@ -4,31 +4,15 @@ All browsers from :py:mod:`browser_history.browsers` inherit this class.
 """
 
 import abc
-import csv
 import datetime
 import json
 import os
 import shutil
 import sqlite3
 import tempfile
-from collections import defaultdict
-from functools import partial
-from io import StringIO
 from pathlib import Path
-from typing import (
-    Any,
-    Callable,
-    DefaultDict,
-    Dict,
-    List,
-    Optional,
-    Sequence,
-    Tuple,
-    Type,
-    Union,
-    overload
-)
-from urllib.parse import urlparse
+from typing import List, Optional, Sequence, Tuple, Type, Union, overload
+from browser_history.outputs import BookmarksOutputs, HistoryOutputs
 
 import browser_history.utils as utils
 from browser_history.exceptions import BookmarksNotSupportedError
@@ -61,6 +45,7 @@ class Browser(abc.ABC):
     * :py:class:`_aliases`: A tuple containing other names for the browser in lowercase
 
     Example:
+        >>> from browser_history.generic import Browser
         >>> class CustomBrowser(Browser):
         ...     name = 'custom browser'
         ...     _aliases = ('custom-browser', 'customhtm')
@@ -73,8 +58,9 @@ class Browser(abc.ABC):
         ...     \"\"\"
         ...     _linux_path = 'browser'
         ...
-        ... vars(CustomBrowser())
-        {'_history_dir': PosixPath('/home/username/browser')}
+        >>> browser = CustomBrowser()
+        >>> browser
+        <CustomBrowser object at 0x...>
     """
 
     _windows_path: Optional[str] = None
@@ -206,15 +192,11 @@ class Browser(abc.ABC):
         return self._profiles(self._bookmarks_file)
 
     @overload
-    def _history_paths(
-        self, profile_dir: None = None
-    ) -> List[Path]:
+    def _history_paths(self, profile_dir: None = None) -> List[Path]:
         ...
 
     @overload
-    def _history_paths(
-        self, profile_dir: str
-    ) -> Path:
+    def _history_paths(self, profile_dir: str) -> Path:
         ...
 
     def _history_paths(
@@ -239,15 +221,11 @@ class Browser(abc.ABC):
             ]
 
     @overload
-    def _bookmark_paths(
-        self, profile_dir: None = None
-    ) -> List[Path]:
+    def _bookmark_paths(self, profile_dir: None = None) -> List[Path]:
         ...
 
     @overload
-    def _bookmark_paths(
-        self, profile_dir: str
-    ) -> Path:
+    def _bookmark_paths(self, profile_dir: str) -> Path:
         ...
 
     def _bookmark_paths(
@@ -274,16 +252,12 @@ class Browser(abc.ABC):
                 for profile_dir in self._profiles(profile_file=self._bookmarks_file)
             ]
 
-    def history_profiles(self, profile_dirs: Sequence[str]) -> "Outputs":
+    def history_profiles(self, profile_dirs: Sequence[str]) -> HistoryOutputs:
         """Return history of profiles given by `profile_dirs`.
 
         Args:
             profile_dirs: Profile directories. Can be obtained from
                 :py:meth:`_profiles`.
-
-        Returns:
-            Object of class :py:class:`browser_history.generic.Outputs` with the data
-            member histories set to list(tuple(:py:class:`datetime.datetime`, str)).
         """
         history_paths = [
             self._history_paths(profile_dir) for profile_dir in profile_dirs
@@ -295,7 +269,7 @@ class Browser(abc.ABC):
         history_paths: Optional[List[Path]] = None,
         sort=True,
         desc=False,
-    ) -> "Outputs":
+    ) -> HistoryOutputs:
         """Retrieve browser history.
 
         The returned datetimes are timezone-aware with the local timezone set
@@ -308,9 +282,7 @@ class Browser(abc.ABC):
             desc: whether the sorting should be in descending order.
 
         Returns:
-            Object of class :py:class:`browser_history.generic.Outputs` with the data
-            member histories set to list(tuple(:py:class:`datetime.datetime`, str)).
-            If the browser is not installed, this object will be empty.
+            If the browser is not installed, the returned object will be empty.
 
         Note:
             The history files are first copied to a temporary location and then
@@ -318,9 +290,10 @@ class Browser(abc.ABC):
             returned might not be the latest if the browser is in use. This is
             done because the SQlite files are locked by the browser when in use.
         """
+        # TODO: what does "object will be empty" above mean?
         if history_paths is None:
             history_paths = self._history_paths()
-        output_object = Outputs(fetch_type="history")
+        output_object = HistoryOutputs()
         with tempfile.TemporaryDirectory() as tmpdirname:
             for history_path in history_paths:
                 copied_history_path = shutil.copy2(history_path.absolute(), tmpdirname)
@@ -338,9 +311,9 @@ class Browser(abc.ABC):
                     )
                     for d, url in cursor.fetchall()
                 ]
-                output_object.histories.extend(date_histories)
+                output_object.data.extend(date_histories)
                 if sort:
-                    output_object.histories.sort(reverse=desc)
+                    output_object.data.sort(reverse=desc)
                 conn.close()
         return output_object
 
@@ -349,7 +322,7 @@ class Browser(abc.ABC):
         bookmarks_paths: Optional[List[Path]] = None,
         sort=True,
         desc=False,
-    ) -> "Outputs":
+    ) -> BookmarksOutputs:
         """Retrive browser bookmarks.
 
         The returned datetimes are timezone-aware with the local timezone set
@@ -360,11 +333,6 @@ class Browser(abc.ABC):
                 of all profiles are used if not specified.
             sort: whether the output should be sorted.
             desc: whether the sorting should be in descending order.
-
-        Returns:
-            Object of class :py:class:`browser_history.generic.Outputs`
-            with the attribute bookmarks set to a list of
-            (timestamp, url, title, folder) tuples.
 
         Note:
             The bookmark files are first copied to a temporary location and then
@@ -377,7 +345,7 @@ class Browser(abc.ABC):
         ), "Bookmarks are not supported for {} browser".format(self.name)
         if bookmarks_paths is None:
             bookmarks_paths = self._bookmark_paths()
-        output_object = Outputs(fetch_type="bookmarks")
+        output_object = BookmarksOutputs()
         with tempfile.TemporaryDirectory() as tmpdirname:
             for bookmarks_path in bookmarks_paths:
                 if not os.path.exists(bookmarks_path):
@@ -386,9 +354,9 @@ class Browser(abc.ABC):
                     bookmarks_path.absolute(), tmpdirname
                 )
                 date_bookmarks = self._bookmarks_parser(copied_bookmark_path)
-                output_object.bookmarks.extend(date_bookmarks)
+                output_object.data.extend(date_bookmarks)
             if sort:
-                output_object.bookmarks.sort(reverse=desc)
+                output_object.data.sort(reverse=desc)
         return output_object
 
     @classmethod
@@ -409,220 +377,6 @@ class Browser(abc.ABC):
         super().__init_subclass__(*args, **kwargs)
         if not is_abstract:
             cls._implemented_browsers.append(cls)
-
-
-class Outputs:
-    """Encapsulates history and bookmark outputs with methods for conversion."""
-
-    # TODO: not be stringly typed
-    def __init__(self, fetch_type: str):
-        """Initialize Outputs of given ``fetch_type`` but with no data.
-
-        Args:
-            fetch_type: type of data to fetch. Must be one of ``bookmarks`` or
-                ``history``.
-        """
-        self.fetch_type = fetch_type
-
-        self.histories: List[Tuple[datetime.datetime, str]] = []
-        """List of tuples of Timestamp and URL."""
-
-        self.bookmarks: List[Tuple[datetime.datetime, str, str, str]] = []
-        """List of tuples of Timestamp, URL, Title, Folder."""
-
-        # TODO: not be stringly typed. maybe a dataclass?
-        self.field_map: Dict[str, Dict[str, Any]] = {
-            "history": {"var": self.histories, "fields": ("Timestamp", "URL")},
-            "bookmarks": {
-                "var": self.bookmarks,
-                "fields": ("Timestamp", "URL", "Title", "Folder"),
-            },
-        }
-        """Maps fetch_type to the respective variables and formatting fields."""
-
-        self.format_map: Dict[str, Callable[[], str]] = {
-            "csv": self.to_csv,
-            "json": self.to_json,
-            "jsonl": partial(self.to_json, json_lines=True),
-        }
-        """Maps output formats to their respective functions."""
-
-    def sort_domain(self) -> DefaultDict[Any, List[Any]]:
-        """Return the history/bookamarks sorted according to the domain-name.
-
-        Examples:
-            >>> from datetime import datetime
-            ... from browser_history import generic
-            ... entries = [
-            ...     [datetime(2020, 1, 1), 'https://google.com'],
-            ...     [datetime(2020, 1, 1), 'https://google.com/imghp?hl=EN'],
-            ...     [datetime(2020, 1, 1), 'https://example.com'],
-            ... ]
-            ... obj = generic.Outputs('history')
-            ... obj.histories = entries
-            ... obj.sort_domain()
-            defaultdict(<class 'list'>, {
-                'example.com': [
-                    [
-                        datetime.datetime(2020, 1, 1, 0, 0),
-                        'https://example.com'
-                    ]
-                ],
-                'google.com': [
-                     [
-                        datetime.datetime(2020, 1, 1, 0, 0),
-                        'https://google.com'
-                     ],
-                     [
-                        datetime.datetime(2020, 1, 1, 0, 0),
-                        'https://google.com/imghp?hl=EN'
-                    ]
-                ]
-             })
-        """
-        domain_histories: DefaultDict[Any, List[Any]] = defaultdict(list)
-        for entry in self.field_map[self.fetch_type]["var"]:
-            domain_histories[urlparse(entry[1]).netloc].append(entry)
-        return domain_histories
-
-    def formatted(self, output_format: str = "csv") -> str:
-        """Return history or bookmarks formatted as ``output_format``.
-
-        Args:
-            output_format: One of `csv`, `json`, `jsonl`.
-        """
-        # TODO: do not hard code formats above
-
-        # convert to lower case since the formats tuple is enforced in
-        # lowercase
-        output_format = output_format.lower()
-        if self.format_map.get(output_format):
-            # fetch the required formatter and call it. The formatters are
-            # instance methods so no need to pass any arguments
-            formatter = self.format_map[output_format]
-            return formatter()
-        raise ValueError(
-            f"Invalid format {output_format}. Should be one of \
-            {self.format_map.keys()}"
-        )
-
-    def to_csv(self) -> str:
-        """Return history or bookmarks formatted as a comma separated string.
-
-        The first row has the fields names.
-
-        Examples:
-            >>> from datetime import datetime
-            ... from browser_history import generic
-            ... entries = [
-            ...     [datetime(2020, 1, 1), 'https://google.com'],
-            ...     [datetime(2020, 1, 1), 'https://example.com'],
-            ... ]
-            ... obj = generic.Outputs('history')
-            ... obj.histories = entries
-            ... print(obj.to_csv())
-            Timestamp,URL
-            2020-01-01 00:00:00,https://google.com
-            2020-01-01 00:00:00,https://example.com
-        """
-        # we will use csv module and let it do all the heavy lifting such as
-        # special character escaping and correct line termination escape
-        # sequences
-        # The catch is, we need to return a string but the csv module only
-        # works with files so we will use StringIO to build the csv in
-        # memory first
-        with StringIO() as output:
-            writer = csv.writer(output)
-            writer.writerow(self.field_map[self.fetch_type]["fields"])
-            for row in self.field_map[self.fetch_type]["var"]:
-                writer.writerow(row)
-            return output.getvalue()
-
-    def to_json(self, json_lines: bool = False) -> str:
-        """Return history or bookmarks formatted as a JSON or JSON Lines.
-
-        Args:
-            json_lines: whether JSON lines format should be used instead of JSON.
-
-        Examples:
-            >>> from datetime import datetime
-            ... from browser_history import generic
-            ... entries = [
-            ...     [datetime(2020, 1, 1), 'https://google.com'],
-            ...     [datetime(2020, 1, 1), 'https://example.com'],
-            ... ]
-            ... obj = generic.Outputs()
-            ... obj.entries = entries
-            ... print(obj.to_json(True))
-            {"Timestamp": "2020-01-01T00:00:00", "URL": "https://google.com"}
-            {"Timestamp": "2020-01-01T00:00:00", "URL": "https://example.com"}
-            >>> print(obj.to_json())
-            {
-                "history": [
-                    {
-                        "Timestamp": "2020-01-01T00:00:00",
-                        "URL": "https://google.com"
-                    },
-                    {
-                        "Timestamp": "2020-01-01T00:00:00",
-                        "URL": "https://example.com"
-                    }
-                ]
-            }
-        """
-        # custom json encoder for datetime objects
-        class DateTimeEncoder(json.JSONEncoder):
-            """Custom JSON encoder to encode datetime objects."""
-
-            # Override the default method
-            def default(self, o):
-                if isinstance(o, (datetime.date, datetime.datetime)):
-                    return o.isoformat()
-                # skip coverage for this line (tested but not detected)
-                return super().default(o)  # pragma: no cover
-
-        # fetch lines
-        lines = []
-        for entry in self.field_map[self.fetch_type]["var"]:
-            json_record = {}
-            for field, value in zip(self.field_map[self.fetch_type]["fields"], entry):
-                json_record[field] = value
-            lines.append(json_record)
-
-        if json_lines:
-            json_string = "\n".join(
-                [json.dumps(line, cls=DateTimeEncoder) for line in lines]
-            )
-        else:
-            json_string = json.dumps(
-                {self.fetch_type: lines}, cls=DateTimeEncoder, indent=4
-            )
-
-        return json_string
-
-    def save(self, filename: str, output_format: Optional[str] = None):
-        """Save history or bookmarks to a file.
-
-        Infers the type from the given filename extension.
-        If the type could not be inferred, it defaults to ``csv``.
-
-        Args:
-            filename: the name of the file.
-            output_format: One of `csv`, `json`, `jsonl`.
-                If not given, it will automatically be inferred from the file's
-                extension.
-        """
-        # TODO: do not hardcode the options above
-        if output_format is None:
-            output_format = os.path.splitext(filename)[1][1:]
-            if output_format not in self.format_map:
-                raise ValueError(
-                    f"Invalid extension .{output_format}. Should be one of "
-                    f"{', '.join(self.format_map.keys())}"
-                )
-
-        with open(filename, "w") as out_file:
-            out_file.write(self.formatted(output_format))
 
 
 class ChromiumBasedBrowser(Browser, is_abstract=True):
