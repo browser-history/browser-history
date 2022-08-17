@@ -653,7 +653,6 @@ class ChromiumBasedBrowser(Browser, abc.ABC):
                     bookmarks_list = _deeper(b_m["roots"][root], root, bookmarks_list)
         return bookmarks_list
    
-
 class InternetExplorer(Browser, abc.ABC):
     """ Internet Explorer Browser
         Supported platforms
@@ -679,11 +678,11 @@ class InternetExplorer(Browser, abc.ABC):
              for i in itertools.count():
                  yield winreg.EnumKey(k, i)
 
-    def fetch_history(hkey,keys,path):
+    def get_history_data(hkey=hkey,keys=history_paths,path=iepath):
         history_sites = {}
         for i in keys:
-            for h in subkeys(hkey=hkey,path=""):
-                for g in subvalues(hkey=hkey,path=h+path+i):
+            for h in InternetExplorer.subkeys(hkey=hkey,path=""):
+                for g in InternetExplorer.subvalues(hkey=hkey,path=h+path+i):
                     try:
                         history_sites[g[0]].update({i:g[1]})
                     except KeyError:
@@ -705,3 +704,8 @@ class InternetExplorer(Browser, abc.ABC):
             entries.append([hist_data[i]['TypedURLsTime'],hist_data[i]['TypedURLs']])
         return entries
     
+    def fetch_history():
+        hist_data = InternetExplorer.get_history_data()
+        hist_data = InternetExplorer.hist_transform_win_date(hist_data)
+        entries = InternetExplorer.hist_transfrom_output(hist_data)
+        return entries
