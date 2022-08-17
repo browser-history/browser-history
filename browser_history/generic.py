@@ -8,7 +8,6 @@ import struct
 import winreg 
 import contextlib  
 import itertools
-import struct
 import abc
 import csv
 import json
