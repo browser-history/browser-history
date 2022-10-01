@@ -570,6 +570,10 @@ class Outputs:
 
         with open(filename, "w") as out_file:
             out_file.write(self.formatted(output_format))
+            
+    def __len__(self):
+        """Returns the number of entries in the history or bookmarks"""
+        return len(self.field_map[self.fetch_type]["var"])
 
 
 class ChromiumBasedBrowser(Browser, abc.ABC):
