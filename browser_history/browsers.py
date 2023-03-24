@@ -79,7 +79,8 @@ class Firefox(Browser):
             datetime(
                 visit_date/1000000, 'unixepoch', 'localtime'
             ) AS 'visit_time',
-            url
+            url,
+            moz_places.title
         FROM
             moz_historyvisits
         INNER JOIN
@@ -189,7 +190,8 @@ class Safari(Browser):
             datetime(
                 visit_time + 978307200, 'unixepoch', 'localtime'
             ) as visit_time,
-            url
+            url,
+            title
         FROM
             history_visits
         INNER JOIN

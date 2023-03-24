@@ -72,7 +72,7 @@ GENERAL_INVALID_ARGS = [
 HELP_SIGNATURE = (
     "usage: browser-history [-h] [-t TYPE] [-b BROWSER] [-f FORMAT] [-o OUTPUT]"
 )
-HISTORY_HEADER = "Timestamp,URL"
+HISTORY_HEADER = "Timestamp,URL,Title"
 BOOKMARKS_HEADER = "Timestamp,URL,Title,Folder"
 
 CSV_HISTORY_HEADER = HISTORY_HEADER
@@ -173,12 +173,12 @@ def test_format_argument(capsys, platform):
     # First check format of default:
     cli([])
     captured = capsys.readouterr()
-    csv_output = captured.out
+    csv_output = '\n'.join(captured.out[:10])
     # Sniffer determines format, less intensive than reading in csv.reader
     # and we don't mind the CSV dialect, so just check call doesn't error
     read_csv = csv.Sniffer()
     # This gives '_csv.Error: Could not determine delimiter' if not a csv file
-    read_csv.sniff(csv_output, delimiters=",")
+    read_csv.sniff(csv_output)
     assert read_csv.has_header(
         csv_output
     ), "CSV format missing heading with type followed by column names."
@@ -188,7 +188,7 @@ def test_format_argument(capsys, platform):
             cli([fmt_opt, fmt_arg])
             output = capsys.readouterr().out
             if fmt_arg in ("csv", "infer"):  # infer gives csv if no file
-                read_csv.sniff(output, delimiters=",")
+                read_csv.sniff(output, delimiters=',')
                 assert read_csv.has_header(output)
                 assert CSV_HISTORY_HEADER in output
             elif fmt_arg == "json":
@@ -479,8 +479,8 @@ def test_firefox_windows_profile(capsys, become_windows, change_homedir):  # noq
     cli(["-b", "firefox", "-p", "Profile 2"])
 
     out, err = capsys.readouterr()
-    assert out.startswith("Timestamp,URL")
-    assert out.endswith("https://www.reddit.com/\r\n\n")
+    assert out.startswith("Timestamp,URL,Title")
+    assert out.endswith("https://www.reddit.com/,reddit: the front page of the internet\r\n\n")
     assert err == ""
 
 

@@ -23,13 +23,13 @@ def test_outputs_init():
 @pytest.mark.parametrize(
     "entries, exp_res",
     [
-        [[], "Timestamp,URL\r\n"],
+        [[], "Timestamp,URL,Title\r\n"],
         [
             [
                 [datetime(2020, 1, 1), "https://google.com"],
                 [datetime(2020, 1, 1), "https://example.com"],
             ],
-            "Timestamp,URL\r\n"
+            "Timestamp,URL,Title\r\n"
             "2020-01-01 00:00:00,https://google.com\r\n"
             "2020-01-01 00:00:00,https://example.com\r\n",
         ],
