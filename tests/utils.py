@@ -88,9 +88,8 @@ def assert_histories_equal(actual_history, expected_history):
     timezone awareness. For earlier versions, an external module must be used.
     """
     local_timezone = tz.gettz()
-
     assert _detach_timezone_stamp(actual_history) == _detach_timezone_stamp(
-        (expected_history[0].astimezone(local_timezone), expected_history[1])
+        (expected_history[0].astimezone(local_timezone), *expected_history[1:])
     )
 
 

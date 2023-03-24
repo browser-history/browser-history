@@ -266,6 +266,8 @@ class Browser(abc.ABC):
         output_object = Outputs(fetch_type="history")
         with tempfile.TemporaryDirectory() as tmpdirname:
             for history_path in history_paths:
+                if os.path.getsize(history_path.absolute()) == 0:
+                    continue
                 copied_history_path = shutil.copy2(history_path.absolute(), tmpdirname)
                 conn = sqlite3.connect(
                     f"file:{copied_history_path}?mode=ro&immutable=1&nolock=1", uri=True
@@ -278,8 +280,9 @@ class Browser(abc.ABC):
                             tzinfo=self._local_tz
                         ),
                         url,
+                        title
                     )
-                    for d, url in cursor.fetchall()
+                    for d, url, title in cursor.fetchall()
                 ]
                 output_object.histories.extend(date_histories)
                 if sort:
@@ -373,7 +376,7 @@ class Outputs:
         self.histories = []
         self.bookmarks = []
         self.field_map = {
-            "history": {"var": self.histories, "fields": ("Timestamp", "URL")},
+            "history": {"var": self.histories, "fields": ("Timestamp", "URL", "Title")},
             "bookmarks": {
                 "var": self.bookmarks,
                 "fields": ("Timestamp", "URL", "Title", "Folder"),
@@ -475,7 +478,7 @@ class Outputs:
         # works with files so we will use StringIO to build the csv in
         # memory first
         with StringIO() as output:
-            writer = csv.writer(output)
+            writer = csv.writer(output, dialect="excel", delimiter=',', quoting=csv.QUOTE_MINIMAL)
             writer.writerow(self.field_map[self.fetch_type]["fields"])
             for row in self.field_map[self.fetch_type]["var"]:
                 writer.writerow(row)
@@ -587,7 +590,8 @@ class ChromiumBasedBrowser(Browser, abc.ABC):
                 datetime(
                     visits.visit_time/1000000-11644473600, 'unixepoch', 'localtime'
                 ) as 'visit_time',
-                urls.url
+                urls.url,
+                urls.title
             FROM
                 visits INNER JOIN urls ON visits.url = urls.id
             WHERE
