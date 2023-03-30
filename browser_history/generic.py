@@ -236,7 +236,7 @@ class Browser(abc.ABC):
         ]
         return self.fetch_history(history_paths)
 
-    def fetch_history(self, history_paths=None, sort=True, desc=False):
+    def fetchtimestamp_history(self, history_paths=None, sort=True, desc=False):
         """Returns history of all available profiles stored in SQL.
 
         The returned datetimes are timezone-aware with the local timezone set
@@ -257,7 +257,7 @@ class Browser(abc.ABC):
         :type asc: boolean
         :return: Object of class :py:class:`browser_history.generic.Outputs`
             with the data member histories set to
-            list(tuple(:py:class:`datetime.datetime`, str)).
+            list(tuple(timestamp, url, title)).
             If the browser is not installed, this object will be empty.
         :rtype: :py:class:`browser_history.generic.Outputs`
         """
@@ -460,15 +460,15 @@ class Outputs:
         >>> from datetime import datetime
         ... from browser_history import generic
         ... entries = [
-        ...     [datetime(2020, 1, 1), 'https://google.com'],
-        ...     [datetime(2020, 1, 1), 'https://example.com'],
+        ...     [datetime(2020, 1, 1), 'https://google.com', 'Google'],
+        ...     [datetime(2020, 1, 1), 'https://example.com', 'Example Domain'],
         ... ]
         ... obj = generic.Outputs('history')
         ... obj.histories = entries
         ... print(obj.to_csv())
         Timestamp,URL
-        2020-01-01 00:00:00,https://google.com
-        2020-01-01 00:00:00,https://example.com
+        2020-01-01 00:00:00,https://google.com,Google
+        2020-01-01 00:00:00,https://example.com,Example Domain
 
         """
         # we will use csv module and let it do all the heavy lifting such as
@@ -499,24 +499,26 @@ class Outputs:
         >>> from datetime import datetime
         ... from browser_history import generic
         ... entries = [
-        ...     [datetime(2020, 1, 1), 'https://google.com'],
-        ...     [datetime(2020, 1, 1), 'https://example.com'],
+        ...     [datetime(2020, 1, 1), 'https://google.com', 'Google'],
+        ...     [datetime(2020, 1, 1), 'https://example.com', 'Example Domain'],
         ... ]
         ... obj = generic.Outputs()
         ... obj.entries = entries
         ... print(obj.to_json(True))
-        {"Timestamp": "2020-01-01T00:00:00", "URL": "https://google.com"}
-        {"Timestamp": "2020-01-01T00:00:00", "URL": "https://example.com"}
+        {"Timestamp": "2020-01-01T00:00:00", "URL": "https://google.com", "Google"}
+        {"Timestamp": "2020-01-01T00:00:00", "URL": "https://example.com", "Example Domain"}
         >>> print(obj.to_json())
         {
             "history": [
                 {
                     "Timestamp": "2020-01-01T00:00:00",
-                    "URL": "https://google.com"
+                    "URL": "https://google.com",
+                    "Title", "Google"
                 },
                 {
                     "Timestamp": "2020-01-01T00:00:00",
-                    "URL": "https://example.com"
+                    "URL": "https://example.com",
+                    "Title": "Example Domain"
                 }
             ]
         }
