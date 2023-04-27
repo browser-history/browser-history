@@ -173,12 +173,12 @@ def test_format_argument(capsys, platform):
     # First check format of default:
     cli([])
     captured = capsys.readouterr()
-    csv_output = '\n'.join(captured.out[:10])
+    csv_output = captured.out
     # Sniffer determines format, less intensive than reading in csv.reader
     # and we don't mind the CSV dialect, so just check call doesn't error
     read_csv = csv.Sniffer()
     # This gives '_csv.Error: Could not determine delimiter' if not a csv file
-    read_csv.sniff(csv_output)
+    read_csv.sniff(csv_output, delimiters=',')
     assert read_csv.has_header(
         csv_output
     ), "CSV format missing heading with type followed by column names."
