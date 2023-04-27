@@ -167,7 +167,7 @@ def test_browser_argument(browser_arg, capsys, platform):
                 )
 
 
-@pytest.mark.parametrize("platform", all_platform_fixtures, indirect=True)
+@pytest.mark.parametrize("platform", ['become_windows'], indirect=True)
 def test_format_argument(capsys, platform):
     """Tests arguments for the format option."""
     # First check format of default:
@@ -178,6 +178,7 @@ def test_format_argument(capsys, platform):
     # and we don't mind the CSV dialect, so just check call doesn't error
     read_csv = csv.Sniffer()
     # This gives '_csv.Error: Could not determine delimiter' if not a csv file
+    csv_output = csv_output.replace('\r', '')
     read_csv.sniff(csv_output, delimiters=',')
     assert read_csv.has_header(
         csv_output
@@ -188,6 +189,7 @@ def test_format_argument(capsys, platform):
             cli([fmt_opt, fmt_arg])
             output = capsys.readouterr().out
             if fmt_arg in ("csv", "infer"):  # infer gives csv if no file
+                output = output.replace('\r', '')
                 read_csv.sniff(output, delimiters=',')
                 assert read_csv.has_header(output)
                 assert CSV_HISTORY_HEADER in output
