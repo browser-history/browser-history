@@ -236,7 +236,7 @@ class Browser(abc.ABC):
         ]
         return self.fetch_history(history_paths)
 
-    def fetchtimestamp_history(self, history_paths=None, sort=True, desc=False):
+    def fetch_history(self, history_paths=None, sort=True, desc=False):
         """Returns history of all available profiles stored in SQL.
 
         The returned datetimes are timezone-aware with the local timezone set
