@@ -179,7 +179,7 @@ def test_format_argument(capsys, platform):
     read_csv = csv.Sniffer()
     # This gives '_csv.Error: Could not determine delimiter' if not a csv file
     csv_output = csv_output.replace('\r', '')
-    read_csv.sniff(csv_output, delimiters=',')
+    read_csv.sniff(csv_output)
     assert read_csv.has_header(
         csv_output
     ), "CSV format missing heading with type followed by column names."
@@ -190,7 +190,7 @@ def test_format_argument(capsys, platform):
             output = capsys.readouterr().out
             if fmt_arg in ("csv", "infer"):  # infer gives csv if no file
                 output = output.replace('\r', '')
-                read_csv.sniff(output, delimiters=',')
+                read_csv.sniff(output)
                 assert read_csv.has_header(output)
                 assert CSV_HISTORY_HEADER in output
             elif fmt_arg == "json":
