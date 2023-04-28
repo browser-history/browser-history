@@ -257,7 +257,7 @@ class Browser(abc.ABC):
         :type asc: boolean
         :return: Object of class :py:class:`browser_history.generic.Outputs`
             with the data member histories set to
-            list(tuple(timestamp, url, title)).
+            list(tuple(:py:class:`datetime.datetime`, str, str))
             If the browser is not installed, this object will be empty.
         :rtype: :py:class:`browser_history.generic.Outputs`
         """
@@ -478,7 +478,7 @@ class Outputs:
         # works with files so we will use StringIO to build the csv in
         # memory first
         with StringIO() as output:
-            writer = csv.writer(output, dialect="excel", delimiter=',', quoting=csv.QUOTE_MINIMAL)
+            writer = csv.writer(output)
             writer.writerow(self.field_map[self.fetch_type]["fields"])
             for row in self.field_map[self.fetch_type]["var"]:
                 writer.writerow(row)
