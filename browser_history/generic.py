@@ -646,7 +646,7 @@ class ChromiumBasedBrowser(Browser, abc.ABC):
                     )
             return bookmarks_list
 
-        with open(bookmark_path) as b_p:
+        with open(bookmark_path, "rb") as b_p:
             b_m = json.load(b_p)
             bookmarks_list = []
             for root in b_m["roots"]:
