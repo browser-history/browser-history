@@ -17,10 +17,11 @@ except ImportError:
     )
 
 import platform
+from packaging import version
 
-MIN_PYTHON_VERSION = ("3", "6")
+MIN_PYTHON_VERSION = "3.6"
 
-if platform.python_version_tuple() < MIN_PYTHON_VERSION:
+if version.parse(platform.python_version()) < version.parse(MIN_PYTHON_VERSION):
     raise SystemExit(
         "Could not install browser-history in the environment. The"
         " browser-history package requires python version 3.6+, you are using "
