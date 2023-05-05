@@ -326,7 +326,7 @@ class Browser(abc.ABC):
                 copied_bookmark_path = shutil.copy2(
                     bookmarks_path.absolute(), tmpdirname
                 )
-                date_bookmarks = self.bookmarks_parser(copied_bookmark_path)
+                date_bookmarks = self.bookmarks_parser(copied_bookmark_path)  # pylint: disable=assignment-from-no-return
                 output_object.bookmarks.extend(date_bookmarks)
             if sort:
                 output_object.bookmarks.sort(reverse=desc)
