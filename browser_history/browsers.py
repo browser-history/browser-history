@@ -130,6 +130,7 @@ class Firefox(Browser):
             )
             for d, url, title, folder in cursor.fetchall()
         ]
+        conn.close()
         return date_bookmarks
 
 
