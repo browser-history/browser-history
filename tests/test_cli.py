@@ -167,7 +167,7 @@ def test_browser_argument(browser_arg, capsys, platform):
                 )
 
 
-@pytest.mark.parametrize("platform", ['become_windows'], indirect=True)
+@pytest.mark.parametrize("platform", all_platform_fixtures, indirect=True)
 def test_format_argument(capsys, platform):
     """Tests arguments for the format option."""
     # First check format of default:
