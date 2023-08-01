@@ -16,16 +16,5 @@ except ImportError:
         "is missing. Please create a new virtual environment before proceeding"
     )
 
-import platform
-
-MIN_PYTHON_VERSION = ("3", "6")
-
-if platform.python_version_tuple() < MIN_PYTHON_VERSION:
-    raise SystemExit(
-        "Could not install browser-history in the environment. The"
-        " browser-history package requires python version 3.6+, you are using "
-        f"{platform.python_version()}"
-    )
-
 if __name__ == "__main__":
     setuptools.setup()
