@@ -4,6 +4,7 @@ All browsers must inherit from :py:mod:`browser_history.generic.Browser`.
 """
 import datetime
 import sqlite3
+import subprocess
 
 from browser_history.generic import Browser, ChromiumBasedBrowser
 
@@ -65,7 +66,18 @@ class Firefox(Browser):
     name = "Firefox"
     aliases = ("firefoxurl",)
 
-    linux_path = ".mozilla/firefox"
+    # Determine if Firefox was installed by snap or by normal method
+    try:
+        # find firefox executable. This may fail if not in linux or if Firefox is not
+        # installed, in which case we default to False
+        snap_install = (
+            "snap/bin/" in subprocess.check_output("which firefox".split()).decode()
+        )
+    except FileNotFoundError:
+        snap_install = False
+    linux_path = (
+        "snap/firefox/common/.mozilla/firefox" if snap_install else ".mozilla/firefox"
+    )
     windows_path = "AppData/Roaming/Mozilla/Firefox/Profiles"
     mac_path = "Library/Application Support/Firefox/Profiles/"
 
@@ -144,6 +156,7 @@ class LibreWolf(Firefox):
 
     Profile support: Yes
     """
+
     name = "LibreWolf"
     aliases = ("librewolfurl",)
 
