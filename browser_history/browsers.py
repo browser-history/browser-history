@@ -73,7 +73,7 @@ class Firefox(Browser):
         snap_install = (
             "snap/bin/" in subprocess.check_output("which firefox".split()).decode()
         )
-    except FileNotFoundError:
+    except (FileNotFoundError, subprocess.CalledProcessError):
         snap_install = False
     linux_path = (
         "snap/firefox/common/.mozilla/firefox" if snap_install else ".mozilla/firefox"
