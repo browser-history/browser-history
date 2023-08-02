@@ -15,8 +15,12 @@ from .utils import (  # noqa: F401; pylint: disable=unused-import
 # pylint: disable=redefined-outer-name,unused-argument
 
 
-def test_firefox_linux(become_linux, change_homedir):  # noqa: F811
+def test_firefox_linux(become_linux, change_homedir, monkeypatch):  # noqa: F811
     """Test history is correct on Firefox for Linux"""
+    # Make sure we run this test with firefox in the default (non-snap) directory
+    monkeypatch.setattr(
+        "browser_history.browsers.Firefox.linux_path", ".mozilla/firefox"
+    )
     f = browser_history.browsers.Firefox()
     h_output = f.fetch_history()
     b_output = f.fetch_bookmarks()
@@ -587,6 +591,7 @@ def test_vivaldi_mac(become_mac, change_homedir):  # noqa: F811
         ),
     )
 
+
 def test_librewolf_linux(become_linux, change_homedir):  # noqa: F811
     """Test history is correct on LibreWolf for Linux"""
     f = browser_history.browsers.LibreWolf()
@@ -596,7 +601,7 @@ def test_librewolf_linux(become_linux, change_homedir):  # noqa: F811
     bmk = b_output.bookmarks
     assert len(his) == 12
     assert len(bmk) == 1
-    
+
     assert_histories_equal(
         his[0],
         (
