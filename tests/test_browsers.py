@@ -11,13 +11,27 @@ from .utils import (  # noqa: F401; pylint: disable=unused-import
     assert_bookmarks_equal,
 )
 
+import pytest
+
 
 # pylint: disable=redefined-outer-name,unused-argument
 
 
-def test_firefox_linux(become_linux, change_homedir):  # noqa: F811
+@pytest.mark.parametrize(
+    "browser_type, bookmark_dir",
+    [
+        (browser_history.browsers.Firefox, ".mozilla/firefox/profile/places.sqlite"),
+        (
+            browser_history.browsers.FirefoxSnap,
+            "snap/firefox/common/.mozilla/firefox/profile/places.sqlite",
+        ),
+    ],
+)
+def test_firefox_linux(
+    become_linux, change_homedir, browser_type, bookmark_dir  # noqa: F811
+):
     """Test history is correct on Firefox for Linux"""
-    f = browser_history.browsers.Firefox()
+    f = browser_type()
     h_output = f.fetch_history()
     b_output = f.fetch_bookmarks()
     his = h_output.histories
@@ -59,9 +73,7 @@ def test_firefox_linux(become_linux, change_homedir):  # noqa: F811
     profs = f.profiles(f.history_file)
     his_path = f.history_path_profile(profs[0])
     bmk_path = f.bookmarks_path_profile(profs[0])
-    assert (
-        his_path == bmk_path == Path.home() / ".mozilla/firefox/profile/places.sqlite"
-    )
+    assert his_path == bmk_path == Path.home() / bookmark_dir
     his = f.history_profiles(profs).histories
     assert len(his) == 5
     assert_histories_equal(
@@ -587,6 +599,7 @@ def test_vivaldi_mac(become_mac, change_homedir):  # noqa: F811
         ),
     )
 
+
 def test_librewolf_linux(become_linux, change_homedir):  # noqa: F811
     """Test history is correct on LibreWolf for Linux"""
     f = browser_history.browsers.LibreWolf()
@@ -596,7 +609,7 @@ def test_librewolf_linux(become_linux, change_homedir):  # noqa: F811
     bmk = b_output.bookmarks
     assert len(his) == 12
     assert len(bmk) == 1
-    
+
     assert_histories_equal(
         his[0],
         (
