@@ -115,7 +115,7 @@ class Browser(abc.ABC):
     @abc.abstractmethod
     def history_SQL(self) -> str:
         """SQL query required to extract history from the ``history_file``.
-        The query must return two columns: ``visit_time`` and ``url``.
+        The query must return three columns: ``visit_time``, ``url`` and ``title``.
         The ``visit_time`` must be processed using the `datetime`_
         function with the modifier ``localtime``.
 
@@ -360,7 +360,8 @@ class Outputs:
 
     # type hint for histories and bookmarks have to be manually written for
     # docs instead of using HistoryVar and BookmarkVar respectively
-    histories: List[Tuple[datetime.datetime, str]]  #: List of tuples of Timestamp & URL
+    histories: List[Tuple[datetime.datetime, str, str]]
+    """List of tuples of Timestamp, URL, Title."""
     bookmarks: List[Tuple[datetime.datetime, str, str, str]]
     """List of tuples of Timestamp, URL, Title, Folder."""
 
@@ -397,9 +398,9 @@ class Outputs:
         >>> from datetime import datetime
         ... from browser_history import generic
         ... entries = [
-        ...     [datetime(2020, 1, 1), 'https://google.com'],
-        ...     [datetime(2020, 1, 1), 'https://google.com/imghp?hl=EN'],
-        ...     [datetime(2020, 1, 1), 'https://example.com'],
+        ...     (datetime(2020, 1, 1), 'https://google.com', 'Google'),
+        ...     (datetime(2020, 1, 1), 'https://google.com/imghp?hl=EN', 'Google Images'),
+        ...     (datetime(2020, 1, 1), 'https://example.com', 'Example'),
         ... ]
         ... obj = generic.Outputs('history')
         ... obj.histories = entries
@@ -408,17 +409,20 @@ class Outputs:
             'example.com': [
                 [
                     datetime.datetime(2020, 1, 1, 0, 0),
-                    'https://example.com'
+                    'https://example.com',
+                    'Example'
                 ]
             ],
             'google.com': [
                  [
                     datetime.datetime(2020, 1, 1, 0, 0),
-                    'https://google.com'
+                    'https://google.com',
+                    'Google'
                  ],
                  [
                     datetime.datetime(2020, 1, 1, 0, 0),
-                    'https://google.com/imghp?hl=EN'
+                    'https://google.com/imghp?hl=EN',
+                    'Google Images'
                 ]
             ]
          })
