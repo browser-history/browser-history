@@ -367,9 +367,7 @@ class Outputs:
     bookmarks: List[Tuple[datetime.datetime, str, str, str]]
     """List of tuples of Timestamp, URL, Title, Folder."""
 
-    field_map: Dict[str, Dict[str, Any]]
-    """Dictionary which maps fetch_type to the respective variables and
-    formatting fields."""
+    _valid_fetch_types = ("history", "bookmarks")
 
     format_map: Dict[str, Callable]
     """Dictionary which maps output formats to their respective functions."""
@@ -378,18 +376,27 @@ class Outputs:
         self.fetch_type = fetch_type
         self.histories = []
         self.bookmarks = []
-        self.field_map = {
-            "history": {"var": self.histories, "fields": ("Timestamp", "URL", "Title")},
-            "bookmarks": {
-                "var": self.bookmarks,
-                "fields": ("Timestamp", "URL", "Title", "Folder"),
-            },
-        }
         self.format_map = {
             "csv": self.to_csv,
             "json": self.to_json,
             "jsonl": partial(self.to_json, json_lines=True),
         }
+
+    def _get_data(self):
+        if self.fetch_type == "history":
+            return self.histories
+        elif self.fetch_type == "bookmarks":
+            return self.bookmarks
+        else:
+            raise ValueError(f"Invalid fetch type {self.fetch_type}")
+
+    def _get_fields(self):
+        if self.fetch_type == "history":
+            return ("Timestamp", "URL", "Title")
+        elif self.fetch_type == "bookmarks":
+            return ("Timestamp", "URL", "Title", "Folder")
+        else:
+            raise ValueError(f"Invalid fetch type {self.fetch_type}")
 
     def sort_domain(self) -> typing.DefaultDict[Any, List[Any]]:
         """
@@ -430,7 +437,7 @@ class Outputs:
          })
         """
         domain_histories: typing.DefaultDict[typing.Any, List[Any]] = defaultdict(list)
-        for entry in self.field_map[self.fetch_type]["var"]:
+        for entry in self._get_data():
             domain_histories[urlparse(entry[1]).netloc].append(entry)
         return domain_histories
 
@@ -485,8 +492,8 @@ class Outputs:
         # memory first
         with StringIO() as output:
             writer = csv.writer(output)
-            writer.writerow(self.field_map[self.fetch_type]["fields"])
-            for row in self.field_map[self.fetch_type]["var"]:
+            writer.writerow(self._get_fields())
+            for row in self._get_data():
                 writer.writerow(row)
             return output.getvalue()
 
@@ -542,9 +549,9 @@ class Outputs:
 
         # fetch lines
         lines = []
-        for entry in self.field_map[self.fetch_type]["var"]:
+        for entry in self._get_data():
             json_record = {}
-            for field, value in zip(self.field_map[self.fetch_type]["fields"], entry):
+            for field, value in zip(self._get_fields(), entry):
                 json_record[field] = value
             lines.append(json_record)
 

@@ -17,7 +17,6 @@ def test_outputs_init():
     obj = generic.Outputs("history")
     assert not obj.histories
     assert obj.format_map
-    assert obj.field_map
 
 
 @pytest.mark.parametrize(
@@ -75,6 +74,10 @@ def test_output_sort_domain(entries, exp_res):
     """test Outputs.sort_domain"""
     obj = generic.Outputs("history")
     obj.histories.extend(entries)
+    assert list(obj.sort_domain().items()) == exp_res
+
+    obj = generic.Outputs("history")
+    obj.histories = entries
     assert list(obj.sort_domain().items()) == exp_res
 
 
