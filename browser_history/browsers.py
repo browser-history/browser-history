@@ -285,3 +285,20 @@ class Vivaldi(ChromiumBasedBrowser):
     windows_path = "AppData/Local/Vivaldi/User Data"
 
     profile_support = True
+
+
+class Arc(ChromiumBasedBrowser):
+    """Arc browser by The Browser Company.
+
+    Supported platforms:
+
+    * Mac OS
+
+    Profile support: Yes
+    """
+
+    name = "Arc"
+
+    mac_path = "Library/Application Support/Arc/User Data/"
+
+    profile_support = True
