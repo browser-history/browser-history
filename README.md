@@ -1,5 +1,5 @@
 <p align="center" width="100%">
-    <img width="33%" src="./logo.png">
+    <img width="33%" src="https://github.com/browser-history/browser-history/blob/master/logo.png?raw=true">
 </p>
 
 <h1 align="center"> browser-history</h1>
