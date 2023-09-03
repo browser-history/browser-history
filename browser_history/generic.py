@@ -326,6 +326,8 @@ class Browser(abc.ABC):
             for bookmarks_path in bookmarks_paths:
                 if not os.path.exists(bookmarks_path):
                     continue
+                if os.path.getsize(bookmarks_path.absolute()) == 0:
+                    continue
                 copied_bookmark_path = shutil.copy2(
                     bookmarks_path.absolute(), tmpdirname
                 )
