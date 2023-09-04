@@ -75,11 +75,8 @@ def test_firefox_linux(
     his_path = f.history_path_profile("profile")
     bmk_path = f.bookmarks_path_profile("profile")
     assert his_path == bmk_path == Path.home() / bookmark_dir
-    his = f.history_profiles(profs).histories
-    assert "profile" in profs
-    his_path = f.history_path_profile("profile")
-    bmk_path = f.bookmarks_path_profile("profile")
     his = f.history_profiles(["profile"]).histories
+    assert "profile" in profs
     assert len(his) == 5
     assert_histories_equal(
         his[0],
