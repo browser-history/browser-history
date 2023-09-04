@@ -58,12 +58,13 @@ def test_firefox_linux(become_linux, change_homedir):  # noqa: F811
         ),
     )
     profs = f.profiles(f.history_file)
-    his_path = f.history_path_profile(profs[1])
-    bmk_path = f.bookmarks_path_profile(profs[1])
+    assert "profile" in profs
+    his_path = f.history_path_profile("profile")
+    bmk_path = f.bookmarks_path_profile("profile")
     assert (
         his_path == bmk_path == Path.home() / ".mozilla/firefox/profile/places.sqlite"
     )
-    his = f.history_profiles(profs[1:]).histories
+    his = f.history_profiles(["profile"]).histories
     assert len(his) == 5
     assert_histories_equal(
         his[0],
