@@ -72,11 +72,14 @@ def test_firefox_linux(
         ),
     )
     profs = f.profiles(f.history_file)
-    his_path = f.history_path_profile(profs[0])
-    bmk_path = f.bookmarks_path_profile(profs[0])
+    his_path = f.history_path_profile("profile")
+    bmk_path = f.bookmarks_path_profile("profile")
     assert his_path == bmk_path == Path.home() / bookmark_dir
     his = f.history_profiles(profs).histories
-    # >>>>>>> 1042e11 ([TESTS] add test for empty history file)
+    assert "profile" in profs
+    his_path = f.history_path_profile("profile")
+    bmk_path = f.bookmarks_path_profile("profile")
+    his = f.history_profiles(["profile"]).histories
     assert len(his) == 5
     assert_histories_equal(
         his[0],
