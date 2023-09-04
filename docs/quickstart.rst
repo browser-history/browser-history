@@ -28,7 +28,7 @@ To get history from all installed browsers:
 
     outputs = get_history()
 
-    # his is a list of (datetime.datetime, url) tuples
+    # his is a list of (datetime.datetime, url, title) tuples
     his = outputs.histories
 
 If you want history from a specific browser:
@@ -39,7 +39,7 @@ If you want history from a specific browser:
     f = Firefox()
     outputs = f.fetch_history()
 
-    # his is a list of (datetime.datetime, url) tuples
+    # his is a list of (datetime.datetime, url, title) tuples
     his = outputs.histories
 
 - ``Firefox`` in the above snippet can be replaced with any of the :ref:`supported_browsers`.

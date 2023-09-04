@@ -115,7 +115,7 @@ class Browser(abc.ABC):
     @abc.abstractmethod
     def history_SQL(self) -> str:
         """SQL query required to extract history from the ``history_file``.
-        The query must return two columns: ``visit_time`` and ``url``.
+        The query must return three columns: ``visit_time``, ``url`` and ``title``.
         The ``visit_time`` must be processed using the `datetime`_
         function with the modifier ``localtime``.
 
@@ -257,7 +257,7 @@ class Browser(abc.ABC):
         :type asc: boolean
         :return: Object of class :py:class:`browser_history.generic.Outputs`
             with the data member histories set to
-            list(tuple(:py:class:`datetime.datetime`, str)).
+            list(tuple(:py:class:`datetime.datetime`, str, str))
             If the browser is not installed, this object will be empty.
         :rtype: :py:class:`browser_history.generic.Outputs`
         """
@@ -266,6 +266,8 @@ class Browser(abc.ABC):
         output_object = Outputs(fetch_type="history")
         with tempfile.TemporaryDirectory() as tmpdirname:
             for history_path in history_paths:
+                if os.path.getsize(history_path.absolute()) == 0:
+                    continue
                 copied_history_path = shutil.copy2(history_path.absolute(), tmpdirname)
                 conn = sqlite3.connect(
                     f"file:{copied_history_path}?mode=ro&immutable=1&nolock=1", uri=True
@@ -278,8 +280,9 @@ class Browser(abc.ABC):
                             tzinfo=self._local_tz
                         ),
                         url,
+                        title
                     )
-                    for d, url in cursor.fetchall()
+                    for d, url, title in cursor.fetchall()
                 ]
                 output_object.histories.extend(date_histories)
                 if sort:
@@ -323,6 +326,8 @@ class Browser(abc.ABC):
             for bookmarks_path in bookmarks_paths:
                 if not os.path.exists(bookmarks_path):
                     continue
+                if os.path.getsize(bookmarks_path.absolute()) == 0:
+                    continue
                 copied_bookmark_path = shutil.copy2(
                     bookmarks_path.absolute(), tmpdirname
                 )
@@ -357,7 +362,8 @@ class Outputs:
 
     # type hint for histories and bookmarks have to be manually written for
     # docs instead of using HistoryVar and BookmarkVar respectively
-    histories: List[Tuple[datetime.datetime, str]]  #: List of tuples of Timestamp & URL
+    histories: List[Tuple[datetime.datetime, str, str]]
+    """List of tuples of Timestamp, URL, Title."""
     bookmarks: List[Tuple[datetime.datetime, str, str, str]]
     """List of tuples of Timestamp, URL, Title, Folder."""
 
@@ -373,7 +379,7 @@ class Outputs:
         self.histories = []
         self.bookmarks = []
         self.field_map = {
-            "history": {"var": self.histories, "fields": ("Timestamp", "URL")},
+            "history": {"var": self.histories, "fields": ("Timestamp", "URL", "Title")},
             "bookmarks": {
                 "var": self.bookmarks,
                 "fields": ("Timestamp", "URL", "Title", "Folder"),
@@ -394,9 +400,9 @@ class Outputs:
         >>> from datetime import datetime
         ... from browser_history import generic
         ... entries = [
-        ...     [datetime(2020, 1, 1), 'https://google.com'],
-        ...     [datetime(2020, 1, 1), 'https://google.com/imghp?hl=EN'],
-        ...     [datetime(2020, 1, 1), 'https://example.com'],
+        ...     (datetime(2020, 1, 1), 'https://google.com', 'Google'),
+        ...     (datetime(2020, 1, 1), 'https://google.com/imghp?hl=EN', 'Google Images'),
+        ...     (datetime(2020, 1, 1), 'https://example.com', 'Example'),
         ... ]
         ... obj = generic.Outputs('history')
         ... obj.histories = entries
@@ -405,17 +411,20 @@ class Outputs:
             'example.com': [
                 [
                     datetime.datetime(2020, 1, 1, 0, 0),
-                    'https://example.com'
+                    'https://example.com',
+                    'Example'
                 ]
             ],
             'google.com': [
                  [
                     datetime.datetime(2020, 1, 1, 0, 0),
-                    'https://google.com'
+                    'https://google.com',
+                    'Google'
                  ],
                  [
                     datetime.datetime(2020, 1, 1, 0, 0),
-                    'https://google.com/imghp?hl=EN'
+                    'https://google.com/imghp?hl=EN',
+                    'Google Images'
                 ]
             ]
          })
@@ -457,15 +466,15 @@ class Outputs:
         >>> from datetime import datetime
         ... from browser_history import generic
         ... entries = [
-        ...     [datetime(2020, 1, 1), 'https://google.com'],
-        ...     [datetime(2020, 1, 1), 'https://example.com'],
+        ...     [datetime(2020, 1, 1), 'https://google.com', 'Google'],
+        ...     [datetime(2020, 1, 1), 'https://example.com', 'Example Domain'],
         ... ]
         ... obj = generic.Outputs('history')
         ... obj.histories = entries
         ... print(obj.to_csv())
         Timestamp,URL
-        2020-01-01 00:00:00,https://google.com
-        2020-01-01 00:00:00,https://example.com
+        2020-01-01 00:00:00,https://google.com,Google
+        2020-01-01 00:00:00,https://example.com,Example Domain
 
         """
         # we will use csv module and let it do all the heavy lifting such as
@@ -496,24 +505,26 @@ class Outputs:
         >>> from datetime import datetime
         ... from browser_history import generic
         ... entries = [
-        ...     [datetime(2020, 1, 1), 'https://google.com'],
-        ...     [datetime(2020, 1, 1), 'https://example.com'],
+        ...     [datetime(2020, 1, 1), 'https://google.com', 'Google'],
+        ...     [datetime(2020, 1, 1), 'https://example.com', 'Example Domain'],
         ... ]
         ... obj = generic.Outputs()
         ... obj.entries = entries
         ... print(obj.to_json(True))
-        {"Timestamp": "2020-01-01T00:00:00", "URL": "https://google.com"}
-        {"Timestamp": "2020-01-01T00:00:00", "URL": "https://example.com"}
+        {"Timestamp": "2020-01-01T00:00:00", "URL": "https://google.com", "Google"}
+        {"Timestamp": "2020-01-01T00:00:00", "URL": "https://example.com", "Example Domain"}
         >>> print(obj.to_json())
         {
             "history": [
                 {
                     "Timestamp": "2020-01-01T00:00:00",
-                    "URL": "https://google.com"
+                    "URL": "https://google.com",
+                    "Title", "Google"
                 },
                 {
                     "Timestamp": "2020-01-01T00:00:00",
-                    "URL": "https://example.com"
+                    "URL": "https://example.com",
+                    "Title": "Example Domain"
                 }
             ]
         }
@@ -587,7 +598,8 @@ class ChromiumBasedBrowser(Browser, abc.ABC):
                 datetime(
                     visits.visit_time/1000000-11644473600, 'unixepoch', 'localtime'
                 ) as 'visit_time',
-                urls.url
+                urls.url,
+                urls.title
             FROM
                 visits INNER JOIN urls ON visits.url = urls.id
             WHERE

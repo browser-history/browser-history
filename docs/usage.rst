@@ -31,7 +31,7 @@ To get consolidated history from all browsers:
 
     outputs = get_history()
 
-    # his is a list of (datetime.datetime, url) tuples
+    # his is a list of (datetime.datetime, url, title) tuples
     his = outputs.histories
 
 History from the default browser
@@ -52,7 +52,7 @@ Let ``browser-history`` automatically detect the default browser set in the syst
         print("could not get default browser!")
     else:
         b = BrowserClass()
-        # his is a list of (datetime.datetime, url) tuples
+        # his is a list of (datetime.datetime, url, title) tuples
         his = b.fetch_history().histories
 
 History from a specific browser
@@ -66,7 +66,7 @@ If you need histories from a specific browser:
     f = Firefox()
     outputs = f.fetch_history()
 
-    # his is a list of (datetime.datetime, url) tuples
+    # his is a list of (datetime.datetime, url, title) tuples
     his = outputs.histories
 
 ``Firefox`` in the above snippet can be replaced with any of the :ref:`supported_browsers`.
