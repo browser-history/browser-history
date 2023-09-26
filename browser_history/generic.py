@@ -12,6 +12,7 @@ import shutil
 import sqlite3
 import tempfile
 import typing
+import warnings
 from collections import defaultdict
 from functools import partial
 from io import StringIO
@@ -382,7 +383,28 @@ class Outputs:
             "jsonl": partial(self.to_json, json_lines=True),
         }
 
+    @property
+    def field_map(self) -> typing.Dict[str, typing.Any]:
+        """[Deprecated] This was not meant for public usage and will be removed soon.
+
+        Use _get_data and _get_fields if you really need this.
+        """
+        warnings.warn(
+            "Outputs.field_map is deprecated. This property was not "
+            + "meant for public usage. Use _get_data and _get_fields "
+            + "if you really need this.",
+            DeprecationWarning,
+        )
+        return {
+            "history": {"var": self.histories, "fields": ("Timestamp", "URL")},
+            "bookmarks": {
+                "var": self.bookmarks,
+                "fields": ("Timestamp", "URL", "Title", "Folder"),
+            },
+        }
+
     def _get_data(self):
+        """Return the list of histories or bookmarks (depending on `fetch_type`)."""
         if self.fetch_type == "history":
             return self.histories
         elif self.fetch_type == "bookmarks":
@@ -391,6 +413,7 @@ class Outputs:
             raise ValueError(f"Invalid fetch type {self.fetch_type}")
 
     def _get_fields(self):
+        """Return names of the fields of the data."""
         if self.fetch_type == "history":
             return ("Timestamp", "URL", "Title")
         elif self.fetch_type == "bookmarks":
