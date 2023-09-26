@@ -81,6 +81,22 @@ def test_output_sort_domain(entries, exp_res):
     assert list(obj.sort_domain().items()) == exp_res
 
 
+def test_output_invalid_fetch_type():
+    obj = generic.Outputs("history")
+    assert obj._get_data() == []
+    assert obj._get_fields() is not None
+
+    obj = generic.Outputs("bookmarks")
+    assert obj._get_data() == []
+    assert obj._get_fields() is not None
+
+    obj = generic.Outputs("bistory")
+    with pytest.raises(ValueError):
+        obj._get_data()
+    with pytest.raises(ValueError):
+        obj._get_fields()
+
+
 class _CustomBrowser(generic.Browser):
     name = "Custom browser"
     history_file = ""
