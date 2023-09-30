@@ -12,6 +12,7 @@ import shutil
 import sqlite3
 import tempfile
 import typing
+import warnings
 from collections import defaultdict
 from functools import partial
 from io import StringIO
@@ -367,9 +368,7 @@ class Outputs:
     bookmarks: List[Tuple[datetime.datetime, str, str, str]]
     """List of tuples of Timestamp, URL, Title, Folder."""
 
-    field_map: Dict[str, Dict[str, Any]]
-    """Dictionary which maps fetch_type to the respective variables and
-    formatting fields."""
+    _valid_fetch_types = ("history", "bookmarks")
 
     format_map: Dict[str, Callable]
     """Dictionary which maps output formats to their respective functions."""
@@ -378,18 +377,49 @@ class Outputs:
         self.fetch_type = fetch_type
         self.histories = []
         self.bookmarks = []
-        self.field_map = {
-            "history": {"var": self.histories, "fields": ("Timestamp", "URL", "Title")},
-            "bookmarks": {
-                "var": self.bookmarks,
-                "fields": ("Timestamp", "URL", "Title", "Folder"),
-            },
-        }
         self.format_map = {
             "csv": self.to_csv,
             "json": self.to_json,
             "jsonl": partial(self.to_json, json_lines=True),
         }
+
+    @property
+    def field_map(self) -> typing.Dict[str, typing.Any]:
+        """[Deprecated] This was not meant for public usage and will be removed soon.
+
+        Use _get_data and _get_fields if you really need this.
+        """
+        warnings.warn(
+            "Outputs.field_map is deprecated. This property was not "
+            + "meant for public usage. Use _get_data and _get_fields "
+            + "if you really need this.",
+            DeprecationWarning,
+        )
+        return {
+            "history": {"var": self.histories, "fields": ("Timestamp", "URL")},
+            "bookmarks": {
+                "var": self.bookmarks,
+                "fields": ("Timestamp", "URL", "Title", "Folder"),
+            },
+        }
+
+    def _get_data(self):
+        """Return the list of histories or bookmarks (depending on `fetch_type`)."""
+        if self.fetch_type == "history":
+            return self.histories
+        elif self.fetch_type == "bookmarks":
+            return self.bookmarks
+        else:
+            raise ValueError(f"Invalid fetch type {self.fetch_type}")
+
+    def _get_fields(self):
+        """Return names of the fields of the data."""
+        if self.fetch_type == "history":
+            return ("Timestamp", "URL", "Title")
+        elif self.fetch_type == "bookmarks":
+            return ("Timestamp", "URL", "Title", "Folder")
+        else:
+            raise ValueError(f"Invalid fetch type {self.fetch_type}")
 
     def sort_domain(self) -> typing.DefaultDict[Any, List[Any]]:
         """
@@ -430,7 +460,7 @@ class Outputs:
          })
         """
         domain_histories: typing.DefaultDict[typing.Any, List[Any]] = defaultdict(list)
-        for entry in self.field_map[self.fetch_type]["var"]:
+        for entry in self._get_data():
             domain_histories[urlparse(entry[1]).netloc].append(entry)
         return domain_histories
 
@@ -485,8 +515,8 @@ class Outputs:
         # memory first
         with StringIO() as output:
             writer = csv.writer(output)
-            writer.writerow(self.field_map[self.fetch_type]["fields"])
-            for row in self.field_map[self.fetch_type]["var"]:
+            writer.writerow(self._get_fields())
+            for row in self._get_data():
                 writer.writerow(row)
             return output.getvalue()
 
@@ -542,9 +572,9 @@ class Outputs:
 
         # fetch lines
         lines = []
-        for entry in self.field_map[self.fetch_type]["var"]:
+        for entry in self._get_data():
             json_record = {}
-            for field, value in zip(self.field_map[self.fetch_type]["fields"], entry):
+            for field, value in zip(self._get_fields(), entry):
                 json_record[field] = value
             lines.append(json_record)
 

@@ -16,7 +16,7 @@ from browser_history import (
 # get list of all implemented browser by finding subclasses of generic.Browser
 AVAILABLE_BROWSERS = ", ".join(b.__name__ for b in utils.get_browsers())
 AVAILABLE_FORMATS = ", ".join(generic.Outputs(fetch_type=None).format_map.keys())
-AVAILABLE_TYPES = ", ".join(generic.Outputs(fetch_type=None).field_map.keys())
+AVAILABLE_TYPES = ", ".join(generic.Outputs._valid_fetch_types)
 
 
 def make_parser():
