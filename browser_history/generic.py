@@ -3,9 +3,13 @@ This module defines the generic base class and the functionality.
 
 All browsers from :py:mod:`browser_history.browsers` inherit this class.
 """
+import datetime
+import struct
+import winreg 
+import contextlib  
+import itertools
 import abc
 import csv
-import datetime
 import json
 import os
 import shutil
@@ -689,3 +693,60 @@ class ChromiumBasedBrowser(Browser, abc.ABC):
                 if isinstance(b_m["roots"][root], dict):
                     bookmarks_list = _deeper(b_m["roots"][root], root, bookmarks_list)
         return bookmarks_list
+   
+class InternetExplorer(Browser, abc.ABC):
+    """ Internet Explorer Browser
+        Supported platforms
+        * Windows
+        Profile support: No
+    """
+    name="InternetExplorer"
+    aliases = ("ie")
+    profile_support = False
+    bookmark_path = "Main\\WindowsSearch\\"
+    history_paths = ["TypedURLsTime","TypedURLs"]
+    hkey = winreg.HKEY_USERS
+    iepath = "\\Software\\Microsoft\\Internet Explorer\\"
+
+    #credit https://stackoverflow.com/questions/14350517/python-winreg-looping-through-sub-keys
+    def subvalues(path="", hkey=None, flags=0):
+         with contextlib.suppress(WindowsError), winreg.OpenKey(hkey, path, 0, winreg.KEY_READ|flags) as k:
+             for i in itertools.count():
+                 yield winreg.EnumValue(k, i)
+
+    def subkeys(path="", hkey=None, flags=0):
+        with contextlib.suppress(WindowsError), winreg.OpenKey(hkey, path, 0, winreg.KEY_READ|flags) as k:
+             for i in itertools.count():
+                 yield winreg.EnumKey(k, i)
+
+    def get_history_data(hkey=hkey,keys=history_paths,path=iepath):
+        history_sites = {}
+        for i in keys:
+            for h in InternetExplorer.subkeys(hkey=hkey,path=""):
+                for g in InternetExplorer.subvalues(hkey=hkey,path=h+path+i):
+                    try:
+                        history_sites[g[0]].update({i:g[1]})
+                    except KeyError:
+                        history_sites[g[0]]={i:g[1]}
+        return history_sites
+    
+    #credit https://stackoverflow.com/questions/39481221/convert-datetime-back-to-windows-64-bit-filetime
+    def hist_transform_win_date(hist_data):
+        for i in hist_data:
+            win_timestamp = struct.unpack('<Q',hist_data[i]['TypedURLsTime'])[0]
+            ts = (win_timestamp - 116444736000000000.0) / int(1/10**-7) 
+            timestamp = datetime.datetime.fromtimestamp(ts)
+            hist_data[i].update({'TypedURLsTime':timestamp})
+        return hist_data
+
+    def hist_transfrom_output(hist_data):
+        entries = []
+        for i in hist_data:
+            entries.append([hist_data[i]['TypedURLsTime'],hist_data[i]['TypedURLs']])
+        return entries
+    
+    def fetch_history():
+        hist_data = InternetExplorer.get_history_data()
+        hist_data = InternetExplorer.hist_transform_win_date(hist_data)
+        entries = InternetExplorer.hist_transfrom_output(hist_data)
+        return entries

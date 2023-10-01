@@ -287,3 +287,19 @@ class Vivaldi(ChromiumBasedBrowser):
     windows_path = "AppData/Local/Vivaldi/User Data"
 
     profile_support = True
+    
+class InternetExplorer(Browser):
+    """ Internet Explorer Browser
+
+        Supported platforms
+
+        * Windows
+
+        Profile support: No
+    """
+
+    name="InternetExplorer"
+
+    aliases = ("ie")
+    
+    profile_support = False
