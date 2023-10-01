@@ -17,19 +17,18 @@ def test_outputs_init():
     obj = generic.Outputs("history")
     assert not obj.histories
     assert obj.format_map
-    assert obj.field_map
 
 
 @pytest.mark.parametrize(
     "entries, exp_res",
     [
-        [[], "Timestamp,URL\r\n"],
+        [[], "Timestamp,URL,Title\r\n"],
         [
             [
                 [datetime(2020, 1, 1), "https://google.com"],
                 [datetime(2020, 1, 1), "https://example.com"],
             ],
-            "Timestamp,URL\r\n"
+            "Timestamp,URL,Title\r\n"
             "2020-01-01 00:00:00,https://google.com\r\n"
             "2020-01-01 00:00:00,https://example.com\r\n",
         ],
@@ -76,6 +75,36 @@ def test_output_sort_domain(entries, exp_res):
     obj = generic.Outputs("history")
     obj.histories.extend(entries)
     assert list(obj.sort_domain().items()) == exp_res
+
+    obj = generic.Outputs("history")
+    obj.histories = entries
+    assert list(obj.sort_domain().items()) == exp_res
+
+
+def test_outputs_invalid_fetch_type():
+    """Check that there's an error raised when an invalid fetch_type is used."""
+    obj = generic.Outputs("history")
+    assert obj._get_data() == []
+    assert obj._get_fields() is not None
+
+    obj = generic.Outputs("bookmarks")
+    assert obj._get_data() == []
+    assert obj._get_fields() is not None
+
+    obj = generic.Outputs("bistory")
+    with pytest.raises(ValueError):
+        obj._get_data()
+    with pytest.raises(ValueError):
+        obj._get_fields()
+
+
+def test_outputs_field_map():
+    """Check that the field_map property exists on Outputs."""
+
+    obj = generic.Outputs("history")
+
+    with pytest.deprecated_call():
+        assert isinstance(obj.field_map, dict)
 
 
 class _CustomBrowser(generic.Browser):
