@@ -659,3 +659,50 @@ def test_librewolf_linux(become_linux, change_homedir):  # noqa: F811
             "menu",
         ),
     )
+
+def test_epic_windows(become_windows, change_homedir):  # noqa: F811
+    """Test history is correct on Brave for Windows"""
+    f = browser_history.browsers.Epic()
+    h_output = f.fetch_history()
+    b_output = f.fetch_bookmarks()
+    his = h_output.histories
+    bmk = b_output.bookmarks
+    assert len(his) == 2
+    assert len(bmk) == 1
+    assert_histories_equal(
+        his[0],
+        (
+            datetime.datetime(
+                2023,
+                10,
+                1,
+                17,
+                26,
+                28,
+                tzinfo=datetime.timezone(
+                    datetime.timedelta(seconds=19800), 'India Standard Time'
+                )
+            ),
+            'https://github.com/',
+            'GitHub: Let’s build from here · GitHub'
+        ),
+    )
+    assert_bookmarks_equal(
+        bmk[0],
+        (
+            datetime.datetime(
+                2023,
+                10,
+                1,
+                17,
+                34,
+                7,
+                tzinfo=datetime.timezone(
+                    datetime.timedelta(seconds=19800), 'India Standard Time'
+                ),
+            ),
+            'https://github.com/',
+            'GitHub: Let’s build from here · GitHub',
+            'bookmark_bar'
+        )
+    )
