@@ -11,13 +11,27 @@ from .utils import (  # noqa: F401; pylint: disable=unused-import
     assert_bookmarks_equal,
 )
 
+import pytest
+
 
 # pylint: disable=redefined-outer-name,unused-argument
 
 
-def test_firefox_linux(become_linux, change_homedir):  # noqa: F811
+@pytest.mark.parametrize(
+    "browser_type, bookmark_dir",
+    [
+        (browser_history.browsers.Firefox, ".mozilla/firefox/profile/places.sqlite"),
+        (
+            browser_history.browsers.FirefoxSnap,
+            "snap/firefox/common/.mozilla/firefox/profile/places.sqlite",
+        ),
+    ],
+)
+def test_firefox_linux(
+    become_linux, change_homedir, browser_type, bookmark_dir  # noqa: F811
+):
     """Test history is correct on Firefox for Linux"""
-    f = browser_history.browsers.Firefox()
+    f = browser_type()
     h_output = f.fetch_history()
     b_output = f.fetch_bookmarks()
     his = h_output.histories
@@ -37,7 +51,7 @@ def test_firefox_linux(become_linux, change_homedir):  # noqa: F811
                 tzinfo=datetime.timezone(datetime.timedelta(seconds=19800), "IST"),
             ),
             "https://www.mozilla.org/en-US/privacy/firefox/",
-            "Firefox Privacy Notice — Mozilla"
+            "Firefox Privacy Notice — Mozilla",
         ),
     )
     assert_bookmarks_equal(
@@ -58,13 +72,11 @@ def test_firefox_linux(become_linux, change_homedir):  # noqa: F811
         ),
     )
     profs = f.profiles(f.history_file)
-    assert "profile" in profs
     his_path = f.history_path_profile("profile")
     bmk_path = f.bookmarks_path_profile("profile")
-    assert (
-        his_path == bmk_path == Path.home() / ".mozilla/firefox/profile/places.sqlite"
-    )
+    assert his_path == bmk_path == Path.home() / bookmark_dir
     his = f.history_profiles(["profile"]).histories
+    assert "profile" in profs
     assert len(his) == 5
     assert_histories_equal(
         his[0],
@@ -79,13 +91,20 @@ def test_firefox_linux(become_linux, change_homedir):  # noqa: F811
                 tzinfo=datetime.timezone(datetime.timedelta(seconds=19800), "IST"),
             ),
             "https://www.mozilla.org/en-US/privacy/firefox/",
-            "Firefox Privacy Notice — Mozilla"
+            "Firefox Privacy Notice — Mozilla",
         ),
     )
 
 
-def test_empty_history_file(become_linux, change_homedir):  # noqa: F811
-    f = browser_history.browsers.Firefox()
+@pytest.mark.parametrize(
+    "browser_type",
+    [
+        browser_history.browsers.Firefox,
+        browser_history.browsers.FirefoxSnap,
+    ],
+)
+def test_empty_history_file(become_linux, change_homedir, browser_type):  # noqa: F811
+    f = browser_type()
     out = f.history_profiles(["empty"])
 
     assert len(out.histories) == 0
@@ -113,7 +132,7 @@ def test_chrome_linux(become_linux, change_homedir):  # noqa: F811
                 tzinfo=datetime.timezone(datetime.timedelta(seconds=7200), "CEST"),
             ),
             "www.github.com",
-            "GitHub: Where the world builds software · GitHub"
+            "GitHub: Where the world builds software · GitHub",
         ),
     )
     assert_bookmarks_equal(
@@ -154,7 +173,7 @@ def test_chrome_linux(become_linux, change_homedir):  # noqa: F811
                 tzinfo=datetime.timezone(datetime.timedelta(seconds=7200), "CEST"),
             ),
             "www.github.com",
-            "GitHub: Where the world builds software · GitHub"
+            "GitHub: Where the world builds software · GitHub",
         ),
     )
 
@@ -181,7 +200,7 @@ def test_chromium_linux(become_linux, change_homedir):  # noqa: F811
                 tzinfo=datetime.timezone(datetime.timedelta(seconds=7200), "CEST"),
             ),
             "www.github.com",
-            "GitHub: Where the world builds software · GitHub"
+            "GitHub: Where the world builds software · GitHub",
         ),
     )
     assert_bookmarks_equal(
@@ -228,7 +247,7 @@ def test_chromium_linux(become_linux, change_homedir):  # noqa: F811
                 tzinfo=datetime.timezone(datetime.timedelta(seconds=7200), "CEST"),
             ),
             "www.github.com",
-            "GitHub: Where the world builds software · GitHub"
+            "GitHub: Where the world builds software · GitHub",
         ),
     )
 
@@ -260,7 +279,7 @@ def test_firefox_windows(become_windows, change_homedir):  # noqa: F811
                 ),
             ),
             "https://www.youtube.com/",
-            "YouTube"
+            "YouTube",
         ),
     )
     assert_bookmarks_equal(
@@ -295,7 +314,7 @@ def test_firefox_windows(become_windows, change_homedir):  # noqa: F811
                 ),
             ),
             "https://www.reddit.com/",
-            "reddit: the front page of the internet"
+            "reddit: the front page of the internet",
         ),
     )
     # get history for second profile
@@ -316,7 +335,7 @@ def test_firefox_windows(become_windows, change_homedir):  # noqa: F811
                 ),
             ),
             "https://www.reddit.com/",
-            "reddit: the front page of the internet"
+            "reddit: the front page of the internet",
         ),
     )
 
@@ -343,7 +362,7 @@ def test_edge_windows(become_windows, change_homedir):  # noqa: F811
                 ),
             ),
             "https://pesos.github.io/",
-            "Welcome to PES Open Source - PES Open Source"
+            "Welcome to PES Open Source - PES Open Source",
         ),
     )
 
@@ -372,7 +391,7 @@ def test_edge_windows(become_windows, change_homedir):  # noqa: F811
                 ),
             ),
             "https://pesos.github.io/",
-            "Welcome to PES Open Source - PES Open Source"
+            "Welcome to PES Open Source - PES Open Source",
         ),
     )
 
@@ -397,7 +416,7 @@ def test_safari_mac(become_mac, change_homedir):  # noqa: F811
                 tzinfo=datetime.timezone(datetime.timedelta(seconds=19800), "IST"),
             ),
             "https://www.apple.com/in/",
-            ""
+            "",
         ),
     )
     assert his[1][1] == "https://www.google.co.in/?client=safari&channel=mac_bm"
@@ -414,7 +433,7 @@ def test_safari_mac(become_mac, change_homedir):  # noqa: F811
                 tzinfo=datetime.timezone(datetime.timedelta(seconds=19800), "IST"),
             ),
             "https://pesos.github.io/",
-            None
+            None,
         ),
     )
 
@@ -442,7 +461,7 @@ def test_opera_windows(become_windows, change_homedir):  # noqa: F811
                 ),
             ),
             "https://www.youtube.com/",
-            "YouTube"
+            "YouTube",
         ),
     )
     assert_bookmarks_equal(
@@ -478,7 +497,7 @@ def test_opera_windows(become_windows, change_homedir):  # noqa: F811
                 ),
             ),
             "https://github.com/",
-            "GitHub: Where the world builds software · GitHub"
+            "GitHub: Where the world builds software · GitHub",
         ),
     )
     assert len(o.profiles(o.history_file)) == 1
@@ -511,7 +530,7 @@ def test_brave_windows(become_windows, change_homedir):  # noqa: F811
                 ),
             ),
             "https://github.com/",
-            "GitHub: Where the world builds software · GitHub"
+            "GitHub: Where the world builds software · GitHub",
         ),
     )
     assert_bookmarks_equal(
@@ -546,7 +565,7 @@ def test_brave_windows(become_windows, change_homedir):  # noqa: F811
                 ),
             ),
             "https://stackoverflow.com/",
-            "Stack Overflow - Where Developers Learn, Share, & Build Careers"
+            "Stack Overflow - Where Developers Learn, Share, & Build Careers",
         ),
     )
     # get history for second profile
@@ -566,7 +585,7 @@ def test_brave_windows(become_windows, change_homedir):  # noqa: F811
                 ),
             ),
             "https://www.reddit.com/",
-            "reddit: the front page of the internet"
+            "reddit: the front page of the internet",
         ),
     )
 
@@ -593,7 +612,7 @@ def test_vivaldi_mac(become_mac, change_homedir):  # noqa: F811
                 tzinfo=datetime.timezone(datetime.timedelta(seconds=19800), "IST"),
             ),
             "https://vivaldi.com/whats-new-in-vivaldi-3-5/",
-            "What’s New in Vivaldi 3.5 | Vivaldi Browser"
+            "What’s New in Vivaldi 3.5 | Vivaldi Browser",
         ),
     )
 
@@ -611,9 +630,10 @@ def test_vivaldi_mac(become_mac, change_homedir):  # noqa: F811
                 tzinfo=datetime.timezone(datetime.timedelta(seconds=19800), "IST"),
             ),
             "https://pesos.github.io/",
-            "Welcome to PES Open Source - PES Open Source"
+            "Welcome to PES Open Source - PES Open Source",
         ),
     )
+
 
 def test_librewolf_linux(become_linux, change_homedir):  # noqa: F811
     """Test history is correct on LibreWolf for Linux"""
@@ -624,7 +644,7 @@ def test_librewolf_linux(become_linux, change_homedir):  # noqa: F811
     bmk = b_output.bookmarks
     assert len(his) == 12
     assert len(bmk) == 1
-    
+
     assert_histories_equal(
         his[0],
         (
@@ -638,7 +658,7 @@ def test_librewolf_linux(become_linux, change_homedir):  # noqa: F811
                 tzinfo=datetime.timezone(datetime.timedelta(seconds=19800), "IST"),
             ),
             "https://duckduckgo.com/?t=ffab&q=fhgi",
-            "fhgi at DuckDuckGo"
+            "fhgi at DuckDuckGo",
         ),
     )
 

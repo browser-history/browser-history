@@ -145,10 +145,26 @@ class LibreWolf(Firefox):
 
     Profile support: Yes
     """
+
     name = "LibreWolf"
     aliases = ("librewolfurl",)
 
     linux_path = ".librewolf"
+
+
+class FirefoxSnap(Firefox):
+    """Firefox browser installed via Snap
+
+    Supported platforms:
+
+    * Linux
+
+
+    Profile support: Yes
+    """
+
+    name = "Firefox (Snap)"
+    linux_path = "snap/firefox/common/.mozilla/firefox"
 
 
 class Safari(Browser):
