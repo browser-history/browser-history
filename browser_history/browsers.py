@@ -287,3 +287,20 @@ class Vivaldi(ChromiumBasedBrowser):
     windows_path = "AppData/Local/Vivaldi/User Data"
 
     profile_support = True
+
+class Epic(ChromiumBasedBrowser):
+    """Epic Privacy Browser
+
+    Supported platforms (TODO: Add Mac OS support)
+
+    * Windows
+    * Mac OS
+
+    Profile support: No
+    """
+
+    name = "Epic Privacy Browser"
+
+    windows_path = "AppData/Local/Epic Privacy Browser/User Data/Default"
+
+    profile_support = False
