@@ -11,7 +11,6 @@ from .utils import (  # noqa: F401; pylint: disable=unused-import
     assert_bookmarks_equal,
 )
 
-
 # pylint: disable=redefined-outer-name,unused-argument
 
 
@@ -658,4 +657,99 @@ def test_librewolf_linux(become_linux, change_homedir):  # noqa: F811
             "GitHub: Where the world builds software · GitHub",
             "menu",
         ),
+    )
+
+def test_epic_windows(become_windows, change_homedir):  # noqa: F811
+    """Test history is correct on Epic for Windows"""
+    f = browser_history.browsers.Epic()
+    h_output = f.fetch_history()
+    b_output = f.fetch_bookmarks()
+    his = h_output.histories
+    bmk = b_output.bookmarks
+    assert len(his) == 2
+    assert len(bmk) == 1
+    assert_histories_equal(
+        his[0],
+        (
+            datetime.datetime(
+                2023,
+                10,
+                1,
+                17,
+                26,
+                28,
+                tzinfo=datetime.timezone(
+                    datetime.timedelta(seconds=19800), 'India Standard Time'
+                )
+            ),
+            'https://github.com/',
+            'GitHub: Let’s build from here · GitHub'
+        ),
+    )
+    assert_bookmarks_equal(
+        bmk[0],
+        (
+            datetime.datetime(
+                2023,
+                10,
+                1,
+                17,
+                34,
+                7,
+                tzinfo=datetime.timezone(
+                    datetime.timedelta(seconds=19800), 'India Standard Time'
+                ),
+            ),
+            'https://github.com/',
+            'GitHub: Let’s build from here · GitHub',
+            'bookmark_bar'
+        )
+    )
+
+
+def test_epic_mac(become_mac, change_homedir):  # noqa: F811
+    """Test history is correct on Epic for Mac OS"""
+    f = browser_history.browsers.Epic()
+    h_output = f.fetch_history()
+    b_output = f.fetch_bookmarks()
+    his = h_output.histories
+    bmk = b_output.bookmarks
+    assert len(his) == 5
+    assert len(bmk) == 1
+    assert_histories_equal(
+        his[0],
+        (
+            datetime.datetime(
+                2023,
+                10,
+                27,
+                20,
+                19,
+                49,
+                tzinfo=datetime.timezone(
+                    datetime.timedelta(seconds=19800), 'IST'
+                )
+            ),
+            'https://epicbrowser.com/encrypted_proxy/',
+            "Epic Privacy Browser - Epic's Encrypted Proxy (VPN)"
+        ),
+    )
+    assert_bookmarks_equal(
+        bmk[0],
+        (
+            datetime.datetime(
+                2023,
+                10,
+                27,
+                20,
+                22,
+                1,
+                tzinfo=datetime.timezone(
+                    datetime.timedelta(seconds=19800), 'IST'
+                )
+            ),
+            'https://github.com/',
+            'GitHub: Let’s build from here · GitHub',
+            'bookmark_bar'
+        )
     )
