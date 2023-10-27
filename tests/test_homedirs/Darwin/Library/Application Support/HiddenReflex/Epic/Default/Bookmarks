@@ -1,0 +1,47 @@
+{
+   "checksum": "7dda005570bafebda941d884bc62a6e6",
+   "roots": {
+      "bookmark_bar": {
+         "children": [ {
+            "date_added": "13342891921916461",
+            "date_last_used": "0",
+            "guid": "9a677426-81af-4257-85bc-78ffee54db8e",
+            "id": "5",
+            "meta_info": {
+               "power_bookmark_meta": ""
+            },
+            "name": "GitHub: Let’s build from here · GitHub",
+            "type": "url",
+            "url": "https://github.com/"
+         } ],
+         "date_added": "13342891809720197",
+         "date_last_used": "0",
+         "date_modified": "13342891921916461",
+         "guid": "0bc5d13f-2cba-5d74-951f-3f233fe6c908",
+         "id": "1",
+         "name": "Bookmarks Bar",
+         "type": "folder"
+      },
+      "other": {
+         "children": [  ],
+         "date_added": "13342891809720198",
+         "date_last_used": "0",
+         "date_modified": "0",
+         "guid": "82b081ec-3dd3-529c-8475-ab6c344590dd",
+         "id": "2",
+         "name": "Other Bookmarks",
+         "type": "folder"
+      },
+      "synced": {
+         "children": [  ],
+         "date_added": "13342891809720199",
+         "date_last_used": "0",
+         "date_modified": "0",
+         "guid": "4cf2e351-0e85-532b-bb37-df045d8f8d0f",
+         "id": "3",
+         "name": "Mobile Bookmarks",
+         "type": "folder"
+      }
+   },
+   "version": 1
+}
