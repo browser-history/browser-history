@@ -302,5 +302,6 @@ class Epic(ChromiumBasedBrowser):
     name = "Epic Privacy Browser"
 
     windows_path = "AppData/Local/Epic Privacy Browser/User Data/Default"
+    mac_path = "Library/Application Support/HiddenReflex/Epic/Default"
 
     profile_support = False
