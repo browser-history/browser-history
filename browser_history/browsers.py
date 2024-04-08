@@ -2,6 +2,7 @@
 
 All browsers must inherit from :py:mod:`browser_history.generic.Browser`.
 """
+
 import datetime
 import sqlite3
 
@@ -145,6 +146,7 @@ class LibreWolf(Firefox):
 
     Profile support: Yes
     """
+
     name = "LibreWolf"
     aliases = ("librewolfurl",)
 
@@ -287,6 +289,7 @@ class Vivaldi(ChromiumBasedBrowser):
     windows_path = "AppData/Local/Vivaldi/User Data"
 
     profile_support = True
+
 
 class Epic(ChromiumBasedBrowser):
     """Epic Privacy Browser

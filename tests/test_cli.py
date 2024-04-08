@@ -150,7 +150,7 @@ def test_browser_argument(browser_arg, capsys, platform):
                 for browser_unavailable_err in (
                     "browser is not supported",
                     "browser is not installed",
-                    "browser is unavailable"
+                    "browser is unavailable",
                 )
             ):
                 # In case the tester does not have access to the browser
@@ -178,7 +178,7 @@ def test_format_argument(capsys, platform):
     # and we don't mind the CSV dialect, so just check call doesn't error
     read_csv = csv.Sniffer()
     # This gives '_csv.Error: Could not determine delimiter' if not a csv file
-    csv_output = csv_output.replace('\r', '')
+    csv_output = csv_output.replace("\r", "")
     read_csv.sniff(csv_output)
     assert read_csv.has_header(
         csv_output
@@ -189,7 +189,7 @@ def test_format_argument(capsys, platform):
             cli([fmt_opt, fmt_arg])
             output = capsys.readouterr().out
             if fmt_arg in ("csv", "infer"):  # infer gives csv if no file
-                output = output.replace('\r', '')
+                output = output.replace("\r", "")
                 read_csv.sniff(output)
                 assert read_csv.has_header(output)
                 assert CSV_HISTORY_HEADER in output
@@ -245,7 +245,7 @@ def test_argument_combinations(capsys, platform, browser):
                         "browser is not supported",
                         "browser is not installed",
                         "Bookmarks are not supported",
-                        "browser is unavailable"
+                        "browser is unavailable",
                     )
                 ):
                     # In case the tester does not have access to the browser
@@ -482,7 +482,9 @@ def test_firefox_windows_profile(capsys, become_windows, change_homedir):  # noq
 
     out, err = capsys.readouterr()
     assert out.startswith("Timestamp,URL,Title")
-    assert out.endswith("https://www.reddit.com/,reddit: the front page of the internet\r\n\n")
+    assert out.endswith(
+        "https://www.reddit.com/,reddit: the front page of the internet\r\n\n"
+    )
     assert err == ""
 
 
