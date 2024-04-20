@@ -1,4 +1,4 @@
-name: mypy-test
+name: mypy
 
 on:
   push:
@@ -11,21 +11,17 @@ jobs:
 
     strategy:
       matrix:
-        python-version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
+        python-version: ["3.7", "3.8", "3.9", "3.10", "3.11", "3.12"]
         platform: [ubuntu-latest]
 
     runs-on: ${{ matrix.platform }}
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-    - name: Test with mypy
-      uses: jpetrucciani/mypy-check@master
+    - run: python -m pip install --upgrade pip
+    - uses: jpetrucciani/mypy-check@master
       with:
         path: 'browser_history'
