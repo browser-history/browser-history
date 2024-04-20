@@ -1,6 +1,5 @@
 from . import browsers, generic, utils  # noqa: F401
 
-
 __version__ = "0.4.0"
 
 
@@ -23,7 +22,9 @@ def get_history():
             output_object.histories.extend(browser_output_object.histories)
         except AssertionError:
             utils.logger.info("%s browser is not supported", browser_class.name)
-    output_object.histories.sort()
+    # Can't sort tuples with None values, and some titles
+    # are None, so replace them with ''
+    output_object.histories.sort(key=lambda h: tuple(el or "" for el in h))
     return output_object
 
 

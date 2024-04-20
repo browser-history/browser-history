@@ -3,6 +3,7 @@ This module defines the generic base class and the functionality.
 
 All browsers from :py:mod:`browser_history.browsers` inherit this class.
 """
+
 import abc
 import csv
 import datetime
@@ -281,13 +282,17 @@ class Browser(abc.ABC):
                             tzinfo=self._local_tz
                         ),
                         url,
-                        title
+                        title,
                     )
                     for d, url, title in cursor.fetchall()
                 ]
                 output_object.histories.extend(date_histories)
                 if sort:
-                    output_object.histories.sort(reverse=desc)
+                    # Can't sort tuples with None values, and some titles
+                    # are None, so replace them with ''
+                    output_object.histories.sort(
+                        key=lambda h: tuple(el or "" for el in h), reverse=desc
+                    )
                 conn.close()
         return output_object
 
@@ -332,7 +337,8 @@ class Browser(abc.ABC):
                 copied_bookmark_path = shutil.copy2(
                     bookmarks_path.absolute(), tmpdirname
                 )
-                date_bookmarks = self.bookmarks_parser(copied_bookmark_path)  # pylint: disable=assignment-from-no-return
+                # pylint: disable=assignment-from-no-return
+                date_bookmarks = self.bookmarks_parser(copied_bookmark_path)
                 output_object.bookmarks.extend(date_bookmarks)
             if sort:
                 output_object.bookmarks.sort(reverse=desc)
@@ -431,7 +437,11 @@ class Outputs:
         ... from browser_history import generic
         ... entries = [
         ...     (datetime(2020, 1, 1), 'https://google.com', 'Google'),
-        ...     (datetime(2020, 1, 1), 'https://google.com/imghp?hl=EN', 'Google Images'),
+        ...     (
+        ...         datetime(2020, 1, 1),
+        ...         "https://google.com/imghp?hl=EN",
+        ...         "Google Images",
+        ...     ),
         ...     (datetime(2020, 1, 1), 'https://example.com', 'Example'),
         ... ]
         ... obj = generic.Outputs('history')
@@ -541,8 +551,16 @@ class Outputs:
         ... obj = generic.Outputs()
         ... obj.entries = entries
         ... print(obj.to_json(True))
-        {"Timestamp": "2020-01-01T00:00:00", "URL": "https://google.com", "Google"}
-        {"Timestamp": "2020-01-01T00:00:00", "URL": "https://example.com", "Example Domain"}
+        {
+            "Timestamp": "2020-01-01T00:00:00",
+            "URL": "https://google.com",
+            "Title": "Google",
+        }
+        {
+            "Timestamp": "2020-01-01T00:00:00",
+            "URL": "https://example.com",
+            "Title": "Example Domain",
+        }
         >>> print(obj.to_json())
         {
             "history": [
@@ -559,6 +577,7 @@ class Outputs:
             ]
         }
         """
+
         # custom json encoder for datetime objects
         class DateTimeEncoder(json.JSONEncoder):
             """Custom JSON encoder to encode datetime objects"""

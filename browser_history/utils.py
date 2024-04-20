@@ -2,6 +2,7 @@
 Module defines Platform class enumerates the popular Operating Systems.
 
 """
+
 import enum
 import inspect
 import logging
