@@ -1,10 +1,4 @@
-Sphinx==4.3.1
-sphinx-argparse==0.2.5
-sphinx-autodoc-typehints==1.12.0
-sphinx-rtd-theme==1.0.0
-sphinxcontrib-applehelp==1.0.2
-sphinxcontrib-devhelp==1.0.2
-sphinxcontrib-htmlhelp==2.0.0
-sphinxcontrib-jsmath==1.0.1
-sphinxcontrib-qthelp==1.0.3
-sphinxcontrib-serializinghtml==1.1.5
+Sphinx==7.3.7
+sphinx-argparse==0.4.0
+sphinx-autodoc-typehints==2.1.0
+sphinx-rtd-theme==2.0.0
