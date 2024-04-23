@@ -1,29 +1,19 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v2.4.0
+    rev: v4.6.0
     hooks:
       - id: check-ast
       - id: check-merge-conflict
       - id: check-yaml
+      - id: check-toml
       - id: debug-statements
       - id: end-of-file-fixer
         types: [python]
-      - id: flake8
-        additional_dependencies:
-          - flake8-string-format
-          - flake8-comprehensions
-          - flake8-builtins
-      - id: requirements-txt-fixer
       - id: trailing-whitespace
         types: [python]
 
-  - repo: https://github.com/psf/black
-    rev: stable
-    hooks:
-      - id: black
-
   - repo: https://github.com/pre-commit/pygrep-hooks
-    rev: v1.6.0
+    rev: v1.10.0
     hooks:
       - id: rst-backticks
       - id: rst-inline-touching-normal
