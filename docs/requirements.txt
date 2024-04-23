@@ -1,4 +1,0 @@
-Sphinx==7.3.7
-sphinx-argparse==0.4.0
-sphinx-autodoc-typehints==2.1.0
-sphinx-rtd-theme==2.0.0
