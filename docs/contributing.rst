@@ -4,7 +4,7 @@ Contributing
 Development Dependencies
 ------------------------
 
-#. Python 3 (versions 3.6 to 3.8 are currently supported)
+#. Python 3 (versions 3.8 to 3.12 are currently supported)
 #. ``pip install pylint pytest pytest-cov pre-commit python-dateutil``
 
     * ``pylint`` to check for errors and to enforce code style.
