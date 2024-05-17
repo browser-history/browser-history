@@ -5,15 +5,8 @@ Development Dependencies
 ------------------------
 
 #. Python 3 (versions 3.8 to 3.12 are currently supported)
-#. ``pip install pylint pytest pytest-cov pre-commit python-dateutil``
-
-    * ``pylint`` to check for errors and to enforce code style.
-    * ``pytest`` to run the tests.
-    * ``pytest-cov`` to check for code coverage.
-    * ``pre-commit`` to automate code style checks.
-    * ``python-dateutil`` to resolve timezone-related issues in the tests.
-
-#. If you're making changes to the documentation, install the documentation dependencies: ``pip install -r docs/requirements.txt``.
+#. ``pip install -e '.[dev]'``
+#. If you're making changes to the documentation, install the documentation dependencies: ``pip install -e '.[dev,docs]'``.
 
     * Refer `this <https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html>`_ for a brief introduction to ReST.
 
@@ -26,7 +19,7 @@ Development Process - Short Version
 #. Work on the master branch for smaller patches and a separate branch for new features.
 #. Initialize pre-commit hook (only on first commit) by running: ``pre-commit install``
 #. Make changes, ``git add`` and then commit. Make sure to link the issue number in the commit message.
-#. Run the following commands: ``pylint browser_history``, ``pytest --cov=./browser_history``
+#. Run the following commands: ``pytest --cov=./browser_history``, ``flake8 browser_history tests`` and ``black browser_history tests``
 #. (Optional) If you're updating the documentation, make sure you update ``docs/quickstart.rst`` and ``README.md`` simultaneously.
    Run the following: ``cd docs``, ``make html`` and then open ``_build/html/index.html`` in a browser to confirm that the documentation rendered correctly.
 #. If all tests are passing, pull changes from the original remote with a rebase, and push the changes to your remote repository.
@@ -62,7 +55,7 @@ Development Process - Long Version
 #. Make changes, ``git add`` and then commit. Make sure to link the issue number in the commit message.
 
    .. caution:: When testing changes, create and activate a virtual environment and install
-      the package in editable mode using ``pip install -e .`` to ensure that the pip version is not used.
+      the package in editable mode using ``pip install -e '.[dev,docs]'`` to ensure that the pip version is not used.
 
    * ``git add <names of all modified files>``
    * ``git commit``
@@ -82,8 +75,9 @@ Development Process - Long Version
 
 #. Run the following commands:
 
-   * ``pylint browser_history`` - ensure that there are no errors (codes starting with an ``E``).
    * ``pytest --cov=./browser_history`` - ensure that all tests pass.
+   * ``flake8 browser_history tests`` - ensure that there are no errors.
+   * ``black browser_history tests`` - formats all files. If files were modified by this command, be sure to commit them.
 
 #. (Optional) If you're updating the documentation, run the following:
 

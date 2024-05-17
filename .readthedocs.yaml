@@ -16,4 +16,8 @@ formats:
 
 python:
   install:
-    - requirements: docs/requirements.txt
+    - method: pip
+      path: .
+      extra_requirements:
+        # will run `pip install .[docs]`
+        - docs
