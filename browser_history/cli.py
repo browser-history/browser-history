@@ -215,4 +215,11 @@ def cli(args):
 
 
 def main():
-    cli(sys.argv[1:])
+    try:
+        cli(sys.argv[1:])
+    except BrokenPipeError:
+        # ignore broken pipe errors just in case output is
+        # piped to another command
+        pass
+    except KeyboardInterrupt:
+        sys.exit(1)
