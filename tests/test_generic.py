@@ -199,3 +199,42 @@ def test_chromium_based_browser_bookmark_parser_deep_hierarchy():
         with patch("browser_history.generic.json.load", Mock(return_value=nodes)):
             bookmark_list = browser.bookmarks_parser("/")
     assert len(bookmark_list) == 1
+
+
+def test_bookmarks_with_none_values_sorted():
+    class CustomChromiumBrowser(ChromiumBasedBrowser):
+        name = "Test"
+        linux_path = "random_path"
+
+        def paths(self, profile_file):
+            # can be anything. just needs to be a valid path.
+            return [pathlib.Path("README.md")]
+
+    browser = CustomChromiumBrowser(utils.Platform.LINUX)
+    nodes = {
+        "roots": {
+            "key": {
+                "parent": {
+                    "children": [
+                        {
+                            "type": "url",
+                            "date_added": int(datetime.now().timestamp()),
+                            "url": "foo.bar",
+                            "name": "foo",
+                        },
+                        {
+                            "type": "url",
+                            "date_added": int(datetime.now().timestamp()),
+                            "url": None,
+                            "name": "foo",
+                        },
+                    ]
+                }
+            }
+        }
+    }
+    with patch("browser_history.generic.open"):
+        with patch("browser_history.generic.json.load", Mock(return_value=nodes)):
+            bookmark_list = browser.fetch_bookmarks(sort=True)
+    assert len(bookmark_list.bookmarks) == 2
+    assert bookmark_list.bookmarks[1][1] is None
