@@ -3,12 +3,13 @@ Module defines Platform class enumerates the popular Operating Systems.
 
 """
 
+import datetime
 import enum
 import inspect
 import logging
 import platform
 import subprocess
-from typing import Optional
+from typing import Optional, Tuple
 
 from . import generic
 
@@ -214,3 +215,12 @@ def get_browser(browser_name):
             )
 
         return browser_class
+
+
+def bookmarks_sort_key(
+    bookmark: Tuple[datetime.datetime, str, str, str]
+) -> Tuple[datetime.datetime, Tuple[bool, str], Tuple[bool, str], Tuple[bool, str]]:
+    time, url, title, folder = bookmark
+    # (x is None, x) pattern is used to sort `None`s last.
+    #  - Since `False < True`, `None` values will be moved to the end.
+    return time, (url is None, url), (title is None, title), (folder is None, folder)

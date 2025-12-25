@@ -50,5 +50,5 @@ def get_bookmarks():
             output_object.bookmarks.extend(browser_output_object.bookmarks)
         except AssertionError as e:
             utils.logger.info("%s", e)
-    output_object.bookmarks.sort()
+    output_object.bookmarks.sort(key=utils.bookmarks_sort_key)
     return output_object

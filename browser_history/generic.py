@@ -341,7 +341,7 @@ class Browser(abc.ABC):
                 date_bookmarks = self.bookmarks_parser(copied_bookmark_path)
                 output_object.bookmarks.extend(date_bookmarks)
             if sort:
-                output_object.bookmarks.sort(reverse=desc)
+                output_object.bookmarks.sort(reverse=desc, key=utils.bookmarks_sort_key)
         return output_object
 
     @classmethod
