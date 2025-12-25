@@ -5,6 +5,7 @@ All browsers must inherit from :py:mod:`browser_history.generic.Browser`.
 
 import datetime
 import sqlite3
+import typing
 
 from browser_history.generic import Browser, ChromiumBasedBrowser
 
@@ -66,9 +67,9 @@ class Firefox(Browser):
     name = "Firefox"
     aliases = ("firefoxurl",)
 
-    linux_path = ".mozilla/firefox"
-    windows_path = "AppData/Roaming/Mozilla/Firefox/Profiles"
-    mac_path = "Library/Application Support/Firefox/Profiles/"
+    linux_path: typing.Optional[str] = ".mozilla/firefox"
+    windows_path: typing.Optional[str] = "AppData/Roaming/Mozilla/Firefox/Profiles"
+    mac_path: typing.Optional[str] = "Library/Application Support/Firefox/Profiles/"
 
     profile_support = True
 
@@ -151,6 +152,28 @@ class LibreWolf(Firefox):
     aliases = ("librewolfurl",)
 
     linux_path = ".librewolf"
+    windows_path = None
+    mac_path = None
+
+
+class Zen(Firefox):
+    """Zen Browser
+
+    Supported platforms:
+
+    * Mac OS
+
+    Profile support: Yes
+    """
+
+    name = "Zen"
+    aliases = ("zen",)
+
+    linux_path = None
+    windows_path = None
+    mac_path = "Library/Application Support/zen/Profiles/"
+
+    profile_support = True
 
 
 class Safari(Browser):
@@ -308,3 +331,22 @@ class Epic(ChromiumBasedBrowser):
     mac_path = "Library/Application Support/HiddenReflex/Epic/Default"
 
     profile_support = False
+
+
+class Arc(ChromiumBasedBrowser):
+    """Arc browser by The Browser Company
+
+    Supported platforms
+
+    * Mac OS
+
+    Profile support: Yes
+    """
+
+    name = "Arc"
+
+    linux_path = None
+    windows_path = None
+    mac_path = "Library/Application Support/Arc/User Data"
+
+    profile_support = True

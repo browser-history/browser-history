@@ -751,3 +751,81 @@ def test_epic_mac(become_mac, change_homedir):  # noqa: F811
             "bookmark_bar",
         ),
     )
+
+
+def test_zen_mac(become_mac, change_homedir):  # noqa: F811
+    """Test history is correct on Zen for Mac OS"""
+    f = browser_history.browsers.Zen()
+    h_output = f.fetch_history()
+    b_output = f.fetch_bookmarks()
+    his = h_output.histories
+    bmk = b_output.bookmarks
+    assert len(his) == 2
+    assert len(bmk) == 4
+    assert_histories_equal(
+        his[0],
+        (
+            datetime.datetime(
+                2025,
+                12,
+                25,
+                15,
+                51,
+                32,
+                tzinfo=datetime.timezone(datetime.timedelta(seconds=19800), "IST"),
+            ),
+            "https://zen-browser.app/privacy-policy/",
+            "Privacy Policy - Zen",
+        ),
+    )
+    assert_bookmarks_equal(
+        bmk[0],
+        (
+            datetime.datetime(
+                2025,
+                12,
+                25,
+                15,
+                51,
+                32,
+                tzinfo=datetime.timezone(datetime.timedelta(seconds=19800), "IST"),
+            ),
+            (
+                "https://support.mozilla.org/kb/customize-firefox-controls-buttons-and-"
+                "toolbars?utm_source=firefox-browser&utm_medium=default-bookmarks"
+                "&utm_campaign=customize"
+            ),
+            "Customize Firefox",
+            "Mozilla Firefox",
+        ),
+    )
+
+
+def test_arc_mac(become_mac, change_homedir):  # noqa: F811
+    """Test history is correct on Arc for Mac OS"""
+    f = browser_history.browsers.Arc()
+    h_output = f.fetch_history()
+    b_output = f.fetch_bookmarks()
+    his = h_output.histories
+    bmk = b_output.bookmarks
+    assert len(his) == 5
+    assert len(bmk) == 0
+    assert_histories_equal(
+        his[0],
+        (
+            datetime.datetime(
+                2025,
+                12,
+                25,
+                16,
+                22,
+                34,
+                tzinfo=datetime.timezone(datetime.timedelta(seconds=19800), "IST"),
+            ),
+            "https://github.com/browser-history/browser-history",
+            (
+                "GitHub - browser-history/browser-history: A simple, zero-dependencies"
+                ", developer-friendly Python package to retrieve web browser history"
+            ),
+        ),
+    )
