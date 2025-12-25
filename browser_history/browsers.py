@@ -170,7 +170,7 @@ class Zen(Firefox):
     aliases = ("zen",)
 
     linux_path = None
-    windows_path = None
+    windows_path = "AppData/Roaming/zen/Profiles"
     mac_path = "Library/Application Support/zen/Profiles/"
 
     profile_support = True
