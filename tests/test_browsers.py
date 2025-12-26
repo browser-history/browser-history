@@ -881,3 +881,56 @@ def test_arc_mac(become_mac, change_homedir):  # noqa: F811
             ),
         ),
     )
+
+
+def test_arc_windows(become_windows, change_homedir):  # noqa: F811
+    """Test history is correct on Arc for Windows"""
+    f = browser_history.browsers.Arc()
+    h_output = f.fetch_history()
+    b_output = f.fetch_bookmarks()
+    his = h_output.histories
+    bmk = b_output.bookmarks
+    assert len(his) == 4
+    assert len(bmk) == 0
+    assert_histories_equal(
+        his[0],
+        (
+            datetime.datetime(
+                2025,
+                12,
+                26,
+                14,
+                1,
+                38,
+                tzinfo=datetime.timezone(
+                    datetime.timedelta(seconds=10800), "E. Africa Standard Time"
+                ),
+            ),
+            "https://github.com/",
+            "GitHub · Change is constant. GitHub keeps you ahead. · GitHub",
+        ),
+    )
+
+    profs = f.profiles(f.history_file)
+    assert len(profs) == 2
+
+    his = f.history_profiles(["Profile 2"]).histories
+
+    assert_histories_equal(
+        his[0],
+        (
+            datetime.datetime(
+                2025,
+                12,
+                26,
+                14,
+                39,
+                43,
+                tzinfo=datetime.timezone(
+                    datetime.timedelta(seconds=10800), "E. Africa Standard Time"
+                ),
+            ),
+            "https://www.cloudflare.com/",
+            "Connect, protect, and build everywhere | Cloudflare",
+        ),
+    )

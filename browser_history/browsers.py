@@ -338,6 +338,7 @@ class Arc(ChromiumBasedBrowser):
 
     Supported platforms
 
+    * Windows
     * Mac OS
 
     Profile support: Yes
@@ -346,7 +347,10 @@ class Arc(ChromiumBasedBrowser):
     name = "Arc"
 
     linux_path = None
-    windows_path = None
+    windows_path = (
+        "AppData/Local/Packages/TheBrowserCompany.Arc_ttt1ap7aakyb4"
+        "/LocalCache/Local/Arc/User Data"
+    )
     mac_path = "Library/Application Support/Arc/User Data"
 
     profile_support = True
