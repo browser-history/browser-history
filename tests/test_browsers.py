@@ -751,3 +751,186 @@ def test_epic_mac(become_mac, change_homedir):  # noqa: F811
             "bookmark_bar",
         ),
     )
+
+
+def test_zen_mac(become_mac, change_homedir):  # noqa: F811
+    """Test history is correct on Zen for Mac OS"""
+    f = browser_history.browsers.Zen()
+    h_output = f.fetch_history()
+    b_output = f.fetch_bookmarks()
+    his = h_output.histories
+    bmk = b_output.bookmarks
+    assert len(his) == 2
+    assert len(bmk) == 4
+    assert_histories_equal(
+        his[0],
+        (
+            datetime.datetime(
+                2025,
+                12,
+                25,
+                15,
+                51,
+                32,
+                tzinfo=datetime.timezone(datetime.timedelta(seconds=19800), "IST"),
+            ),
+            "https://zen-browser.app/privacy-policy/",
+            "Privacy Policy - Zen",
+        ),
+    )
+    assert_bookmarks_equal(
+        bmk[0],
+        (
+            datetime.datetime(
+                2025,
+                12,
+                25,
+                15,
+                51,
+                32,
+                tzinfo=datetime.timezone(datetime.timedelta(seconds=19800), "IST"),
+            ),
+            (
+                "https://support.mozilla.org/kb/customize-firefox-controls-buttons-and-"
+                "toolbars?utm_source=firefox-browser&utm_medium=default-bookmarks"
+                "&utm_campaign=customize"
+            ),
+            "Customize Firefox",
+            "Mozilla Firefox",
+        ),
+    )
+
+
+def test_zen_windows(become_windows, change_homedir):  # noqa: F811
+    """Test history is correct on Zen for Windows"""
+    f = browser_history.browsers.Zen()
+    h_output = f.fetch_history()
+    b_output = f.fetch_bookmarks()
+    his = h_output.histories
+    bmk = b_output.bookmarks
+    assert len(his) == 2
+    assert len(bmk) == 4
+    assert_histories_equal(
+        his[0],
+        (
+            datetime.datetime(
+                2025,
+                12,
+                25,
+                16,
+                55,
+                36,
+                tzinfo=datetime.timezone(
+                    datetime.timedelta(seconds=19800), "India Standard Time"
+                ),
+            ),
+            "https://zen-browser.app/privacy-policy/",
+            "Privacy Policy - Zen",
+        ),
+    )
+    assert_bookmarks_equal(
+        bmk[0],
+        (
+            datetime.datetime(
+                2025,
+                12,
+                25,
+                16,
+                55,
+                36,
+                tzinfo=datetime.timezone(
+                    datetime.timedelta(seconds=19800), "India Standard Time"
+                ),
+            ),
+            (
+                "https://support.mozilla.org/kb/customize-firefox-controls-buttons-and-"
+                "toolbars?utm_source=firefox-browser&utm_medium=default-bookmarks"
+                "&utm_campaign=customize"
+            ),
+            "Customize Firefox",
+            "Mozilla Firefox",
+        ),
+    )
+
+
+def test_arc_mac(become_mac, change_homedir):  # noqa: F811
+    """Test history is correct on Arc for Mac OS"""
+    f = browser_history.browsers.Arc()
+    h_output = f.fetch_history()
+    b_output = f.fetch_bookmarks()
+    his = h_output.histories
+    bmk = b_output.bookmarks
+    assert len(his) == 5
+    assert len(bmk) == 0
+    assert_histories_equal(
+        his[0],
+        (
+            datetime.datetime(
+                2025,
+                12,
+                25,
+                16,
+                22,
+                34,
+                tzinfo=datetime.timezone(datetime.timedelta(seconds=19800), "IST"),
+            ),
+            "https://github.com/browser-history/browser-history",
+            (
+                "GitHub - browser-history/browser-history: A simple, zero-dependencies"
+                ", developer-friendly Python package to retrieve web browser history"
+            ),
+        ),
+    )
+
+
+def test_arc_windows(become_windows, change_homedir):  # noqa: F811
+    """Test history is correct on Arc for Windows"""
+    f = browser_history.browsers.Arc()
+    h_output = f.fetch_history()
+    b_output = f.fetch_bookmarks()
+    his = h_output.histories
+    bmk = b_output.bookmarks
+    assert len(his) == 4
+    assert len(bmk) == 0
+    assert_histories_equal(
+        his[0],
+        (
+            datetime.datetime(
+                2025,
+                12,
+                26,
+                14,
+                1,
+                38,
+                tzinfo=datetime.timezone(
+                    datetime.timedelta(seconds=10800), "E. Africa Standard Time"
+                ),
+            ),
+            "https://github.com/",
+            "GitHub · Change is constant. GitHub keeps you ahead. · GitHub",
+        ),
+    )
+
+    profs = f.profiles(f.history_file)
+    assert len(profs) == 2
+
+    his = f.history_profiles(["Profile 2"]).histories
+
+    assert_histories_equal(
+        his[0],
+        (
+            datetime.datetime(
+                2025,
+                12,
+                26,
+                14,
+                39,
+                43,
+                tzinfo=datetime.timezone(
+                    datetime.timedelta(seconds=10800), "E. Africa Standard Time"
+                ),
+            ),
+            "https://www.cloudflare.com/",
+            "Connect, protect, and build everywhere | Cloudflare",
+        ),
+    )
