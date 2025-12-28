@@ -1,6 +1,6 @@
 from . import browsers, generic, utils  # noqa: F401
 
-__version__ = "0.4.1"
+__version__ = "0.5.0"
 
 
 def get_history():
