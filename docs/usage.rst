@@ -113,6 +113,52 @@ Example:
     # override format
     outputs.save("history_file", output_format="json")
 
+To see most visited site using bar graph
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+This code shows another usages of ``browser-history``. Here history data is fetched from the browser and shown the frequency of visits.
+To plot the the graph ``matplotlib`` is used. So, to install matplotlib enter ``pip install matplotlib``.
+
+::
+
+    from browser_history.browsers import get_history
+    import matplotlib.pyplot as plt
+
+    def getMostVisitedSites(history):
+        frequency = {}
+        for tup in history:
+
+            url = tup[1]
+            por = url.split("/")
+            for idx in range(2, len(por)):
+                if len(por[idx])>1:
+                    site = por[idx]
+                    break
+                    
+            if site not in frequency:
+                frequency[site] += 1
+            else:
+                frequency[site] = 1
+
+        return frequency
+
+    def showGraph(data):
+        sites = list(data.keys())
+        visits = list(data.values())
+        left = [i for i in range(1, len(visits)+1)]
+
+        plt.bar(left, visits, tick_label = sites)
+        plt.ylabel('No. of visits')
+        plt.xlabel('sites')
+        plt.title('Site visit stats')
+        plt.show()
+
+    output = get_history()
+    his = output.histories
+
+    rec = getMostVisitedSites(his)
+    showGraph(rec)
+
 
 
 Bookmarks
